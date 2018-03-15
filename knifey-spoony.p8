@@ -12,7 +12,7 @@ __lua__
 ]]
 
 -->8
--- global vars
+-- global setup
 
 score             = 0
 high_score        = 0
@@ -29,6 +29,7 @@ function update_high_score()
   if (score > high_score) then
     high_score        = score
     high_score_beaten = true
+    dset(0, high_score)
   end
   global_score = score
 end
@@ -194,6 +195,8 @@ scenes = {
 -- game loop
 
 function _init()
+  cartdata('knifeyspoony')
+  high_score = dget(0)
   scenes:go_to('title')
 end
 

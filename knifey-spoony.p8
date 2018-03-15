@@ -14,8 +14,9 @@ __lua__
 -->8
 -- global vars
 
-score      = 0
-high_score = 0
+score             = 0
+high_score        = 0
+high_score_beaten = false
 
 -->8
 -- helpers
@@ -24,79 +25,145 @@ function table_has_key(table, key)
   return table[key] ~= nil
 end
 
+function update_high_score()
+  if (score > high_score) then
+    high_score        = score
+    high_score_beaten = true
+  end
+  global_score = score
+end
+
 -->8
 -- game scenes
+
+function scene_game_over()
+  return {
+    _update = function()
+      if (btnp(5)) scenes:go_to('playing')
+    end,
+
+    _draw = function()
+      print('game over - you suck', 16, 16, 7)
+      print('your score was ' .. score, 16, 24, 7)
+      print('press x', 16, 32, 7)
+    end
+  }
+end
+
+function scene_playing()
+  return {
+    current_utensil    = nil,
+    round_timeout      = 0,
+    timeout            = 0,
+    timeout_minimum    = 20,
+    timeout_multiplier = 0.95,
+
+    choose_utensil = function(self)
+      self.current_utensil = rnd(1) > 0.5 and 'knifey' or 'spoony'
+    end,
+
+    decrease_timeout = function(self)
+      local new_timeout = self.timeout * self.timeout_multiplier
+      self.timeout = mid(self.timeout_minimum, new_timeout, self.timeout)
+      printh(self.timeout)
+    end,
+
+    get_input = function(self)
+      if (btnp(0)) then
+        if (self.current_utensil == 'knifey') then
+          return self:round_passed()
+        end
+
+        self:round_failed()
+      end
+
+      if (btnp(1)) then
+        if (self.current_utensil == 'spoony') then
+          return self:round_passed()
+        end
+
+        self:round_failed()
+      end
+    end,
+
+    new_round = function(self)
+      self.round_timeout = self.timeout
+      self:choose_utensil()
+    end,
+
+    round_failed = function()
+      update_high_score()
+      scenes:go_to('game_over')
+    end,
+
+    round_passed = function(self)
+      score += 1
+      update_high_score()
+      self:decrease_timeout()
+      self:new_round()
+    end,
+
+    timeout_width = function(self)
+      return flr((self.round_timeout / self.timeout) * 128)
+    end,
+
+    _init = function(self)
+      self.timeout = 120
+      score = 0
+      self:new_round()
+    end,
+
+    _update = function(self)
+      self.round_timeout -= 1
+
+      if (self.round_timeout < 0) then
+        return scenes:go_to('game_over')
+      end
+
+      self:get_input()
+    end,
+
+    _draw = function(self)
+      print(self.current_utensil, 16, 16, 7)
+      rectfill(0, 0, self:timeout_width(), 4, 9)
+    end
+  }
+end
+
+function scene_title()
+  return {
+    _update = function()
+      if (btnp(5)) scenes:go_to('playing')
+    end,
+
+    _draw = function()
+      print('knifey spoony', 16, 16, 6)
+      print('a jonic linley game', 16, 24, 6)
+      print('high score: '.. high_score, 16, 32, 6)
+      print('press x to start', 16, 48, 6)
+      print('knifey \139 | \145 spoony', 16, 64, 6)
+    end
+  }
+end
 
 scenes = {
   current = {
     name     = nil,
     instance = nil
   },
+
   definitions = {
-    title = {
-      _update = function(s)
-        if (btn(5)) scenes:go_to('game')
-      end,
-
-      _draw = function(s)
-        print('knifey spoony', 16, 16, 6)
-        print('high score: '.. high_score, 16, 32, 6)
-        print('press x to start', 16, 48, 6)
-        print('x: knife', 16, 64, 6)
-        print('c: spoon', 16, 72, 6)
-      end
-    },
-
-    game = {
-      round_timeout      = 0,
-      score              = 0,
-      timeout            = 0,
-      timeout_multiplier = 0,
-
-      timeout_width = function(s)
-        return flr((s.round_timeout / s.timeout) * 128)
-      end,
-
-      _init = function(s)
-        s.round_timeout      = 90
-        s.timeout            = 90
-        s.timeout_multiplier = 0.98
-        score                = 0
-      end,
-
-      _update = function(s)
-        s.round_timeout = s.round_timeout - 1
-
-        if (s.round_timeout < 0) then
-          scenes:go_to('game_over')
-        end
-      end,
-
-      _draw = function(s)
-        print(s.round_timeout, 16, 16, 7)
-        rectfill(0, 0, s:timeout_width(), 4, 9)
-      end
-    },
-
-    game_over = {
-      _update = function(s)
-        if (btn(4)) scenes:go_to('game')
-      end,
-
-      _draw = function(s)
-        print('game over - you suck', 16, 16, 7)
-        print('your score was ' .. score, 16, 24, 7)
-        print('press c', 16, 32, 7)
-      end
-    }
+    game_over = scene_game_over(),
+    playing   = scene_playing(),
+    title     = scene_title()
   },
 
   get_instance = function(self)
-    printh(self.current.name)
     self.current.instance = self.definitions[self.current.name]
 
-    if (self.just_updated and self:instance_can_init()) then
-      self.current.instance:_init()
+    if (self.just_updated) then
+      self:_init()
+      self.just_updated = false
     end
   end,
 
@@ -106,8 +173,10 @@ scenes = {
     self:get_instance()
   end,
 
-  instance_can_init = function(self)
-    table_has_key(self.current.instance, '_init')
+  _init = function(self)
+    if (table_has_key(self.current.instance, '_init')) then
+      self.current.instance:_init()
+    end
   end,
 
   _update = function(self)

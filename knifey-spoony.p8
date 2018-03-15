@@ -43,9 +43,10 @@ function scene_game_over()
     end,
 
     _draw = function()
-      print('game over - you suck', 16, 16, 7)
-      print('your score was ' .. score, 16, 24, 7)
-      print('press x', 16, 32, 7)
+      print('game over!', 16, 16, 7)
+      print('score:      ' .. score, 16, 32, 7)
+      print('high score: ' .. high_score, 16, 40, 7)
+      print('press x to play again', 16, 56, 7)
     end
   }
 end
@@ -138,10 +139,11 @@ function scene_title()
 
     _draw = function()
       print('knifey spoony', 16, 16, 6)
-      print('a jonic linley game', 16, 24, 6)
-      print('high score: '.. high_score, 16, 32, 6)
-      print('press x to start', 16, 48, 6)
-      print('knifey \139 | \145 spoony', 16, 64, 6)
+      print('-- a game by jonic', 16, 24, 6)
+      print('press x to start', 16, 40, 6)
+      print('high score: '.. high_score, 16, 56, 6)
+      print('how to play:', 16, 72, 6)
+      print('knifey \139 | \145 spoony', 16, 80, 6)
     end
   }
 end

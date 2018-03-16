@@ -1,13 +1,14 @@
 pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
--- fireworks
+-- knifey spoony
 -- by jonic
 -- v1.1.0
 
 --[[
-  full code is on github here:
+  "i see you've played knifey spoony before"
 
+  full code is on github here:
   https://github.com/jonic/knifey-spoony
 ]]
 
@@ -21,6 +22,10 @@ high_score_beaten = false
 -->8
 -- helpers
 
+function text_center(str)
+  return 64 - #str * 2
+end
+
 function table_has_key(table, key)
   return table[key] ~= nil
 end
@@ -31,6 +36,7 @@ function update_high_score()
     high_score_beaten = true
     dset(0, high_score)
   end
+
   global_score = score
 end
 
@@ -44,10 +50,10 @@ function scene_game_over()
     end,
 
     _draw = function()
-      print('game over!', 16, 16, 7)
-      print('score:      ' .. score, 16, 32, 7)
+      print('game over!',                 16, 16, 7)
+      print('score:      ' .. score,      16, 32, 7)
       print('high score: ' .. high_score, 16, 40, 7)
-      print('press x to play again', 16, 56, 7)
+      print('press x to play again',      16, 56, 7)
     end
   }
 end
@@ -126,7 +132,15 @@ function scene_playing()
     end,
 
     _draw = function(self)
-      print(self.current_utensil, 16, 16, 7)
+      instructions        = 'knifey \139 | \145 spoony'
+      score_printout      = '     score: ' .. score
+      high_score_printout = 'high score: ' .. high_score
+
+      print(score_printout,       text_center(score_printout), 16, 7)
+      print(high_score_printout,  text_center(high_score_printout), 24, 7)
+      print(self.current_utensil, text_center(self.current_utensil), 61, 7)
+      print(instructions,         text_center(instructions), 112, 7)
+
       rectfill(0, 0, self:timeout_width(), 4, 9)
     end
   }
@@ -139,12 +153,12 @@ function scene_title()
     end,
 
     _draw = function()
-      print('knifey spoony', 16, 16, 6)
-      print('-- a game by jonic', 16, 24, 6)
-      print('press x to start', 16, 40, 6)
-      print('high score: '.. high_score, 16, 56, 6)
-      print('how to play:', 16, 72, 6)
-      print('knifey \139 | \145 spoony', 16, 80, 6)
+      print('knifey spoony',             16, 16, 7)
+      print('-- a game by jonic',        16, 24, 7)
+      print('press x to start',          16, 40, 7)
+      print('high score: '.. high_score, 16, 56, 7)
+      print('how to play:',              16, 72, 7)
+      print('knifey \139 | \145 spoony', 16, 80, 7)
     end
   }
 end
@@ -206,5 +220,6 @@ end
 
 function _draw()
   cls()
+  rectfill(0, 0, 128, 128, 5)
   scenes:_draw()
 end

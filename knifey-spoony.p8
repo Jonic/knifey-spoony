@@ -22,15 +22,6 @@ high_score_beaten = false
 -->8
 -- helpers
 
-function oprint(s,x,y,col,ocol)
- --print text with outline
- print(s,x-1,y,ocol)
- print(s,x+1,y,ocol)
- print(s,x,y-1,ocol)
- print(s,x,y+1,ocol)
- print(s,x,y,col)
-end
-
 function table_has_key(table, key)
   return table[key] ~= nil
 end
@@ -69,13 +60,27 @@ text = {
     return self[key]
   end,
 
-  output = function(self, str, y, color)
-    x = self:center(str)
-    oprint(str, x, y, color, 0)
+  outline = function(self, str, x, y, color, outline)
+    print(str, x - 1, y, outline)
+    print(str, x + 1, y, outline)
+    print(str, x, y - 1, outline)
+    print(str, x, y + 1, outline)
+    print(str, x, y,     color)
   end,
 
-  show = function(self, key, y, color)
-    self:output(self:get(key), y, color)
+  output = function(self, str, y, color, outline)
+    outline = outline or nil
+    x       = self:center(str)
+
+    if (outline != nil) then
+      return self:outline(str, x, y, color, outline)
+    end
+
+    print(str, x, y, color)
+  end,
+
+  show = function(self, key, y, color, outline)
+    self:output(self:get(key), y, color, outline)
   end
 }
 
@@ -203,7 +208,7 @@ function screen_title()
 
       rectfill(0, 0, 128, 128, 2)
 
-      text:show('title',           16, 7)
+      text:show('title',           16, 7, 0)
       text:show('about',           24, 7)
       text:show('start_game',      40, 7)
       text:output(high_score_text, 56, 7)

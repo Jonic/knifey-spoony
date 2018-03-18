@@ -99,15 +99,15 @@ function screen_game_over()
 
       rectfill(0, 0, 128, 128, 8)
 
-      text:show('game_over',       16, 7)
-      text:output(score_text,      32, 7)
-      text:output(high_score_text, 40, 7)
+      text:show('game_over',       16, 7, 0)
+      text:output(score_text,      32, 7, 0)
+      text:output(high_score_text, 40, 7, 0)
 
       if (high_score_beaten) then
-        text:show('high_score_beaten', 56, 7)
+        text:show('high_score_beaten', 56, 7, 0)
       end
 
-      text:show('play_again', 112, 7)
+      text:show('play_again', 112, 7, 5)
     end
   }
 end
@@ -187,11 +187,12 @@ function screen_playing()
 
       rectfill(0, 0, 128, 128, 3)
 
-      text:output(score_text, 16, 7)
-      text:output(high_score_text, 24, 7)
-      text:output(self.current_utensil, 61, 7)
-      text:show('instructions', 112, 7)
+      text:output(score_text, 16, 7, 0)
+      text:output(high_score_text, 24, 7, 5)
+      text:output(self.current_utensil, 61, 7, 0)
+      text:show('instructions', 112, 7, 5)
 
+      rectfill(0, 0, self:timeout_width() + 1, 5, 0)
       rectfill(0, 0, self:timeout_width(), 4, 9)
     end
   }
@@ -209,11 +210,11 @@ function screen_title()
       rectfill(0, 0, 128, 128, 2)
 
       text:show('title',           16, 7, 0)
-      text:show('about',           24, 7)
-      text:show('start_game',      40, 7)
-      text:output(high_score_text, 56, 7)
-      text:show('how_to_play',     72, 7)
-      text:show('instructions',    80, 7)
+      text:show('about',           24, 7, 5)
+      text:show('start_game',      40, 7, 0)
+      text:output(high_score_text, 56, 7, 0)
+      text:show('how_to_play',     72, 7, 5)
+      text:show('instructions',    80, 7, 5)
     end
   }
 end

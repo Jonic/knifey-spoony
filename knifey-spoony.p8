@@ -75,12 +75,12 @@ text = {
 }
 
 -->8
--- game scenes
+-- game screens
 
-function scene_game_over()
+function screen_game_over()
   return {
     _update = function()
-      if (btnp(5)) scenes:go_to('playing')
+      if (btnp(5)) screens:go_to('playing')
     end,
 
     _draw = function()
@@ -102,7 +102,7 @@ function scene_game_over()
   }
 end
 
-function scene_playing()
+function screen_playing()
   return {
     current_utensil    = nil,
     round_timeout      = 0,
@@ -139,7 +139,7 @@ function scene_playing()
 
     round_failed = function()
       update_high_score()
-      scenes:go_to('game_over')
+      screens:go_to('game_over')
     end,
 
     round_passed = function(self)
@@ -165,7 +165,7 @@ function scene_playing()
       self.round_timeout -= 1
 
       if (self.round_timeout < 0) then
-        return scenes:go_to('game_over')
+        return screens:go_to('game_over')
       end
 
       self:get_input()
@@ -187,10 +187,10 @@ function scene_playing()
   }
 end
 
-function scene_title()
+function screen_title()
   return {
     _update = function()
-      if (btnp(5)) scenes:go_to('playing')
+      if (btnp(5)) screens:go_to('playing')
     end,
 
     _draw = function()
@@ -208,16 +208,16 @@ function scene_title()
   }
 end
 
-scenes = {
+screens = {
   current = {
     name     = nil,
     instance = nil
   },
 
   definitions = {
-    game_over = scene_game_over(),
-    playing   = scene_playing(),
-    title     = scene_title()
+    game_over = screen_game_over(),
+    playing   = screen_playing(),
+    title     = screen_title()
   },
 
   get_instance = function(self)
@@ -256,14 +256,14 @@ scenes = {
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  scenes:go_to('title')
+  screens:go_to('title')
 end
 
 function _update()
-  scenes:_update()
+  screens:_update()
 end
 
 function _draw()
   cls()
-  scenes:_draw()
+  screens:_draw()
 end

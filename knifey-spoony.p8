@@ -41,6 +41,36 @@ function update_high_score()
 end
 
 -->8
+-- message strings
+text = {
+  about        = 'a game by jonic',
+  game_over    = 'game over!',
+  high_score   = 'high score: ' .. high_score,
+  how_to_play  = 'how to play:',
+  instructions = 'knifey \139 | \145 spoony',
+  knifey       = 'knifey',
+  play_again   = 'press x to play again',
+  score        = 'score: ' .. score,
+  spoony       = 'spoony',
+  start_game   = 'press x to start',
+  title        = 'knifey spoony',
+
+  center = function(self, str)
+    return 64 - #str * 2
+  end,
+
+  output = function(self, str, y, color)
+    x = self:center(str)
+    print(str, x, y, color)
+  end,
+
+  show = function(self, key, y, color)
+    str = self[key]
+    self:output(str, y, color)
+  end
+}
+
+-->8
 -- game scenes
 
 function scene_game_over()
@@ -50,10 +80,11 @@ function scene_game_over()
     end,
 
     _draw = function()
-      print('game over!',                 16, 16, 7)
-      print('score:      ' .. score,      16, 32, 7)
-      print('high score: ' .. high_score, 16, 40, 7)
-      print('press x to play again',      16, 56, 7)
+      rectfill(0, 0, 128, 128, 8)
+      text:show('game_over',  16, 7)
+      text:show('score',      32, 7)
+      text:show('high_score', 40, 7)
+      text:show('play_again', 56, 7)
     end
   }
 end
@@ -67,13 +98,12 @@ function scene_playing()
     timeout_multiplier = 0.95,
 
     choose_utensil = function(self)
-      self.current_utensil = rnd(1) > 0.5 and 'knifey' or 'spoony'
+      self.current_utensil = rnd(1) > 0.5 and text.knifey or text.spoony
     end,
 
     decrease_timeout = function(self)
       local new_timeout = self.timeout * self.timeout_multiplier
       self.timeout = mid(self.timeout_minimum, new_timeout, self.timeout)
-      printh(self.timeout)
     end,
 
     evaluate_input = function(self, choice)
@@ -85,8 +115,8 @@ function scene_playing()
     end,
 
     get_input = function(self)
-      if (btnp(0)) self:evaluate_input('knifey')
-      if (btnp(1)) self:evaluate_input('spoony')
+      if (btnp(0)) self:evaluate_input(text.knifey)
+      if (btnp(1)) self:evaluate_input(text.spoony)
     end,
 
     new_round = function(self)
@@ -127,14 +157,11 @@ function scene_playing()
     end,
 
     _draw = function(self)
-      instructions        = 'knifey \139 | \145 spoony'
-      score_printout      = '     score: ' .. score
-      high_score_printout = 'high score: ' .. high_score
-
-      print(score_printout,       text_center(score_printout), 16, 7)
-      print(high_score_printout,  text_center(high_score_printout), 24, 7)
-      print(self.current_utensil, text_center(self.current_utensil), 61, 7)
-      print(instructions,         text_center(instructions), 112, 7)
+      rectfill(0, 0, 128, 128, 3)
+      text:show('score', 16, 7)
+      text:show('high_score', 24, 7)
+      text:output(self.current_utensil, 61, 7)
+      text:show('instructions', 112, 7)
 
       rectfill(0, 0, self:timeout_width(), 4, 9)
     end
@@ -148,12 +175,13 @@ function scene_title()
     end,
 
     _draw = function()
-      print('knifey spoony',             16, 16, 7)
-      print('-- a game by jonic',        16, 24, 7)
-      print('press x to start',          16, 40, 7)
-      print('high score: '.. high_score, 16, 56, 7)
-      print('how to play:',              16, 72, 7)
-      print('knifey \139 | \145 spoony', 16, 80, 7)
+      rectfill(0, 0, 128, 128, 2)
+      text:show('title',        16, 7)
+      text:show('about',        24, 7)
+      text:show('start_game',   40, 7)
+      text:show('high_score',   56, 7)
+      text:show('how_to_play',  72, 7)
+      text:show('instructions', 80, 7)
     end
   }
 end
@@ -215,6 +243,5 @@ end
 
 function _draw()
   cls()
-  rectfill(0, 0, 128, 128, 5)
   scenes:_draw()
 end

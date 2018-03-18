@@ -22,8 +22,13 @@ high_score_beaten = false
 -->8
 -- helpers
 
-function text_center(str)
-  return 64 - #str * 2
+function oprint(s,x,y,col,ocol)
+ --print text with outline
+ print(s,x-1,y,ocol)
+ print(s,x+1,y,ocol)
+ print(s,x,y-1,ocol)
+ print(s,x,y+1,ocol)
+ print(s,x,y,col)
 end
 
 function table_has_key(table, key)
@@ -66,7 +71,7 @@ text = {
 
   output = function(self, str, y, color)
     x = self:center(str)
-    print(str, x, y, color)
+    oprint(str, x, y, color, 0)
   end,
 
   show = function(self, key, y, color)

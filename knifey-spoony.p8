@@ -76,22 +76,17 @@ function scene_playing()
       printh(self.timeout)
     end,
 
+    evaluate_input = function(self, choice)
+      if (choice == self.current_utensil) then
+        self:round_passed()
+      else
+        self:round_failed()
+      end
+    end,
+
     get_input = function(self)
-      if (btnp(0)) then
-        if (self.current_utensil == 'knifey') then
-          return self:round_passed()
-        end
-
-        self:round_failed()
-      end
-
-      if (btnp(1)) then
-        if (self.current_utensil == 'spoony') then
-          return self:round_passed()
-        end
-
-        self:round_failed()
-      end
+      if (btnp(0)) self:evaluate_input('knifey')
+      if (btnp(1)) self:evaluate_input('spoony')
     end,
 
     new_round = function(self)

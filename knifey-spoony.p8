@@ -220,7 +220,7 @@ function screen_playing()
         { i = 49, x = 15, y = 14 },
       },
       score = {
-        { i = 166, x = 6, y = 11, w = 4, h = 4 }
+        { i = 134, x = 6, y = 11, w = 4, h = 4 }
       },
       utensils = {
         knifey = {

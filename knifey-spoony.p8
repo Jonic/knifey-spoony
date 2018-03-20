@@ -2,13 +2,29 @@ pico-8 cartridge // http://www.pico-8.com
 version 16
 __lua__
 -- knifey spoony
--- by jonic
--- v1.1.0
+-- by jonic + ribbon black
+-- v0.3.0
 
 --[[
-  "i see you've played knifey spoony before"
+  "i see you've played knifey
+  spoony before"
 
-  full code is on github here:
+		jonic: this is my first real
+		attempt to make a game with
+		pico-8. it's a bit messy,
+		because i've spent a long time
+		trying to figure out systems
+		for things such as displaying
+		groups of sprites, animating
+		elements, and dispalying text.
+		
+		i haven't made any attempt to
+		optimise this code, so it
+		should be easy for a beginner
+		to get to grips with it. if
+		you're struggling to read it
+		in pico-8, the full code is
+		on github here:
   https://github.com/jonic/knifey-spoony
 ]]
 

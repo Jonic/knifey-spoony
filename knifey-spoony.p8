@@ -150,9 +150,6 @@ function screen_playing()
           { i = 40, x = 10, y = 12, w = 4, h = 2 }
         }
       },
-      floor = {
-        { i = 224, x = 0, y = 14, w = 16, h = 2 }
-      },
       frame = {
         { i = 0,   x = 0,  y = 0 },
         { i = 96,  x = 1,  y = 0 },
@@ -257,7 +254,9 @@ function screen_playing()
     end,
 
     draw_floor = function(self)
-      draw_sprites(self.sprites.floor)
+      rectfill(4, 111, 123, 112, 15)
+      rectfill(4, 113, 123, 119, 4)
+      rectfill(4, 120, 123, 123, 2)
     end,
 
     draw_frame = function(self)

@@ -321,7 +321,7 @@ function screen_playing()
     end,
 
     draw_timer = function(self)
-      rectfill(10, 8, self:timeout_width() - 20, 8, 8)
+      rectfill(4, 7, self:timeout_width(), 7, 8)
     end,
 
     draw_score = function(self)
@@ -380,7 +380,9 @@ function screen_playing()
     end,
 
     timeout_width = function(self)
-      return flr((self.round_timeout / self.timeout) * 128)
+      timeout_max_width  = 120
+      elapsed_percentage = self.round_timeout / self.timeout
+      return flr(elapsed_percentage * timeout_max_width)
     end,
 
     _init = function(self)
@@ -392,7 +394,7 @@ function screen_playing()
     _update = function(self)
       self.round_timeout -= 1
 
-      if (self.round_timeout < 0) then
+      if (self.round_timeout <= 0) then
         return screens:go_to('game_over')
       end
 

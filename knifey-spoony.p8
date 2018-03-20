@@ -35,6 +35,78 @@ score             = 0
 high_score        = 0
 high_score_beaten = false
 
+sprites = {
+  frame = {
+    -- top
+    { i = 0,  x = 0,  y = 0 },
+    { i = 1,  x = 1,  y = 0 },
+    { i = 1,  x = 2,  y = 0 },
+    { i = 1,  x = 3,  y = 0 },
+    { i = 1,  x = 4,  y = 0 },
+    { i = 1,  x = 5,  y = 0 },
+    { i = 1,  x = 6,  y = 0 },
+    { i = 1,  x = 7,  y = 0 },
+    { i = 1,  x = 8,  y = 0 },
+    { i = 1,  x = 9,  y = 0 },
+    { i = 1,  x = 10, y = 0 },
+    { i = 1,  x = 11, y = 0 },
+    { i = 1,  x = 12, y = 0 },
+    { i = 1,  x = 13, y = 0 },
+    { i = 1,  x = 14, y = 0 },
+    { i = 2,  x = 15, y = 0 },
+
+    -- left side
+    { i = 3,  x = 0, y = 1  },
+    { i = 3,  x = 0, y = 2  },
+    { i = 16, x = 0, y = 3  },
+    { i = 16, x = 0, y = 4  },
+    { i = 17, x = 0, y = 5  },
+    { i = 17, x = 0, y = 6  },
+    { i = 17, x = 0, y = 7  },
+    { i = 17, x = 0, y = 8  },
+    { i = 17, x = 0, y = 9  },
+    { i = 17, x = 0, y = 10 },
+    { i = 17, x = 0, y = 11 },
+    { i = 17, x = 0, y = 12 },
+    { i = 17, x = 0, y = 13 },
+    { i = 17, x = 0, y = 14 },
+
+    --bottom
+    { i = 18, x = 0,  y = 15 },
+    { i = 19, x = 1,  y = 15 },
+    { i = 19, x = 2,  y = 15 },
+    { i = 32, x = 3,  y = 15 },
+    { i = 32, x = 4,  y = 15 },
+    { i = 33, x = 5,  y = 15 },
+    { i = 33, x = 6,  y = 15 },
+    { i = 33, x = 7,  y = 15 },
+    { i = 33, x = 8,  y = 15 },
+    { i = 34, x = 9,  y = 15 },
+    { i = 34, x = 10, y = 15 },
+    { i = 35, x = 11, y = 15 },
+    { i = 35, x = 12, y = 15 },
+    { i = 35, x = 13, y = 15 },
+    { i = 35, x = 14, y = 15 },
+    { i = 48, x = 15, y = 15 },
+
+    -- right side
+    { i = 49, x = 15, y = 1  },
+    { i = 49, x = 15, y = 2  },
+    { i = 49, x = 15, y = 3  },
+    { i = 49, x = 15, y = 4  },
+    { i = 49, x = 15, y = 5  },
+    { i = 49, x = 15, y = 6  },
+    { i = 49, x = 15, y = 7  },
+    { i = 49, x = 15, y = 8  },
+    { i = 49, x = 15, y = 9  },
+    { i = 49, x = 15, y = 10 },
+    { i = 49, x = 15, y = 11 },
+    { i = 49, x = 15, y = 12 },
+    { i = 49, x = 15, y = 13 },
+    { i = 49, x = 15, y = 14 }
+  }
+}
+
 -->8
 -- helpers
 
@@ -76,18 +148,12 @@ end
 -->8
 -- message strings
 text = {
-  about             = 'a game by jonic',
+  about             = '2018 jonic + ribbon black',
   game_over         = 'game over!',
   high_score        = 'high score: ',
   high_score_beaten = '** new high score **',
-  how_to_play       = 'how to play:',
-  instructions      = 'knifey \139 | \145 spoony',
-  knifey            = 'knifey',
   play_again        = 'press x to play again',
-  score             = 'score: ',
   spoony            = 'spoony',
-  start_game        = 'press x to start',
-  title             = 'knifey spoony',
 
   center = function(self, str)
     return 64 - #str * 2
@@ -233,7 +299,7 @@ function screen_playing()
         { i = 49, x = 15, y = 11 },
         { i = 49, x = 15, y = 12 },
         { i = 49, x = 15, y = 13 },
-        { i = 49, x = 15, y = 14 },
+        { i = 49, x = 15, y = 14 }
       },
       score = {
         { i = 134, x = 6, y = 11, w = 4, h = 4 }
@@ -344,31 +410,14 @@ function screen_playing()
       end
     end,
 
-    draw_buttons = function(self)
-      self:draw_button(text.knifey)
-      self:draw_button(text.spoony)
-    end,
-
     draw_floor = function(self)
       rectfill(4, 111, 123, 112, 15)
       rectfill(4, 113, 123, 119, 4)
       rectfill(4, 120, 123, 123, 2)
     end,
 
-    draw_frame = function(self)
-      draw_sprites(self.sprites.frame)
-    end,
-
     draw_timer = function(self)
       rectfill(4, 7, self:timeout_width(), 7, 8)
-    end,
-
-    draw_score = function(self)
-      draw_sprites(self.sprites.score)
-    end,
-
-    draw_utensil = function(self)
-      draw_sprites(self.utensil_sprites)
     end,
 
     evaluate_input = function(self, choice)
@@ -441,11 +490,12 @@ function screen_playing()
     end,
 
     _draw = function(self)
-      self:draw_frame()
+      draw_sprites(sprites.frame)
       self:draw_timer()
-      self:draw_utensil()
-      self:draw_score()
-      self:draw_buttons()
+      draw_sprites(self.utensil_sprites)
+      draw_sprites(self.sprites.score)
+      self:draw_button(text.knifey)
+      self:draw_button(text.spoony)
       self:draw_floor()
     end
   }
@@ -453,21 +503,88 @@ end
 
 function screen_title()
   return {
+    sprites = {
+      bottom_line = {
+        { i = 19, x = 2,  y = 10 },
+        { i = 19, x = 3,  y = 10 },
+        { i = 32, x = 4,  y = 10 },
+        { i = 33, x = 5,  y = 10 },
+        { i = 33, x = 6,  y = 10 },
+        { i = 33, x = 7,  y = 10 },
+        { i = 33, x = 8,  y = 10 },
+        { i = 33, x = 9,  y = 10 },
+        { i = 33, x = 10, y = 10 },
+        { i = 33, x = 11, y = 10 },
+      },
+      knife = {
+        { i = 138, x = 2, y = 3, w = 2, h = 3 }
+      },
+      spoon = {
+        { i = 140, x = 12, y = 10, w = 2, h = 3 }
+      },
+      title = {
+        -- k
+        { i = 192, x = 2, y = 6, w = 2, h = 2 },
+        -- n
+        { i = 192, x = 4, y = 6, h = 2 },
+        { i = 194, x = 5, y = 6, h = 2 },
+        -- i
+        { i = 195, x = 6, y = 6 },
+        { i = 208, x = 6, y = 7 },
+        -- f
+        { i = 192, x = 7, y = 6, h = 2 },
+        { i = 196, x = 8, y = 6, h = 2 },
+        -- e
+        { i = 192, x = 9, y = 6, h = 2 },
+        { i = 197, x = 10, y = 6, h = 2 },
+        -- y
+        { i = 198, x = 11, y = 6, w = 2, h = 2 },
+        -- s
+        { i = 224, x = 2, y = 8, w = 2, h = 2 },
+        -- p
+        { i = 192, x = 4, y = 8, h = 2 },
+        { i = 227, x = 5, y = 8, h = 2 },
+        -- o
+        { i = 228, x = 6, y = 8, h = 2 },
+        { i = 194, x = 7, y = 8 },
+        { i = 245, x = 7, y = 9 },
+        -- o
+        { i = 228, x = 8, y = 8, h = 2 },
+        { i = 194, x = 9, y = 8 },
+        { i = 245, x = 9, y = 9 },
+        -- n
+        { i = 192, x = 10, y = 8, h = 2 },
+        { i = 194, x = 11, y = 8, h = 2 },
+        -- y
+        { i = 198, x = 12, y = 8, w = 2, h = 2 },
+      },
+      top_line = {
+        { i = 1, x = 4,  y = 5 },
+        { i = 1, x = 5,  y = 5 },
+        { i = 1, x = 6,  y = 5 },
+        { i = 1, x = 7,  y = 5 },
+        { i = 1, x = 8,  y = 5 },
+        { i = 1, x = 9,  y = 5 },
+        { i = 1, x = 10, y = 5 },
+        { i = 1, x = 11, y = 5 },
+        { i = 1, x = 12, y = 5 },
+        { i = 1, x = 13, y = 5 },
+      }
+    },
+
     _update = function()
       if (btnp(5)) screens:go_to('playing')
     end,
 
-    _draw = function()
-      high_score_text = text:get('high_score') .. high_score
-
-      rectfill(0, 0, 128, 128, 2)
-
-      text:show('title',           16, 7, 0)
-      text:show('about',           24, 7, 5)
-      text:show('start_game',      40, 7, 0)
-      text:output(high_score_text, 56, 7, 0)
-      text:show('how_to_play',     72, 7, 5)
-      text:show('instructions',    80, 7, 5)
+    _draw = function(self)
+      draw_sprites(self.sprites.knife)
+      draw_sprites(self.sprites.top_line)
+      draw_sprites(self.sprites.title)
+      draw_sprites(self.sprites.bottom_line)
+      draw_sprites(self.sprites.spoon)
+      draw_sprites(sprites.frame)
+      
+      text:show('about', 119, 7)
     end
   }
 end

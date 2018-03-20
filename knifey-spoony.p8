@@ -35,7 +35,7 @@ score             = 0
 high_score        = 0
 high_score_beaten = false
 
-sprites = {
+global_sprites = {
   frame = {
     -- top
     { i = 0,  x = 0,  y = 0 },
@@ -152,7 +152,9 @@ text = {
   game_over         = 'game over!',
   high_score        = 'high score: ',
   high_score_beaten = '** new high score **',
+  knifey            = 'knifey',
   play_again        = 'press x to play again',
+  score             = 'score: ',
   spoony            = 'spoony',
 
   center = function(self, str)
@@ -231,75 +233,6 @@ function screen_playing()
           { i = 44, x = 10, y = 12, w = 4, h = 2 },
           { i = 40, x = 10, y = 12, w = 4, h = 2 }
         }
-      },
-      frame = {
-        -- top
-        { i = 0,  x = 0,  y = 0 },
-        { i = 1,  x = 1,  y = 0 },
-        { i = 1,  x = 2,  y = 0 },
-        { i = 1,  x = 3,  y = 0 },
-        { i = 1,  x = 4,  y = 0 },
-        { i = 1,  x = 5,  y = 0 },
-        { i = 1,  x = 6,  y = 0 },
-        { i = 1,  x = 7,  y = 0 },
-        { i = 1,  x = 8,  y = 0 },
-        { i = 1,  x = 9,  y = 0 },
-        { i = 1,  x = 10, y = 0 },
-        { i = 1,  x = 11, y = 0 },
-        { i = 1,  x = 12, y = 0 },
-        { i = 1,  x = 13, y = 0 },
-        { i = 1,  x = 14, y = 0 },
-        { i = 2,  x = 15, y = 0 },
-
-        -- left side
-        { i = 3,  x = 0, y = 1  },
-        { i = 3,  x = 0, y = 2  },
-        { i = 16, x = 0, y = 3  },
-        { i = 16, x = 0, y = 4  },
-        { i = 17, x = 0, y = 5  },
-        { i = 17, x = 0, y = 6  },
-        { i = 17, x = 0, y = 7  },
-        { i = 17, x = 0, y = 8  },
-        { i = 17, x = 0, y = 9  },
-        { i = 17, x = 0, y = 10 },
-        { i = 17, x = 0, y = 11 },
-        { i = 17, x = 0, y = 12 },
-        { i = 17, x = 0, y = 13 },
-        { i = 17, x = 0, y = 14 },
-
-        --bottom
-        { i = 18, x = 0,  y = 15 },
-        { i = 19, x = 1,  y = 15 },
-        { i = 19, x = 2,  y = 15 },
-        { i = 32, x = 3,  y = 15 },
-        { i = 32, x = 4,  y = 15 },
-        { i = 33, x = 5,  y = 15 },
-        { i = 33, x = 6,  y = 15 },
-        { i = 33, x = 7,  y = 15 },
-        { i = 33, x = 8,  y = 15 },
-        { i = 34, x = 9,  y = 15 },
-        { i = 34, x = 10, y = 15 },
-        { i = 35, x = 11, y = 15 },
-        { i = 35, x = 12, y = 15 },
-        { i = 35, x = 13, y = 15 },
-        { i = 35, x = 14, y = 15 },
-        { i = 48, x = 15, y = 15 },
-
-        -- right side
-        { i = 49, x = 15, y = 1  },
-        { i = 49, x = 15, y = 2  },
-        { i = 49, x = 15, y = 3  },
-        { i = 49, x = 15, y = 4  },
-        { i = 49, x = 15, y = 5  },
-        { i = 49, x = 15, y = 6  },
-        { i = 49, x = 15, y = 7  },
-        { i = 49, x = 15, y = 8  },
-        { i = 49, x = 15, y = 9  },
-        { i = 49, x = 15, y = 10 },
-        { i = 49, x = 15, y = 11 },
-        { i = 49, x = 15, y = 12 },
-        { i = 49, x = 15, y = 13 },
-        { i = 49, x = 15, y = 14 }
       },
       score = {
         { i = 134, x = 6, y = 11, w = 4, h = 4 }
@@ -410,6 +343,11 @@ function screen_playing()
       end
     end,
 
+    draw_buttons = function(self)
+      self:draw_button(text.knifey)
+      self:draw_button(text.spoony)
+    end, 
+
     draw_floor = function(self)
       rectfill(4, 111, 123, 112, 15)
       rectfill(4, 113, 123, 119, 4)
@@ -490,12 +428,11 @@ function screen_playing()
     end,
 
     _draw = function(self)
-      draw_sprites(sprites.frame)
+      draw_sprites(global_sprites.frame)
       self:draw_timer()
       draw_sprites(self.utensil_sprites)
       draw_sprites(self.sprites.score)
-      self:draw_button(text.knifey)
-      self:draw_button(text.spoony)
+      self:draw_buttons()
       self:draw_floor()
     end
   }
@@ -582,7 +519,7 @@ function screen_title()
       draw_sprites(self.sprites.title)
       draw_sprites(self.sprites.bottom_line)
       draw_sprites(self.sprites.spoon)
-      draw_sprites(sprites.frame)
+      draw_sprites(global_sprites.frame)
       
       text:show('about', 119, 7)
     end

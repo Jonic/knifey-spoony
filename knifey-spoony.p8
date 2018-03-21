@@ -35,76 +35,222 @@ high_score        = 0
 high_score_beaten = false
 score             = 0
 
-global_sprites = {
-  frame = {
-    -- top
-    { i = 0,  x = 0,  y = 0 },
-    { i = 1,  x = 1,  y = 0 },
-    { i = 1,  x = 2,  y = 0 },
-    { i = 1,  x = 3,  y = 0 },
-    { i = 1,  x = 4,  y = 0 },
-    { i = 1,  x = 5,  y = 0 },
-    { i = 1,  x = 6,  y = 0 },
-    { i = 1,  x = 7,  y = 0 },
-    { i = 1,  x = 8,  y = 0 },
-    { i = 1,  x = 9,  y = 0 },
-    { i = 1,  x = 10, y = 0 },
-    { i = 1,  x = 11, y = 0 },
-    { i = 1,  x = 12, y = 0 },
-    { i = 1,  x = 13, y = 0 },
-    { i = 1,  x = 14, y = 0 },
-    { i = 2,  x = 15, y = 0 },
 
-    -- left side
-    { i = 3,  x = 0, y = 1  },
-    { i = 3,  x = 0, y = 2  },
-    { i = 16, x = 0, y = 3  },
-    { i = 16, x = 0, y = 4  },
-    { i = 17, x = 0, y = 5  },
-    { i = 17, x = 0, y = 6  },
-    { i = 17, x = 0, y = 7  },
-    { i = 17, x = 0, y = 8  },
-    { i = 17, x = 0, y = 9  },
-    { i = 17, x = 0, y = 10 },
-    { i = 17, x = 0, y = 11 },
-    { i = 17, x = 0, y = 12 },
-    { i = 17, x = 0, y = 13 },
-    { i = 17, x = 0, y = 14 },
+-->8
+-- sprites
+sprites = {
+  global = {
+    frame = {
+      -- top
+      { i = 0,  x = 0,  y = 0 },
+      { i = 1,  x = 1,  y = 0 },
+      { i = 1,  x = 2,  y = 0 },
+      { i = 1,  x = 3,  y = 0 },
+      { i = 1,  x = 4,  y = 0 },
+      { i = 1,  x = 5,  y = 0 },
+      { i = 1,  x = 6,  y = 0 },
+      { i = 1,  x = 7,  y = 0 },
+      { i = 1,  x = 8,  y = 0 },
+      { i = 1,  x = 9,  y = 0 },
+      { i = 1,  x = 10, y = 0 },
+      { i = 1,  x = 11, y = 0 },
+      { i = 1,  x = 12, y = 0 },
+      { i = 1,  x = 13, y = 0 },
+      { i = 1,  x = 14, y = 0 },
+      { i = 2,  x = 15, y = 0 },
 
-    --bottom
-    { i = 18, x = 0,  y = 15 },
-    { i = 19, x = 1,  y = 15 },
-    { i = 19, x = 2,  y = 15 },
-    { i = 32, x = 3,  y = 15 },
-    { i = 32, x = 4,  y = 15 },
-    { i = 33, x = 5,  y = 15 },
-    { i = 33, x = 6,  y = 15 },
-    { i = 33, x = 7,  y = 15 },
-    { i = 33, x = 8,  y = 15 },
-    { i = 34, x = 9,  y = 15 },
-    { i = 34, x = 10, y = 15 },
-    { i = 35, x = 11, y = 15 },
-    { i = 35, x = 12, y = 15 },
-    { i = 35, x = 13, y = 15 },
-    { i = 35, x = 14, y = 15 },
-    { i = 48, x = 15, y = 15 },
+      -- left side
+      { i = 3,  x = 0, y = 1  },
+      { i = 3,  x = 0, y = 2  },
+      { i = 16, x = 0, y = 3  },
+      { i = 16, x = 0, y = 4  },
+      { i = 17, x = 0, y = 5  },
+      { i = 17, x = 0, y = 6  },
+      { i = 17, x = 0, y = 7  },
+      { i = 17, x = 0, y = 8  },
+      { i = 17, x = 0, y = 9  },
+      { i = 17, x = 0, y = 10 },
+      { i = 17, x = 0, y = 11 },
+      { i = 17, x = 0, y = 12 },
+      { i = 17, x = 0, y = 13 },
+      { i = 17, x = 0, y = 14 },
 
-    -- right side
-    { i = 49, x = 15, y = 1  },
-    { i = 49, x = 15, y = 2  },
-    { i = 49, x = 15, y = 3  },
-    { i = 49, x = 15, y = 4  },
-    { i = 49, x = 15, y = 5  },
-    { i = 49, x = 15, y = 6  },
-    { i = 49, x = 15, y = 7  },
-    { i = 49, x = 15, y = 8  },
-    { i = 49, x = 15, y = 9  },
-    { i = 49, x = 15, y = 10 },
-    { i = 49, x = 15, y = 11 },
-    { i = 49, x = 15, y = 12 },
-    { i = 49, x = 15, y = 13 },
-    { i = 49, x = 15, y = 14 }
-  }
+      --bottom
+      { i = 18, x = 0,  y = 15 },
+      { i = 19, x = 1,  y = 15 },
+      { i = 19, x = 2,  y = 15 },
+      { i = 32, x = 3,  y = 15 },
+      { i = 32, x = 4,  y = 15 },
+      { i = 33, x = 5,  y = 15 },
+      { i = 33, x = 6,  y = 15 },
+      { i = 33, x = 7,  y = 15 },
+      { i = 33, x = 8,  y = 15 },
+      { i = 34, x = 9,  y = 15 },
+      { i = 34, x = 10, y = 15 },
+      { i = 35, x = 11, y = 15 },
+      { i = 35, x = 12, y = 15 },
+      { i = 35, x = 13, y = 15 },
+      { i = 35, x = 14, y = 15 },
+      { i = 48, x = 15, y = 15 },
+
+      -- right side
+      { i = 49, x = 15, y = 1  },
+      { i = 49, x = 15, y = 2  },
+      { i = 49, x = 15, y = 3  },
+      { i = 49, x = 15, y = 4  },
+      { i = 49, x = 15, y = 5  },
+      { i = 49, x = 15, y = 6  },
+      { i = 49, x = 15, y = 7  },
+      { i = 49, x = 15, y = 8  },
+      { i = 49, x = 15, y = 9  },
+      { i = 49, x = 15, y = 10 },
+      { i = 49, x = 15, y = 11 },
+      { i = 49, x = 15, y = 12 },
+      { i = 49, x = 15, y = 13 },
+      { i = 49, x = 15, y = 14 },
+    },
+  },
+  playing = {
+    buttons = {
+      knifey = {
+        { i = 4,  x = 2, y = 12, w = 4, h = 2 },
+        { i = 8,  x = 2, y = 12, w = 4, h = 2 },
+        { i = 12, x = 2, y = 12, w = 4, h = 2 },
+        { i = 8,  x = 2, y = 12, w = 4, h = 2 },
+      },
+      spoony = {
+        { i = 36, x = 10, y = 12, w = 4, h = 2 },
+        { i = 40, x = 10, y = 12, w = 4, h = 2 },
+        { i = 44, x = 10, y = 12, w = 4, h = 2 },
+        { i = 40, x = 10, y = 12, w = 4, h = 2 },
+      },
+    },
+    score = {
+      { i = 134, x = 6, y = 11, w = 4, h = 4 },
+    },
+    utensils = {
+      knifey = {
+        {
+          -- red knife
+          { i = 75,  x = 7, y = 2, w = 2, h = 4 },
+          { i = 77,  x = 7, y = 6, w = 2 },
+          { i = 93,  x = 6, y = 7 },
+          { i = 94,  x = 7, y = 7 },
+          { i = 79,  x = 8, y = 7 },
+          { i = 95,  x = 9, y = 7 },
+          { i = 105, x = 7, y = 8, w = 2, h = 2 },
+        },
+        {
+          -- thin knife
+          { i = 64, x = 7, y = 2, w = 2, h = 4 },
+          { i = 66, x = 7, y = 6, w = 2, h = 4 },
+        },
+        {
+          -- metal knife
+          { i = 64,  x = 7, y = 2, w = 2, h = 2 },
+          { i = 68,  x = 7, y = 4 },
+          { i = 113, x = 8, y = 4 },
+          { i = 112, x = 7, y = 5, w = 2 },
+          { i = 84,  x = 7, y = 6, w = 2, h = 3 },
+          { i = 69,  x = 7, y = 9, w = 2 },
+        },
+        {
+          -- master sword
+          { i = 71, x = 7, y = 2, w = 2, h = 4 },
+          { i = 73, x = 7, y = 6, w = 2, h = 4 },
+        }
+      },
+      spoony = {
+        {
+          -- white spoon
+          { i = 130, x = 7, y = 2, w = 2, h = 4 },
+          { i = 132, x = 7, y = 6, w = 1, h = 2 },
+          { i = 164, x = 7, y = 8, w = 2, h = 2 },
+        },
+        {
+          -- metal spoon
+          { i = 109, x = 7, y = 2, w = 2, h = 2 },
+          { i = 128, x = 7, y = 4, w = 2, h = 4 },
+          { i = 116, x = 7, y = 8, w = 2 },
+          { i = 69,  x = 7, y = 9, w = 2 },
+        },
+        {
+          -- wood handle spoon
+          { i = 109, x = 7, y = 2, w = 2, h = 2 },
+          { i = 128, x = 7, y = 4, w = 2, h = 4 },
+          { i = 105, x = 7, y = 8, w = 2, h = 2 },
+        },
+      },
+    },
+  },
+  title = {
+    bottom_line = {
+      { i = 19, x = 2,  y = 10 },
+      { i = 19, x = 3,  y = 10 },
+      { i = 32, x = 4,  y = 10 },
+      { i = 33, x = 5,  y = 10 },
+      { i = 33, x = 6,  y = 10 },
+      { i = 33, x = 7,  y = 10 },
+      { i = 33, x = 8,  y = 10 },
+      { i = 33, x = 9,  y = 10 },
+      { i = 33, x = 10, y = 10 },
+      { i = 33, x = 11, y = 10 },
+    },
+    knife = {
+      { i = 138, x = 2, y = 3, w = 2, h = 3 }
+    },
+    spoon = {
+      { i = 140, x = 12, y = 10, w = 2, h = 3 }
+    },
+    text = {
+      -- k
+      { i = 192, x = 2, y = 6, w = 2, h = 2 },
+      -- n
+      { i = 192, x = 4, y = 6, h = 2 },
+      { i = 194, x = 5, y = 6, h = 2 },
+      -- i
+      { i = 195, x = 6, y = 6 },
+      { i = 208, x = 6, y = 7 },
+      -- f
+      { i = 192, x = 7, y = 6, h = 2 },
+      { i = 196, x = 8, y = 6, h = 2 },
+      -- e
+      { i = 192, x = 9, y = 6, h = 2 },
+      { i = 197, x = 10, y = 6, h = 2 },
+      -- y
+      { i = 198, x = 11, y = 6, w = 2, h = 2 },
+      -- s
+      { i = 224, x = 2, y = 8, w = 2, h = 2 },
+      -- p
+      { i = 192, x = 4, y = 8, h = 2 },
+      { i = 227, x = 5, y = 8, h = 2 },
+      -- o
+      { i = 228, x = 6, y = 8, h = 2 },
+      { i = 194, x = 7, y = 8 },
+      { i = 245, x = 7, y = 9 },
+      -- o
+      { i = 228, x = 8, y = 8, h = 2 },
+      { i = 194, x = 9, y = 8 },
+      { i = 245, x = 9, y = 9 },
+      -- n
+      { i = 192, x = 10, y = 8, h = 2 },
+      { i = 194, x = 11, y = 8, h = 2 },
+      -- y
+      { i = 198, x = 12, y = 8, w = 2, h = 2 },
+    },
+    top_line = {
+      { i = 1, x = 4,  y = 5 },
+      { i = 1, x = 5,  y = 5 },
+      { i = 1, x = 6,  y = 5 },
+      { i = 1, x = 7,  y = 5 },
+      { i = 1, x = 8,  y = 5 },
+      { i = 1, x = 9,  y = 5 },
+      { i = 1, x = 10, y = 5 },
+      { i = 1, x = 11, y = 5 },
+      { i = 1, x = 12, y = 5 },
+      { i = 1, x = 13, y = 5 },
+    },
+  },
 }
 
 -->8
@@ -126,6 +272,11 @@ function draw_sprites(sprites)
   for s in all(sprites) do
     draw_sprite(s)
   end
+end
+
+function reset_globals()
+  high_score_beaten  = false
+  score              = 0
 end
 
 function rndint(min, max)
@@ -220,94 +371,24 @@ end
 
 function screen_playing()
   return {
-    sprites = {
-      buttons = {
+    defaults = {
+      button_animations = {
         knifey = {
-          { i = 4,  x = 2, y = 12, w = 4, h = 2 },
-          { i = 8,  x = 2, y = 12, w = 4, h = 2 },
-          { i = 12, x = 2, y = 12, w = 4, h = 2 },
-          { i = 8,  x = 2, y = 12, w = 4, h = 2 }
+          animating = false,
+          frame     = 1
         },
         spoony = {
-          { i = 36, x = 10, y = 12, w = 4, h = 2 },
-          { i = 40, x = 10, y = 12, w = 4, h = 2 },
-          { i = 44, x = 10, y = 12, w = 4, h = 2 },
-          { i = 40, x = 10, y = 12, w = 4, h = 2 }
-        }
-      },
-      score = {
-        { i = 134, x = 6, y = 11, w = 4, h = 4 }
-      },
-      utensils = {
-        knifey = {
-          {
-            -- red knife
-            { i = 75,  x = 7, y = 2, w = 2, h = 4 },
-            { i = 77,  x = 7, y = 6, w = 2 },
-            { i = 93,  x = 6, y = 7 },
-            { i = 94,  x = 7, y = 7 },
-            { i = 79,  x = 8, y = 7 },
-            { i = 95,  x = 9, y = 7 },
-            { i = 105, x = 7, y = 8, w = 2, h = 2 }
-          },
-          {
-            -- thin knife
-            { i = 64, x = 7, y = 2, w = 2, h = 4 },
-            { i = 66, x = 7, y = 6, w = 2, h = 4 }
-          },
-          {
-            -- metal knife
-            { i = 64,  x = 7, y = 2, w = 2, h = 2 },
-            { i = 68,  x = 7, y = 4 },
-            { i = 113, x = 8, y = 4 },
-            { i = 112, x = 7, y = 5, w = 2 },
-            { i = 84,  x = 7, y = 6, w = 2, h = 3 },
-            { i = 69,  x = 7, y = 9, w = 2 }
-          },
-          {
-            -- master sword
-            { i = 71, x = 7, y = 2, w = 2, h = 4 },
-            { i = 73, x = 7, y = 6, w = 2, h = 4 }
-          }
+          animating = false,
+          frame     = 1
         },
-        spoony = {
-          {
-            -- white spoon
-            { i = 130, x = 7, y = 2, w = 2, h = 4 },
-            { i = 132, x = 7, y = 6, w = 1, h = 2 },
-            { i = 164, x = 7, y = 8, w = 2, h = 2 }
-          },
-          {
-            -- metal spoon
-            { i = 109, x = 7, y = 2, w = 2, h = 2 },
-            { i = 128, x = 7, y = 4, w = 2, h = 4 },
-            { i = 116, x = 7, y = 8, w = 2 },
-            { i = 69,  x = 7, y = 9, w = 2 },
-          },
-          {
-            -- wood handle spoon
-            { i = 109, x = 7, y = 2, w = 2, h = 2 },
-            { i = 128, x = 7, y = 4, w = 2, h = 4 },
-            { i = 105, x = 7, y = 8, w = 2, h = 2 }
-          }
-        }
-      }
-    },
-
-    button_animations_defaults = {
-      knifey = {
-        animating = false,
-        frame     = 1
       },
-      spoony = {
-        animating = false,
-        frame     = 1
-      },
-    },
 
+      active_timeout = 0,
+      round_timeout  = 120,
+    },
     active_timeout     = 0,
-    button_animations  = {},
-    timeout            = 0,
+    round_timeout      = 0,
+    button_animations  = nil,
     timeout_minimum    = 20,
     timeout_multiplier = 0.95,
     utensil            = nil,
@@ -321,22 +402,25 @@ function screen_playing()
       self:get_utensil_sprites()
     end,
 
-    decrease_timeout = function(self)
+    decrease_active_timeout = function(self)
+      self.active_timeout -= 1
+      if (self.active_timeout == 0) screens:go_to('game_over')
+    end,
+
+    decrease_round_timeout = function(self)
       local new_timeout = self.round_timeout * self.timeout_multiplier
       self.round_timeout = mid(self.timeout_minimum, new_timeout, self.round_timeout)
     end,
 
     draw_button = function(self, button)
       local button_animation = self.button_animations[button]
-      local button_sprites   = self.sprites.buttons[button]
+      local button_sprites   = sprites.playing.buttons[button]
 
-      if (button_animation.animating) then
-        button_animation.frame += 1
-      end
+      if (button_animation.animating) button_animation.frame += 1
 
       draw_sprite(button_sprites[button_animation.frame])
 
-      if (button_animation.frame >= #button_sprites) then
+      if (button_animation.frame == #button_sprites) then
         button_animation.animating = false
         button_animation.frame     = 1
       end
@@ -378,8 +462,7 @@ function screen_playing()
     end,
 
     get_utensil_sprites = function(self)
-      local utensil_array  = self.sprites.utensils[self.utensil]
-
+      local utensil_array  = sprites.playing.utensils[self.utensil]
       self.utensil_index   = rndint(1, #utensil_array)
       self.utensil_sprites = utensil_array[self.utensil_index]
     end,
@@ -389,14 +472,12 @@ function screen_playing()
       self:choose_utensil()
     end,
 
-    reset_animations = function(self)
-      self.button_animations = self.button_animations_defaults
-    end,
+    reset = function(self)
+      self.active_timeout    = self.defaults.active_timeout
+      self.button_animations = self.defaults.button_animations
+      self.round_timeout     = self.defaults.round_timeout
 
-    reset_values = function(self)
-      high_score_beaten  = false
-      score              = 0
-      self.round_timeout = 120
+      reset_globals()
     end,
 
     round_failed = function()
@@ -406,7 +487,7 @@ function screen_playing()
     round_passed = function(self)
       score += 1
       update_high_score()
-      self:decrease_timeout()
+      self:decrease_round_timeout()
       self:new_round()
     end,
 
@@ -417,27 +498,20 @@ function screen_playing()
     end,
 
     _init = function(self)
-      printh(self.active_timeout)
-      self:reset_animations()
-      self:reset_values()
+      self:reset()
       self:new_round()
     end,
 
     _update = function(self)
-      self.active_timeout -= 1
-
-      if (self.active_timeout <= 0) then
-        return screens:go_to('game_over')
-      end
-
+      self:decrease_active_timeout()
       self:get_input()
     end,
 
     _draw = function(self)
-      draw_sprites(global_sprites.frame)
+      draw_sprites(sprites.global.frame)
       self:draw_timer()
       draw_sprites(self.utensil_sprites)
-      draw_sprites(self.sprites.score)
+      draw_sprites(sprites.playing.score)
       self:draw_buttons()
       self:draw_floor()
     end
@@ -446,86 +520,17 @@ end
 
 function screen_title()
   return {
-    sprites = {
-      bottom_line = {
-        { i = 19, x = 2,  y = 10 },
-        { i = 19, x = 3,  y = 10 },
-        { i = 32, x = 4,  y = 10 },
-        { i = 33, x = 5,  y = 10 },
-        { i = 33, x = 6,  y = 10 },
-        { i = 33, x = 7,  y = 10 },
-        { i = 33, x = 8,  y = 10 },
-        { i = 33, x = 9,  y = 10 },
-        { i = 33, x = 10, y = 10 },
-        { i = 33, x = 11, y = 10 },
-      },
-      knife = {
-        { i = 138, x = 2, y = 3, w = 2, h = 3 }
-      },
-      spoon = {
-        { i = 140, x = 12, y = 10, w = 2, h = 3 }
-      },
-      title = {
-        -- k
-        { i = 192, x = 2, y = 6, w = 2, h = 2 },
-        -- n
-        { i = 192, x = 4, y = 6, h = 2 },
-        { i = 194, x = 5, y = 6, h = 2 },
-        -- i
-        { i = 195, x = 6, y = 6 },
-        { i = 208, x = 6, y = 7 },
-        -- f
-        { i = 192, x = 7, y = 6, h = 2 },
-        { i = 196, x = 8, y = 6, h = 2 },
-        -- e
-        { i = 192, x = 9, y = 6, h = 2 },
-        { i = 197, x = 10, y = 6, h = 2 },
-        -- y
-        { i = 198, x = 11, y = 6, w = 2, h = 2 },
-        -- s
-        { i = 224, x = 2, y = 8, w = 2, h = 2 },
-        -- p
-        { i = 192, x = 4, y = 8, h = 2 },
-        { i = 227, x = 5, y = 8, h = 2 },
-        -- o
-        { i = 228, x = 6, y = 8, h = 2 },
-        { i = 194, x = 7, y = 8 },
-        { i = 245, x = 7, y = 9 },
-        -- o
-        { i = 228, x = 8, y = 8, h = 2 },
-        { i = 194, x = 9, y = 8 },
-        { i = 245, x = 9, y = 9 },
-        -- n
-        { i = 192, x = 10, y = 8, h = 2 },
-        { i = 194, x = 11, y = 8, h = 2 },
-        -- y
-        { i = 198, x = 12, y = 8, w = 2, h = 2 },
-      },
-      top_line = {
-        { i = 1, x = 4,  y = 5 },
-        { i = 1, x = 5,  y = 5 },
-        { i = 1, x = 6,  y = 5 },
-        { i = 1, x = 7,  y = 5 },
-        { i = 1, x = 8,  y = 5 },
-        { i = 1, x = 9,  y = 5 },
-        { i = 1, x = 10, y = 5 },
-        { i = 1, x = 11, y = 5 },
-        { i = 1, x = 12, y = 5 },
-        { i = 1, x = 13, y = 5 },
-      }
-    },
-
     _update = function()
       if (btnp(5)) screens:go_to('playing')
     end,
 
     _draw = function(self)
-      draw_sprites(self.sprites.knife)
-      draw_sprites(self.sprites.top_line)
-      draw_sprites(self.sprites.title)
-      draw_sprites(self.sprites.bottom_line)
-      draw_sprites(self.sprites.spoon)
-      draw_sprites(global_sprites.frame)
+      draw_sprites(sprites.title.knife)
+      draw_sprites(sprites.title.top_line)
+      draw_sprites(sprites.title.text)
+      draw_sprites(sprites.title.bottom_line)
+      draw_sprites(sprites.title.spoon)
+      draw_sprites(sprites.global.frame)
 
       text:show('about', 119, 7)
     end

@@ -11,40 +11,19 @@
     </script>
 
     <meta charset="utf-8">
-    <title>Knifey Spoony - a game by Jonic</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Knifey Spoony - a game by Jonic + Ribbon Black</title>
     <meta name="description" content="Is it a knife? Or is it a spoon? You tell me.">
-
-    <style TYPE="text/css">
-      html, body {
-        background-color: #000;
-        display         : grid;
-        height          : 100%;
-        margin          : 0;
-        padding         : 0;
-        position:       relative;
-        width           : 100%;
-      }
-
-      canvas {
-        border                : 0;
-        height                : 600px;
-        image-rendering       : optimizeSpeed;
-        image-rendering       : -moz-crisp-edges;
-        image-rendering       : -webkit-optimize-contrast;
-        image-rendering       : optimize-contrast;
-        image-rendering       : pixelated;
-        -ms-interpolation-mode: nearest-neighbor;
-        left                  : 50%;
-        margin                : : 0 auto;
-        position              : absolute;
-        top                   : 50%;
-        transform             : translate(-50%, -50%);
-        width                 : 600px;
-      }
-    </style>
+    <link rel="preload" href="/web/fonts/04b03.woff2" as="font" type="font/woff2" crossorigin>
+    <link href="/web/css/application.css" rel="stylesheet">
   </head>
 
   <body>
+    <h1>Knifey Spoony</h1>
+    <h2>
+      A game by <a href="https://100yen.co.uk">Jonic</a> +
+      <a href="http://ribbonblack.com">Ribbon Black</a>
+    </h2>
     <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
 
     <script type="text/javascript">

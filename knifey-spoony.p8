@@ -80,6 +80,11 @@ function update_high_score()
   global_score = score
 end
 
+function update_score()
+  score += 1
+  update_high_score()
+end
+
 -->8
 -- sprites
 
@@ -385,34 +390,45 @@ function screen_playing()
         },
       },
 
-      active_timeout = 0,
-      round_timeout  = 120,
+      timeout = {
+        max        = 120,
+        min        = 20,
+        multiplier = 0.95,
+        remaining  = 0,
+        start      = 120,
+      },
     },
 
-    active_timeout     = 0,
-    round_timeout      = 0,
-    button_animations  = nil,
-    timeout_minimum    = 20,
-    timeout_multiplier = 0.95,
-    utensil            = nil,
+    button_animations = nil,
+    timeout = {
+      max        = 120,
+      min        = 20,
+      multiplier = 0.95,
+      remaining  = 0,
+      start      = 0,
+    },
+    utensil = {
+      current = nil,
+      sprites = {},
+    },
 
     animate_button = function(self, button)
       self.button_animations[button].animating = true
     end,
 
     choose_utensil = function(self)
-      self.utensil = rnd(1) > 0.5 and text.knifey or text.spoony
+      self.utensil.current = rnd(1) > 0.5 and text.knifey or text.spoony
       self:get_utensil_sprites()
     end,
 
-    decrease_active_timeout = function(self)
-      self.active_timeout -= 1
-      if (self.active_timeout == 0) screens:go_to('game_over')
+    decrease_timeout_remaining = function(self)
+      self.timeout.remaining -= 1
+      if (self.timeout.remaining == 0) screens:go_to('game_over')
     end,
 
-    decrease_round_timeout = function(self)
-      local new_timeout = self.round_timeout * self.timeout_multiplier
-      self.round_timeout = mid(self.timeout_minimum, new_timeout, self.round_timeout)
+    decrease_timeout_start = function(self)
+      local new_timeout = self.timeout.start * self.timeout.multiplier
+      self.timeout.start = mid(self.timeout.min, new_timeout, self.timeout.start)
     end,
 
     draw_button = function(self, button)
@@ -445,7 +461,7 @@ function screen_playing()
     end,
 
     evaluate_input = function(self, choice)
-      if (choice == self.utensil) then
+      if (choice == self.utensil.current) then
         self:round_passed()
       else
         self:round_failed()
@@ -465,21 +481,19 @@ function screen_playing()
     end,
 
     get_utensil_sprites = function(self)
-      local utensil_array  = sprites.playing.utensils[self.utensil]
-      self.utensil_index   = rndint(1, #utensil_array)
-      self.utensil_sprites = utensil_array[self.utensil_index]
+      local utensil_array = sprites.playing.utensils[self.utensil.current]
+      local utensil_index = rndint(1, #utensil_array)
+      self.utensil.sprites = utensil_array[utensil_index]
     end,
 
     new_round = function(self)
-      self.active_timeout = self.round_timeout
+      self.timeout.remaining = self.timeout.start
       self:choose_utensil()
     end,
 
     reset = function(self)
-      self.active_timeout    = self.defaults.active_timeout
+      self.timeout           = self.defaults.timeout
       self.button_animations = self.defaults.button_animations
-      self.round_timeout     = self.defaults.round_timeout
-
       reset_globals()
     end,
 
@@ -488,16 +502,14 @@ function screen_playing()
     end,
 
     round_passed = function(self)
-      score += 1
-      update_high_score()
-      self:decrease_round_timeout()
+      update_score()
+      self:decrease_timeout_start()
       self:new_round()
     end,
 
     timeout_width = function(self)
-      local timeout_max_width  = 120
-      local elapsed_percentage = self.active_timeout / self.round_timeout
-      return flr(elapsed_percentage * timeout_max_width)
+      local elapsed_percentage = self.timeout.remaining / self.timeout.start
+      return flr(elapsed_percentage * self.timeout.max)
     end,
 
     _init = function(self)
@@ -506,14 +518,14 @@ function screen_playing()
     end,
 
     _update = function(self)
-      self:decrease_active_timeout()
+      self:decrease_timeout_remaining()
       self:get_input()
     end,
 
     _draw = function(self)
       draw_sprites(sprites.global.frame)
       self:draw_timer()
-      draw_sprites(self.utensil_sprites)
+      draw_sprites(self.utensil.sprites)
       draw_sprites(sprites.playing.score)
       self:draw_buttons()
       self:draw_floor()

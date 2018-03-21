@@ -534,7 +534,6 @@ end
 
 screens = {
   current = {
-    name     = nil,
     instance = nil
   },
 
@@ -544,25 +543,14 @@ screens = {
     title     = screen_title()
   },
 
-  get_instance = function(self)
-    self.current.instance = self.definitions[self.current.name]
-
-    if (self.just_updated) then
-      self:_init()
-      self.just_updated = false
-    end
-  end,
-
   go_to = function(self, name)
-    self.current.name = name
-    self.just_updated = true
-    self:get_instance()
+    self.current.instance = self.definitions[name]
+    self:_init()
   end,
 
   _init = function(self)
-    if (table_has_key(self.current.instance, '_init')) then
-      self.current.instance:_init()
-    end
+    local can_init = table_has_key(self.current.instance, '_init')
+    if (can_init) self.current.instance:_init()
   end,
 
   _update = function(self)

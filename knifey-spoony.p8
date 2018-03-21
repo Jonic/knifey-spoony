@@ -31,9 +31,9 @@ __lua__
 -->8
 -- global setup
 
-score             = 0
 high_score        = 0
 high_score_beaten = false
+score             = 0
 
 global_sprites = {
   frame = {
@@ -111,13 +111,14 @@ global_sprites = {
 -- helpers
 
 function draw_sprite(s)
-  i  = s.i
-  x  = s.x * 8
-  y  = s.y * 8
-  w  = s.w or 1
-  h  = s.h or 1
-  fx = s.fx or false
-  fy = s.fy or false
+  local i  = s.i
+  local x  = s.x * 8
+  local y  = s.y * 8
+  local w  = s.w or 1
+  local h  = s.h or 1
+  local fx = s.fx or false
+  local fy = s.fy or false
+
   spr(i, x, y, w, h, fx, fy)
 end
 
@@ -174,8 +175,8 @@ text = {
   end,
 
   output = function(self, str, y, color, outline)
-    outline = outline or nil
-    x       = self:center(str)
+    local outline = outline or nil
+    local x       = self:center(str)
 
     if (outline != nil) then
       return self:outline(str, x, y, color, outline)
@@ -199,8 +200,8 @@ function screen_game_over()
     end,
 
     _draw = function()
-      high_score_text = text:get('high_score') .. high_score
-      score_text      = text:get('score') .. score
+      local high_score_text = text:get('high_score') .. high_score
+      local score_text      = text:get('score') .. score
 
       rectfill(0, 0, 128, 128, 8)
 
@@ -304,8 +305,8 @@ function screen_playing()
       },
     },
 
+    active_timeout     = 0,
     button_animations  = {},
-    round_timeout      = 0,
     timeout            = 0,
     timeout_minimum    = 20,
     timeout_multiplier = 0.95,
@@ -316,20 +317,18 @@ function screen_playing()
     end,
 
     choose_utensil = function(self)
-      self.utensil         = rnd(1) > 0.5 and text.knifey or text.spoony
-      utensil_array        = self.sprites.utensils[self.utensil]
-      self.utensil_index   = rndint(1, #utensil_array)
-      self.utensil_sprites = utensil_array[self.utensil_index]
+      self.utensil = rnd(1) > 0.5 and text.knifey or text.spoony
+      self:get_utensil_sprites()
     end,
 
     decrease_timeout = function(self)
-      local new_timeout = self.timeout * self.timeout_multiplier
-      self.timeout = mid(self.timeout_minimum, new_timeout, self.timeout)
+      local new_timeout = self.round_timeout * self.timeout_multiplier
+      self.round_timeout = mid(self.timeout_minimum, new_timeout, self.round_timeout)
     end,
 
     draw_button = function(self, button)
-      button_animation = self.button_animations[button]
-      button_sprites   = self.sprites.buttons[button]
+      local button_animation = self.button_animations[button]
+      local button_sprites   = self.sprites.buttons[button]
 
       if (button_animation.animating) then
         button_animation.frame += 1
@@ -355,7 +354,7 @@ function screen_playing()
     end,
 
     draw_timer = function(self)
-      rectfill(4, 7, self:timeout_width(), 7, 8)
+      rectfill(4, 4, self:timeout_width(), 5, 8)
     end,
 
     evaluate_input = function(self, choice)
@@ -378,8 +377,15 @@ function screen_playing()
       end
     end,
 
+    get_utensil_sprites = function(self)
+      local utensil_array  = self.sprites.utensils[self.utensil]
+
+      self.utensil_index   = rndint(1, #utensil_array)
+      self.utensil_sprites = utensil_array[self.utensil_index]
+    end,
+
     new_round = function(self)
-      self.round_timeout = self.timeout
+      self.active_timeout = self.round_timeout
       self:choose_utensil()
     end,
 
@@ -388,13 +394,12 @@ function screen_playing()
     end,
 
     reset_values = function(self)
-      self.timeout      = 120
-      high_score_beaten = false
-      score             = 0
+      high_score_beaten  = false
+      score              = 0
+      self.round_timeout = 120
     end,
 
     round_failed = function()
-      update_high_score()
       screens:go_to('game_over')
     end,
 
@@ -406,21 +411,22 @@ function screen_playing()
     end,
 
     timeout_width = function(self)
-      timeout_max_width  = 120
-      elapsed_percentage = self.round_timeout / self.timeout
+      local timeout_max_width  = 120
+      local elapsed_percentage = self.active_timeout / self.round_timeout
       return flr(elapsed_percentage * timeout_max_width)
     end,
 
     _init = function(self)
+      printh(self.active_timeout)
       self:reset_animations()
       self:reset_values()
       self:new_round()
     end,
 
     _update = function(self)
-      self.round_timeout -= 1
+      self.active_timeout -= 1
 
-      if (self.round_timeout <= 0) then
+      if (self.active_timeout <= 0) then
         return screens:go_to('game_over')
       end
 
@@ -520,7 +526,7 @@ function screen_title()
       draw_sprites(self.sprites.bottom_line)
       draw_sprites(self.sprites.spoon)
       draw_sprites(global_sprites.frame)
-      
+
       text:show('about', 119, 7)
     end
   }

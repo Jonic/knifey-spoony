@@ -9,35 +9,80 @@ __lua__
   "i see you've played knifey
   spoony before"
 
-		jonic: this is my first real
-		attempt to make a game with
-		pico-8. it's a bit messy,
-		because i've spent a long time
-		trying to figure out systems
-		for things such as displaying
-		groups of sprites, animating
-		elements, and dispalying text.
-		
-		i haven't made any attempt to
-		optimise this code, so it
-		should be easy for a beginner
-		to get to grips with it. if
-		you're struggling to read it
-		in pico-8, the full code is
-		on github here:
+  jonic: this is my first real
+  attempt to make a game with
+  pico-8. it's a bit messy,
+  because i've spent a long time
+  trying to figure out systems
+  for things such as displaying
+  groups of sprites, animating
+  elements, and dispalying text.
+
+  i haven't made any attempt to
+  optimise this code, so it
+  should be easy for a beginner
+  to get to grips with it. if
+  you're struggling to read it
+  in pico-8, the full code is
+  on github here:
+
   https://github.com/jonic/knifey-spoony
 ]]
 
 -->8
--- global setup
+-- global vars
 
 high_score        = 0
 high_score_beaten = false
 score             = 0
 
+-->8
+-- helper functions
+
+function draw_sprite(s)
+  local i  = s.i
+  local x  = s.x * 8
+  local y  = s.y * 8
+  local w  = s.w or 1
+  local h  = s.h or 1
+  local fx = s.fx or false
+  local fy = s.fy or false
+
+  spr(i, x, y, w, h, fx, fy)
+end
+
+function draw_sprites(sprites)
+  for s in all(sprites) do
+    draw_sprite(s)
+  end
+end
+
+function reset_globals()
+  high_score_beaten  = false
+  score              = 0
+end
+
+function rndint(min, max)
+  return flr(rnd(max)) + min
+end
+
+function table_has_key(table, key)
+  return table[key] ~= nil
+end
+
+function update_high_score()
+  if (score > high_score) then
+    high_score        = score
+    high_score_beaten = true
+    dset(0, high_score)
+  end
+
+  global_score = score
+end
 
 -->8
 -- sprites
+
 sprites = {
   global = {
     frame = {
@@ -254,51 +299,8 @@ sprites = {
 }
 
 -->8
--- helpers
+-- text
 
-function draw_sprite(s)
-  local i  = s.i
-  local x  = s.x * 8
-  local y  = s.y * 8
-  local w  = s.w or 1
-  local h  = s.h or 1
-  local fx = s.fx or false
-  local fy = s.fy or false
-
-  spr(i, x, y, w, h, fx, fy)
-end
-
-function draw_sprites(sprites)
-  for s in all(sprites) do
-    draw_sprite(s)
-  end
-end
-
-function reset_globals()
-  high_score_beaten  = false
-  score              = 0
-end
-
-function rndint(min, max)
-  return flr(rnd(max)) + min
-end
-
-function table_has_key(table, key)
-  return table[key] ~= nil
-end
-
-function update_high_score()
-  if (score > high_score) then
-    high_score        = score
-    high_score_beaten = true
-    dset(0, high_score)
-  end
-
-  global_score = score
-end
-
--->8
--- message strings
 text = {
   about             = '2018 jonic + ribbon black',
   game_over         = 'game over!',
@@ -342,7 +344,7 @@ text = {
 }
 
 -->8
--- game screens
+-- screens
 
 function screen_game_over()
   return {
@@ -386,6 +388,7 @@ function screen_playing()
       active_timeout = 0,
       round_timeout  = 120,
     },
+
     active_timeout     = 0,
     round_timeout      = 0,
     button_animations  = nil,

@@ -2,11 +2,11 @@
 
 ## A game for PICO-8 by [Jonic](https://100yen.co.uk) and [Ribbon Black](http://ribbonblack.com)
 
-> I see you've played Knifey Spoony before
+> I see you've played Knifey Spoony before!
 
 Knifey Spoony is a game in which the player must identify knives and spoons within an ever-decreasing time limit.
 
-## Why does this exist
+## Why does this exist?
 
 https://www.youtube.com/watch?v=mcE0aAhbVFc
 

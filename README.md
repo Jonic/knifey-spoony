@@ -10,7 +10,7 @@ Knifey Spoony is a game in which the player must identify knives and spoons with
 
 https://www.youtube.com/watch?v=mcE0aAhbVFc
 
-### What is PICO-8
+## What is PICO-8?
 
 This game is built in [PICO-8](https://www.lexaloffle.com/pico-8.php), a fantasy game console with a very restricted set of tools, and a focus on simplicity.
 

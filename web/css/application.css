@@ -49,3 +49,12 @@ canvas {
     margin                : 0 auto;
     width                 : 600px;
 }
+
+.version {
+    color:    #999;
+    display:  inline-block;
+    position: absolute;
+    right:    5rem;
+    top:      1rem;
+    width:    auto;
+}

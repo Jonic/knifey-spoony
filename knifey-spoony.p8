@@ -3,7 +3,7 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v0.4.3
+-- v0.4.4
 
 --[[
   "i see you've played knifey
@@ -581,32 +581,29 @@ function screen_title()
 end
 
 screens = {
-  current = {
-    instance = nil
-  },
-
+  current     = nil,
   definitions = {
-    game_over = screen_game_over(),
-    playing   = screen_playing(),
-    title     = screen_title()
+    game_over = screen_game_over,
+    playing   = screen_playing,
+    title     = screen_title,
   },
 
   go_to = function(self, name)
-    self.current.instance = self.definitions[name]
+    self.current = self.definitions[name]()
     self:_init()
   end,
 
   _init = function(self)
-    local can_init = table_has_key(self.current.instance, '_init')
-    if (can_init) self.current.instance:_init()
+    local can_init = table_has_key(self.current, '_init')
+    if (can_init) self.current:_init()
   end,
 
   _update = function(self)
-    self.current.instance:_update()
+    self.current:_update()
   end,
 
   _draw = function(self)
-    self.current.instance:_draw()
+    self.current:_draw()
   end
 }
 

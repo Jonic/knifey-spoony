@@ -233,7 +233,7 @@ sprites = {
           -- master sword
           { i = 71, x = 56, y = 16, w = 2, h = 4 },
           { i = 73, x = 56, y = 48, w = 2, h = 4 },
-        }
+        },
       },
       spoony = {
         {
@@ -377,207 +377,212 @@ text = {
 -- screens
 
 function screen_game_over()
-  return {
-    _update = function()
-      if (btnp(5)) screens:go_to('playing')
-    end,
+  local s = {}
 
-    _draw = function()
-      local high_score_text = text:get('high_score') .. high_score
-      local score_text      = text:get('score') .. score
+  s._update = function()
+    if (btnp(5)) screens:go_to('playing')
+  end
 
-      rectfill(0, 0, 128, 128, 8)
+  s._draw = function()
+    local high_score_text = text:get('high_score') .. high_score
+    local score_text      = text:get('score') .. score
 
-      text:show('game_over',       16, 7, 0)
-      text:output(score_text,      32, 7, 0)
-      text:output(high_score_text, 40, 7, 0)
+    rectfill(0, 0, 128, 128, 8)
 
-      if (high_score_beaten) then
-        text:show('high_score_beaten', 56, 7, 0)
-      end
+    text:show('game_over',       16, 7, 0)
+    text:output(score_text,      32, 7, 0)
+    text:output(high_score_text, 40, 7, 0)
 
-      text:show('play_again', 112, 7, 5)
+    if (high_score_beaten) then
+      text:show('high_score_beaten', 56, 7, 0)
     end
-  }
+
+    text:show('play_again', 112, 7, 5)
+  end
+  
+  return s
 end
 
 function screen_playing()
-  return {
-    defaults = {
-      button_animations = {
-        knifey = {
-          animating = false,
-          frame     = 1
-        },
-        spoony = {
-          animating = false,
-          frame     = 1
-        },
-      },
-
-      timeout = {
-        max        = 150,
-        min        = 20,
-        multiplier = 0.95,
-        remaining  = 0,
-        start      = 120,
-      },
+  local s = {}
+  
+  s.defaults = {}
+  s.defaults.button_animations = {
+    knifey = {
+      animating = false,
+      frame     = 1,
     },
-
-    button_animations = {},
-    timeout = {},
-    timer = {
-      color     = 8,
-      height    = 2,
-      max_width = 120,
-      start_x   = 4,
-      start_y   = 4,
+    spoony = {
+      animating = false,
+      frame     = 1,
     },
-    utensil = {
-      current = nil,
-      sprites = {},
-    },
-
-    animate_button = function(self, button)
-      self.button_animations[button].animating = true
-    end,
-
-    choose_utensil = function(self)
-      self.utensil.current = rnd(1) > 0.5 and text.knifey or text.spoony
-      self:get_utensil_sprites()
-    end,
-
-    decrease_timeout_remaining = function(self)
-      self.timeout.remaining -= 1
-      if (self.timeout.remaining <= 0) screens:go_to('game_over')
-    end,
-
-    decrease_timeout_start = function(self)
-      local new_timeout = self.timeout.start * self.timeout.multiplier
-      self.timeout.start = mid(self.timeout.min, new_timeout, self.timeout.start)
-    end,
-
-    draw_button = function(self, button)
-      local button_animation = self.button_animations[button]
-      local button_sprites   = sprites.playing.buttons[button]
-
-      if (button_animation.animating) button_animation.frame += 1
-
-      draw_sprite(button_sprites[button_animation.frame])
-
-      if (button_animation.frame == #button_sprites) then
-        button_animation.animating = false
-        button_animation.frame     = 1
-      end
-    end,
-
-    draw_buttons = function(self)
-      self:draw_button(text.knifey)
-      self:draw_button(text.spoony)
-    end, 
-
-    draw_floor = function(self)
-      rectfill(4, 111, 123, 112, 15)
-      rectfill(4, 113, 123, 119, 4)
-      rectfill(4, 120, 123, 123, 2)
-    end,
-
-    draw_timer = function(self)
-      x = self.timer.start_x + self:timer_width()
-      y = self.timer.start_y + self.timer.height - 1
-      rectfill(self.timer.start_x, self.timer.start_y, x, y, self.timer.color)
-    end,
-
-    evaluate_input = function(self, choice)
-      if (choice == self.utensil.current) then
-        self:round_passed()
-      else
-        self:round_failed()
-      end
-    end,
-
-    get_input = function(self)
-      if (btnp(0)) then
-        self:animate_button(text.knifey)
-        self:evaluate_input(text.knifey)
-      end
-
-      if (btnp(1)) then
-        self:animate_button(text.spoony)
-        self:evaluate_input(text.spoony)
-      end
-    end,
-
-    get_utensil_sprites = function(self)
-      local utensil_array = sprites.playing.utensils[self.utensil.current]
-      local utensil_index = rndint(1, #utensil_array)
-      self.utensil.sprites = utensil_array[utensil_index]
-    end,
-
-    new_round = function(self)
-      self.timeout.remaining = self.timeout.start
-      self:choose_utensil()
-    end,
-
-    reset = function(self)
-      self.timeout           = copy(self.defaults.timeout)
-      self.button_animations = clone(self.defaults.button_animations)
-      reset_globals()
-    end,
-
-    round_failed = function()
-      screens:go_to('game_over')
-    end,
-
-    round_passed = function(self)
-      update_score()
-      self:decrease_timeout_start()
-      self:new_round()
-    end,
-
-    timer_width = function(self)
-      local elapsed_percentage = self.timeout.remaining / self.timeout.start
-      return flr(elapsed_percentage * self.timer.max_width)
-    end,
-
-    _init = function(self)
-      self:reset()
-      self:new_round()
-    end,
-
-    _update = function(self)
-      self:decrease_timeout_remaining()
-      self:get_input()
-    end,
-
-    _draw = function(self)
-      draw_sprites(sprites.global.frame)
-      self:draw_timer()
-      draw_sprites(self.utensil.sprites)
-      draw_sprites(sprites.playing.score)
-      self:draw_buttons()
-      self:draw_floor()
-    end
   }
+
+  s.defaults.timeout = {
+    max        = 150,
+    min        = 20,
+    multiplier = 0.95,
+    remaining  = 0,
+    start      = 120,
+  }
+
+  s.button_animations = {}
+  s.timeout = {}
+  s.timer = {
+    color     = 8,
+    height    = 2,
+    max_width = 120,
+    start_x   = 4,
+    start_y   = 4,
+  }
+  s.utensil = {
+    current = nil,
+    sprites = {},
+  }
+
+  s.animate_button = function(self, button)
+    self.button_animations[button].animating = true
+  end
+
+  s.choose_utensil = function(self)
+    self.utensil.current = rnd(1) > 0.5 and text.knifey or text.spoony
+    self:get_utensil_sprites()
+  end
+
+  s.decrease_timeout_remaining = function(self)
+    self.timeout.remaining -= 1
+    if (self.timeout.remaining <= 0) screens:go_to('game_over')
+  end
+
+  s.decrease_timeout_start = function(self)
+    local new_timeout = self.timeout.start * self.timeout.multiplier
+    self.timeout.start = mid(self.timeout.min, new_timeout, self.timeout.start)
+  end
+
+  s.draw_button = function(self, button)
+    local button_animation = self.button_animations[button]
+    local button_sprites   = sprites.playing.buttons[button]
+
+    if (button_animation.animating) button_animation.frame += 1
+
+    draw_sprite(button_sprites[button_animation.frame])
+
+    if (button_animation.frame == #button_sprites) then
+      button_animation.animating = false
+      button_animation.frame     = 1
+    end
+  end
+
+  s.draw_buttons = function(self)
+    self:draw_button(text.knifey)
+    self:draw_button(text.spoony)
+  end 
+
+  s.draw_floor = function(self)
+    rectfill(4, 111, 123, 112, 15)
+    rectfill(4, 113, 123, 119, 4)
+    rectfill(4, 120, 123, 123, 2)
+  end
+
+  s.draw_timer = function(self)
+    x = self.timer.start_x + self:timer_width()
+    y = self.timer.start_y + self.timer.height - 1
+    rectfill(self.timer.start_x, self.timer.start_y, x, y, self.timer.color)
+  end
+
+  s.evaluate_input = function(self, choice)
+    if (choice == self.utensil.current) then
+      self:round_passed()
+    else
+      self:round_failed()
+    end
+  end
+
+  s.get_input = function(self)
+    if (btnp(0)) then
+      self:animate_button(text.knifey)
+      self:evaluate_input(text.knifey)
+    end
+
+    if (btnp(1)) then
+      self:animate_button(text.spoony)
+      self:evaluate_input(text.spoony)
+    end
+  end
+
+  s.get_utensil_sprites = function(self)
+    local utensil_array = sprites.playing.utensils[self.utensil.current]
+    local utensil_index = rndint(1, #utensil_array)
+    self.utensil.sprites = utensil_array[utensil_index]
+  end
+
+  s.new_round = function(self)
+    self.timeout.remaining = self.timeout.start
+    self:choose_utensil()
+  end
+
+  s.reset = function(self)
+    self.timeout           = copy(self.defaults.timeout)
+    self.button_animations = clone(self.defaults.button_animations)
+    reset_globals()
+  end
+
+  s.round_failed = function()
+    screens:go_to('game_over')
+  end
+
+  s.round_passed = function(self)
+    update_score()
+    self:decrease_timeout_start()
+    self:new_round()
+  end
+
+  s.timer_width = function(self)
+    local elapsed_percentage = self.timeout.remaining / self.timeout.start
+    return flr(elapsed_percentage * self.timer.max_width)
+  end
+
+  s._init = function(self)
+    self:reset()
+    self:new_round()
+  end
+
+  s._update = function(self)
+    self:decrease_timeout_remaining()
+    self:get_input()
+  end
+
+  s._draw = function(self)
+    draw_sprites(sprites.global.frame)
+    self:draw_timer()
+    draw_sprites(self.utensil.sprites)
+    draw_sprites(sprites.playing.score)
+    self:draw_buttons()
+    self:draw_floor()
+  end
+
+  return s
 end
 
 function screen_title()
-  return {
-    _update = function()
-      if (btnp(5)) screens:go_to('playing')
-    end,
+  local s = {}
 
-    _draw = function(self)
-      draw_sprites(sprites.title.knife)
-      draw_sprites(sprites.title.top_line)
-      draw_sprites(sprites.title.text)
-      draw_sprites(sprites.title.bottom_line)
-      draw_sprites(sprites.title.spoon)
-      draw_sprites(sprites.global.frame)
+  s._update = function()
+    if (btnp(5)) screens:go_to('playing')
+  end
 
-      text:show('about', 119, 7)
-    end
-  }
+  s._draw = function(self)
+    draw_sprites(sprites.title.knife)
+    draw_sprites(sprites.title.top_line)
+    draw_sprites(sprites.title.text)
+    draw_sprites(sprites.title.bottom_line)
+    draw_sprites(sprites.title.spoon)
+    draw_sprites(sprites.global.frame)
+
+    text:show('about', 119, 7)
+  end
+
+  return s
 end
 
 screens = {

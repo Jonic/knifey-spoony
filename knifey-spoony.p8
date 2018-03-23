@@ -39,6 +39,31 @@ score             = 0
 -->8
 -- helper functions
 
+-- clone and copy from https://gist.github.com/MihailJP/3931841
+function clone(t) -- deep-copy a table
+    if type(t) ~= "table" then return t end
+    local meta = getmetatable(t)
+    local target = {}
+    for k, v in pairs(t) do
+        if type(v) == "table" then
+            target[k] = clone(v)
+        else
+            target[k] = v
+        end
+    end
+    setmetatable(target, meta)
+    return target
+end
+
+function copy(t) -- shallow-copy a table
+    if type(t) ~= "table" then return t end
+    local meta = getmetatable(t)
+    local target = {}
+    for k, v in pairs(t) do target[k] = v end
+    setmetatable(target, meta)
+    return target
+end
+
 function draw_sprite(s)
   local i  = s.i
   local x  = s.x * 8
@@ -399,14 +424,8 @@ function screen_playing()
       },
     },
 
-    button_animations = nil,
-    timeout = {
-      max        = 120,
-      min        = 20,
-      multiplier = 0.95,
-      remaining  = 0,
-      start      = 0,
-    },
+    button_animations = {},
+    timeout = {},
     utensil = {
       current = nil,
       sprites = {},
@@ -423,7 +442,7 @@ function screen_playing()
 
     decrease_timeout_remaining = function(self)
       self.timeout.remaining -= 1
-      if (self.timeout.remaining == 0) screens:go_to('game_over')
+      if (self.timeout.remaining <= 0) screens:go_to('game_over')
     end,
 
     decrease_timeout_start = function(self)
@@ -492,8 +511,10 @@ function screen_playing()
     end,
 
     reset = function(self)
-      self.timeout           = self.defaults.timeout
-      self.button_animations = self.defaults.button_animations
+      self.timeout           = copy(self.defaults.timeout)
+      self.button_animations = clone(self.defaults.button_animations)
+      printh('timeout.start: ' .. self.timeout.start)
+      printh('timeout.remaining: ' .. self.timeout.remaining)
       reset_globals()
     end,
 

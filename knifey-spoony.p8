@@ -416,7 +416,7 @@ function screen_playing()
       },
 
       timeout = {
-        max        = 120,
+        max        = 150,
         min        = 20,
         multiplier = 0.95,
         remaining  = 0,
@@ -426,6 +426,13 @@ function screen_playing()
 
     button_animations = {},
     timeout = {},
+    timer = {
+      color     = 8,
+      height    = 2,
+      max_width = 120,
+      start_x   = 4,
+      start_y   = 4,
+    },
     utensil = {
       current = nil,
       sprites = {},
@@ -476,7 +483,9 @@ function screen_playing()
     end,
 
     draw_timer = function(self)
-      rectfill(4, 4, self:timeout_width(), 5, 8)
+      x = self.timer.start_x + self:timer_width()
+      y = self.timer.start_y + self.timer.height - 1
+      rectfill(self.timer.start_x, self.timer.start_y, x, y, self.timer.color)
     end,
 
     evaluate_input = function(self, choice)
@@ -513,8 +522,6 @@ function screen_playing()
     reset = function(self)
       self.timeout           = copy(self.defaults.timeout)
       self.button_animations = clone(self.defaults.button_animations)
-      printh('timeout.start: ' .. self.timeout.start)
-      printh('timeout.remaining: ' .. self.timeout.remaining)
       reset_globals()
     end,
 
@@ -528,9 +535,9 @@ function screen_playing()
       self:new_round()
     end,
 
-    timeout_width = function(self)
+    timer_width = function(self)
       local elapsed_percentage = self.timeout.remaining / self.timeout.start
-      return flr(elapsed_percentage * self.timeout.max)
+      return flr(elapsed_percentage * self.timer.max_width)
     end,
 
     _init = function(self)

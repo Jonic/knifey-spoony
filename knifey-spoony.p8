@@ -3,7 +3,7 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v0.4.4
+-- v0.4.5
 
 --[[
   "i see you've played knifey

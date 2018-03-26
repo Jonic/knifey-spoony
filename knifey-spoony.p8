@@ -113,7 +113,7 @@ end
 -->8
 -- sprites
 
-sprites = {
+tiles = {
   global = {
     frame = {
       -- top
@@ -328,6 +328,105 @@ sprites = {
   },
 }
 
+objects = {}
+
+function init_object(options)
+  local obj = {}
+
+  obj.delay            = options.delay or 0
+  obj.delay_countdown  = options.delay or 0
+  obj.duration         = options.duration or 0
+  obj.frame_count      = 0
+  obj.pos_x            = 0
+  obj.pos_y            = 0
+  obj.repeat_after     = options.repeat_after or nil
+  obj.repeat_countdown = options.repeat_after or nil
+  obj.repeating        = options.repeat_after ~= nil
+  obj.tiles            = options.tiles
+  obj.updated          = false
+  obj.x                = { start = options.x1 or 0, dest = options.x2 or nil }
+  obj.y                = { start = options.y1 or 0, dest = options.y2 or nil }
+
+  obj.calculate_pos = function(self, pos_key)
+    local pos = self[pos_key]
+
+    if pos.dest == nil or self.delay > 0 then
+      return pos.start
+    end
+
+    distance = pos.dest - pos.start
+    elapsed  = self.frame_count / self.duration
+
+    return flr(distance * elapsed) + pos.start
+  end
+
+  obj.draw_tile = function(t)
+    t.w  = t.w or 1
+    t.h  = t.h or 1
+    t.fx = t.fx or false
+    t.fy = t.fy or false
+
+    spr(t.i, t.x, t.y, t.w, t.h, t.fx, t.fy)
+  end
+
+  obj.draw_tiles = function(self, tiles)
+    local pos_x, pos_y = self.pos_x, self.pos_y
+
+    for t in all(tiles) do
+      if t.i == nil then
+        return self:draw_tiles(t)
+      end
+
+      self.draw_tile(t)
+    end
+  end
+
+  obj.is_complete = function(self)
+    return self.frame_count > self.duration
+  end
+
+  obj.set_pos = function(self)
+    self.pos_x = self.calculate_pos(self, 'x')
+    self.pos_y = self.calculate_pos(self, 'y')
+  end
+
+  obj.tick = function(self)
+    self.delay_countdown -= 1
+    self.frame_count     += 1
+
+    if (self.delay_countdown < 0) then
+      self.delay_countdown = 0
+    end
+  end
+
+  obj._update = function(self)
+    if obj:is_complete() then
+      return
+    end
+
+    self:tick()
+    self:set_pos()
+
+    self.updated = true
+  end
+
+  obj._draw = function(self)
+    if not self.updated then
+      return
+    end
+
+    self:draw_tiles(self.tiles)
+  end
+
+  add(objects, obj)
+
+  return obj
+end
+
+function destroy_object(obj)
+	del(objects, obj)
+end
+
 -->8
 -- text
 
@@ -461,7 +560,7 @@ function screen_playing()
 
   s.draw_button = function(self, button)
     local button_animation = self.button_animations[button]
-    local button_sprites   = sprites.playing.buttons[button]
+    local button_sprites   = tiles.playing.buttons[button]
 
     if (button_animation.animating) button_animation.frame += 1
 
@@ -511,7 +610,7 @@ function screen_playing()
   end
 
   s.get_utensil_sprites = function(self)
-    local utensil_array = sprites.playing.utensils[self.utensil.current]
+    local utensil_array = tiles.playing.utensils[self.utensil.current]
     local utensil_index = rndint(1, #utensil_array)
     self.utensil.sprites = utensil_array[utensil_index]
   end
@@ -553,10 +652,10 @@ function screen_playing()
   end
 
   s._draw = function(self)
-    draw_sprites(sprites.global.frame)
+    draw_sprites(tiles.global.frame)
     self:draw_timer()
     draw_sprites(self.utensil.sprites)
-    draw_sprites(sprites.playing.score)
+    draw_sprites(tiles.playing.score)
     self:draw_buttons()
     self:draw_floor()
   end
@@ -567,18 +666,20 @@ end
 function screen_title()
   local s = {}
 
+  s._init = function()
+    init_object({ tiles = tiles.title.knife })
+    init_object({ tiles = tiles.title.top_line })
+    init_object({ tiles = tiles.title.text })
+    init_object({ tiles = tiles.title.bottom_line })
+    init_object({ tiles = tiles.title.spoon })
+    init_object({ tiles = tiles.global.frame })
+  end
+
   s._update = function()
     if (btnp(5)) screens:go_to('playing')
   end
 
   s._draw = function(self)
-    draw_sprites(sprites.title.knife)
-    draw_sprites(sprites.title.top_line)
-    draw_sprites(sprites.title.text)
-    draw_sprites(sprites.title.bottom_line)
-    draw_sprites(sprites.title.spoon)
-    draw_sprites(sprites.global.frame)
-
     text:show('about', 119, 7)
   end
 
@@ -599,15 +700,24 @@ screens = {
   end,
 
   _init = function(self)
+    objects = clone({})
     local can_init = table_has_key(self.current, '_init')
     if (can_init) self.current:_init()
   end,
 
   _update = function(self)
+    foreach(objects, function(obj)
+      obj:_update()
+    end)
+
     self.current:_update()
   end,
 
   _draw = function(self)
+    foreach(objects, function(obj)
+      obj:_draw()
+    end)
+
     self.current:_draw()
   end
 }

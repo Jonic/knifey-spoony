@@ -272,7 +272,7 @@ tiles = {
       { i = 33, x = 88, y = 80 },
     },
     knife = {
-      { i = 138, x = 16, y = 24, w = 2, h = 3 },
+      { i = 138, x = 0, y = 0, w = 2, h = 3 },
     },
     spoon = {
       { i = 140, x = 96, y = 80, w = 2, h = 3 },
@@ -360,24 +360,22 @@ function init_object(options)
     return flr(distance * elapsed) + pos.start
   end
 
-  obj.draw_tile = function(t)
+  obj.draw_tile = function(self, t)
     t.w  = t.w or 1
     t.h  = t.h or 1
     t.fx = t.fx or false
     t.fy = t.fy or false
 
-    spr(t.i, t.x, t.y, t.w, t.h, t.fx, t.fy)
+    spr(t.i, t.x + self.pos_x, t.y + self.pos_x, t.w, t.h, t.fx, t.fy)
   end
 
   obj.draw_tiles = function(self, tiles)
-    local pos_x, pos_y = self.pos_x, self.pos_y
-
     for t in all(tiles) do
       if t.i == nil then
         return self:draw_tiles(t)
       end
 
-      self.draw_tile(t)
+      self:draw_tile(t)
     end
   end
 
@@ -387,6 +385,7 @@ function init_object(options)
 
   obj.set_pos = function(self)
     self.pos_x = self.calculate_pos(self, 'x')
+    printh(self.pos_x)
     self.pos_y = self.calculate_pos(self, 'y')
   end
 
@@ -667,12 +666,19 @@ function screen_title()
   local s = {}
 
   s._init = function()
-    init_object({ tiles = tiles.title.knife })
-    init_object({ tiles = tiles.title.top_line })
-    init_object({ tiles = tiles.title.text })
-    init_object({ tiles = tiles.title.bottom_line })
-    init_object({ tiles = tiles.title.spoon })
-    init_object({ tiles = tiles.global.frame })
+    init_object({
+      tiles = tiles.title.knife,
+      x1 = 200,
+      y1 = 200,
+      x2 = 16,
+      y2 = 24,
+      duration = 30,
+    })
+    -- init_object({ tiles = tiles.title.top_line })
+    -- init_object({ tiles = tiles.title.text })
+    -- init_object({ tiles = tiles.title.bottom_line })
+    -- init_object({ tiles = tiles.title.spoon })
+    -- init_object({ tiles = tiles.global.frame })
   end
 
   s._update = function()

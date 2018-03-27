@@ -440,6 +440,7 @@ text = {
   play_again        = 'press x to play again',
   score             = 'score: ',
   spoony            = 'spoony',
+  start_game        = 'press x to start',
 
   center = function(self, str)
     return 64 - #str * 2
@@ -667,6 +668,20 @@ end
 function screen_title()
   local s = {}
 
+  s.start_text_flash = 0
+
+  s.show_start_text = function(self)
+    if self.start_text_flash < 12 then
+      text:show('start_game', 103, 7)
+    end
+
+    self.start_text_flash += 1
+
+    if self.start_text_flash == 24 then
+      self.start_text_flash = 0
+    end
+  end
+
   s._init = function()
     init_object({
       tiles = tiles.title.knife,
@@ -695,6 +710,7 @@ function screen_title()
   end
 
   s._draw = function(self)
+    s:show_start_text()
     text:show('about', 119, 7)
   end
 

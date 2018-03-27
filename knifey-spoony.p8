@@ -386,9 +386,9 @@ function init_object(options)
   end
 
   obj.set_pos = function(self)
-    self.pos_x = self.calculate_pos(self, 'x')
+    self.pos_x = self:calculate_pos('x')
     printh(self.pos_x)
-    self.pos_y = self.calculate_pos(self, 'y')
+    self.pos_y = self:calculate_pos('y')
   end
 
   obj.tick = function(self)

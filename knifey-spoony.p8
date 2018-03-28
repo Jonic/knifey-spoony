@@ -110,6 +110,33 @@ function update_score()
   update_high_score()
 end
 
+-- easing equations
+-- https://github.com/EmmanuelOga/easing/blob/master/lib/easing.lua
+
+local function linear(t, b, c, d)
+  return c * t / d + b
+end
+
+local function outBounce(t, b, c, d)
+  t = t / d
+  if t < 1 / 2.75 then
+    return c * (7.5625 * t * t) + b
+  elseif t < 2 / 2.75 then
+    t = t - (1.5 / 2.75)
+    return c * (7.5625 * t * t + 0.75) + b
+  elseif t < 2.5 / 2.75 then
+    t = t - (2.25 / 2.75)
+    return c * (7.5625 * t * t + 0.9375) + b
+  else
+    t = t - (2.625 / 2.75)
+    return c * (7.5625 * t * t + 0.984375) + b
+  end
+end
+
+local function inBounce(t, b, c, d)
+  return c - outBounce(d - t, 0, c, d) + b
+end
+
 -->8
 -- sprites
 
@@ -336,6 +363,7 @@ function init_object(options)
   obj.delay            = options.delay or 0
   obj.delay_countdown  = options.delay or 0
   obj.duration         = options.duration or 0
+  obj.easing           = options.easing or 'linear'
   obj.frame_count      = 0
   obj.pos_x            = 0
   obj.pos_y            = 0
@@ -354,10 +382,20 @@ function init_object(options)
       return pos.start
     end
 
-    distance = pos.dest - pos.start
-    elapsed  = mid(0, self.frame_count / self.duration, 1)
+    if obj:is_complete() then
+      return pos.dest
+    end
 
-    return flr(distance * elapsed) + pos.start
+    t = self.frame_count     -- elapsed time
+    b = pos.start            -- begin
+    c = pos.dest - pos.start -- change == ending - beginning
+    d = self.duration        -- duration (total time)
+    e = self.easing
+
+    if     e == 'outBounce' then return outBounce(t, b, c, d)
+    elseif e == 'inBounce'  then return inBounce(t, b, c, d)
+    else                         return linear(t, b, c, d)
+    end
   end
 
   obj.draw_tile = function(self, t)
@@ -401,11 +439,10 @@ function init_object(options)
   end
 
   obj._update = function(self)
-    if obj:is_complete() then
-      return
+    if not obj:is_complete() then
+      self:tick()
     end
 
-    self:tick()
     self:set_pos()
 
     self.updated = true
@@ -440,6 +477,7 @@ text = {
   play_again        = 'press x to play again',
   score             = 'score: ',
   spoony            = 'spoony',
+  start_game        = 'press x to start',
 
   center = function(self, str)
     return 64 - #str * 2
@@ -667,6 +705,20 @@ end
 function screen_title()
   local s = {}
 
+  s.start_text_flash = 0
+
+  s.show_start_text = function(self)
+    if self.start_text_flash < 12 then
+      text:show('start_game', 103, 7)
+    end
+
+    self.start_text_flash += 1
+
+    if self.start_text_flash == 24 then
+      self.start_text_flash = 0
+    end
+  end
+
   s._init = function()
     init_object({
       tiles = tiles.title.knife,
@@ -674,7 +726,8 @@ function screen_title()
       y1 = -100,
       x2 = 16,
       y2 = 24,
-      duration = 10,
+      duration = 30,
+      easing = 'outBounce',
     })
     init_object({ tiles = tiles.title.top_line })
     init_object({ tiles = tiles.title.text })
@@ -685,7 +738,8 @@ function screen_title()
       y1 = 227,
       x2 = 96,
       y2 = 80,
-      duration = 10,
+      duration = 30,
+      easing = 'outBounce',
     })
     init_object({ tiles = tiles.global.frame })
   end
@@ -695,6 +749,7 @@ function screen_title()
   end
 
   s._draw = function(self)
+    s:show_start_text()
     text:show('about', 119, 7)
   end
 

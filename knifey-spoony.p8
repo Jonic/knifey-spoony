@@ -386,10 +386,10 @@ function init_object(options)
       return pos.dest
     end
 
-    t = self.frame_count
-    b = pos.start
-    c = pos.dest - pos.start
-    d = self.duration
+    t = self.frame_count     -- elapsed time
+    b = pos.start            -- begin
+    c = pos.dest - pos.start -- change == ending - beginning
+    d = self.duration        -- duration (total time)
     e = self.easing
 
     if     e == 'outBounce' then return outBounce(t, b, c, d)

@@ -3,6 +3,10 @@
     src        : url('../fonts/04b03.woff2') format('woff2');
 }
 
+* {
+    box-sizing: border-box;
+}
+
 html, body {
     background-color: #000;
     color           : #ccc;

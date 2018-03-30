@@ -3,7 +3,7 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v0.6.2
+-- v0.6.3
 
 --[[
   "i see you've played knifey
@@ -354,7 +354,6 @@ function init_object(options)
 
   obj.set_pos = function(self)
     self.pos_x = self:calculate_pos('x')
-    printh(self.pos_x)
     self.pos_y = self:calculate_pos('y')
   end
 
@@ -530,8 +529,13 @@ function screen_playing()
     start_y   = 4,
   }
   s.utensil = {
-    current = nil,
+    type = nil,
+    index = 0,
     sprites = {},
+    previous = {
+      index = nil,
+      type = nil,
+    }
   }
 
   s.animate_button = function(self, button)
@@ -539,8 +543,21 @@ function screen_playing()
   end
 
   s.choose_utensil = function(self)
-    self.utensil.current = rnd(1) > 0.5 and text.knifey or text.spoony
-    self:get_utensil_sprites()
+    self.utensil.previous.type  = self.utensil.type
+    self.utensil.previous.index = self.utensil.index
+
+    local utensil_type  = rnd(1) > 0.5 and text.knifey or text.spoony
+    local utensil_array = tiles.playing.utensils[utensil_type]
+    local utensil_index = rndint(1, #utensil_array)
+
+    if (utensil_index == self.utensil.previous.index) and
+       (utensil_type  == self.utensil.previous.type) then
+      return self:choose_utensil()
+    end
+
+    self.utensil.type    = utensil_type
+    self.utensil.index   = utensil_index
+    self.utensil.sprites = utensil_array[utensil_index]
   end
 
   s.decrease_timeout_remaining = function(self)
@@ -585,7 +602,7 @@ function screen_playing()
   end
 
   s.evaluate_input = function(self, choice)
-    if (choice == self.utensil.current) then
+    if (choice == self.utensil.type) then
       self:round_passed()
     else
       self:round_failed()
@@ -602,12 +619,6 @@ function screen_playing()
       self:animate_button(text.spoony)
       self:evaluate_input(text.spoony)
     end
-  end
-
-  s.get_utensil_sprites = function(self)
-    local utensil_array = tiles.playing.utensils[self.utensil.current]
-    local utensil_index = rndint(1, #utensil_array)
-    self.utensil.sprites = utensil_array[utensil_index]
   end
 
   s.new_round = function(self)

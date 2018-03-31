@@ -481,8 +481,14 @@ text = {
 -->8
 -- screens
 
-function screen_title()
+screens = {}
+
+function init_screen(props)
   local s = {}
+
+  s.props  = props
+  s.name   = props.name
+  s.active = false
 
   s.transition_in_duration  = 100
   s.transition_out_duration = 100
@@ -500,33 +506,85 @@ function screen_title()
     return s.transition_state == 'in'
   end
 
-  s.show_start_text = function()
-    if (s.start_text_flash == nil) then
-      s.start_text_flash = 0
+  s._init = function()
+    printh('s._init')
+    objects = clone({})
+
+    local can_init          = table_has_key(s.props, '_init')
+    local can_transition_in = table_has_key(s.props, 'transition_in')
+
+    if (can_init) then
+      printh('s.props._init')
+      s.props._init()
     end
 
-    if s.start_text_flash < 12 then
-      text:show('start_game', 100, 7)
-    end
-
-    s.start_text_flash += 1
-
-    if s.start_text_flash == 24 then
-      s.start_text_flash = 0
+    if (can_transition_in) then
+      s.props.transition_in()
     end
   end
 
-  s.transition_in = function()
-    local bottom_line = tiles.title.bottom_line
-    local knife       = tiles.title.knife
-    local spoon       = tiles.title.spoon
-    local top_line    = tiles.title.top_line
-    
-    init_object({ tiles = knife, x1 = 16, y1 = -100, x2 = 16, y2 = 24, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = top_line, x1 = 200, y1 = 40, x2 = 32, duration = 10 })
-    s:transition_in_text_animation()
-    init_object({ tiles = bottom_line, x1 = -328, y1 = 80, x2 = 16, duration = 10 })
-    init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
+  s._update = function()
+    foreach(objects, function(o)
+      o._update()
+    end)
+
+    s.props._update()
+  end
+
+  s._draw = function()
+    foreach(objects, function(o)
+      o._draw()
+    end)
+
+    s.props._draw()
+  end
+
+  add(screens, s)
+
+  return s
+end
+
+function screens_update()
+  foreach(screens, function(s)
+    if s.active then
+      s._update()
+    end
+  end)
+end
+
+function screens_draw()
+  foreach(screens, function(s)
+    if s.active then
+      s._draw()
+    end
+  end)
+end
+
+function go_to_screen(name)
+  next_scene = nil
+
+  foreach(screens, function(s)
+    s.active = s.name == name
+    if (s.active) next_scene = s
+  end)
+
+  next_scene.active = true
+  next_scene._init()
+end
+
+-->8
+-- init screens
+
+function screen_title()
+  local s = {}
+
+  s.name = 'title'
+
+  s.show_start_text = function()
+    if (s.start_text_flash == nil) s.start_text_flash = 0
+    if (s.start_text_flash < 12) text:show('start_game', 100, 7)
+    s.start_text_flash += 1
+    if (s.start_text_flash == 24) s.start_text_flash = 0
   end
 
   s.transition_in_text_animation = function()
@@ -553,25 +611,39 @@ function screen_title()
     init_object({ tiles = t.s1, x1 = sx1, y1 = sy, x2 = 16, delay = 15, duration = d, easing = e })
   end
 
+  s._init = function()
+    printh('title._init')
+    local bottom_line = tiles.title.bottom_line
+    local knife       = tiles.title.knife
+    local spoon       = tiles.title.spoon
+    local top_line    = tiles.title.top_line
+
+    init_object({ tiles = knife, x1 = 16, y1 = -100, x2 = 16, y2 = 24, duration = 30, easing = 'outBounce' })
+    init_object({ tiles = top_line, x1 = 200, y1 = 40, x2 = 32, duration = 10 })
+    s.transition_in_text_animation()
+    init_object({ tiles = bottom_line, x1 = -328, y1 = 80, x2 = 16, duration = 10 })
+    init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
+  end
+
   s._update = function()
-    if (btnp(5)) screens:go_to('playing')
+    if (btnp(5)) go_to_screen('playing')
   end
 
   s._draw = function()
-    if (not s.is_transitioning()) then
-      s.show_start_text()
-      text:show('about', 117, 7)
-    end
-
+    s.show_start_text()
+    text:show('about', 117, 7)
     map(0, 0)
   end
 
   return s
 end
 
+init_screen(screen_title())
+
 function screen_playing()
   local s = {}
-  
+
+  s.name = 'playing'
   s.defaults = {}
   s.defaults.button_animations = {
     knifey = {
@@ -635,7 +707,7 @@ function screen_playing()
 
   s.decrease_timeout_remaining = function()
     s.timeout.remaining -= 1
-    if (s.timeout.remaining <= 0) screens:go_to('game_over')
+    if (s.timeout.remaining <= 0) go_to_screen('game_over')
   end
 
   s.decrease_timeout_start = function()
@@ -706,7 +778,7 @@ function screen_playing()
   end
 
   s.round_failed = function()
-    screens:go_to('game_over')
+    go_to_screen('game_over')
   end
 
   s.round_passed = function()
@@ -742,11 +814,15 @@ function screen_playing()
   return s
 end
 
+init_screen(screen_playing())
+
 function screen_game_over()
   local s = {}
 
+  s.name = 'game_over'
+
   s._update = function()
-    if (btnp(5)) screens:go_to('playing')
+    if (btnp(5)) go_to_screen('playing')
   end
 
   s._draw = function()
@@ -766,54 +842,11 @@ function screen_game_over()
     text:show('play_again', 112, 7, 5)
     map(0, 0)
   end
-  
+
   return s
 end
 
-screens = {
-  current     = nil,
-  definitions = {
-    game_over = screen_game_over,
-    playing   = screen_playing,
-    title     = screen_title,
-  },
-
-  go_to = function(self, name)
-    self.current = self.definitions[name]()
-    self:_init()
-  end,
-
-  _init = function(self)
-    objects = clone({})
-
-    local can_init          = table_has_key(self.current, '_init')
-    local can_transition_in = table_has_key(self.current, 'transition_in')
-
-    if (can_init) then
-      self.current:_init()
-    end
-
-    if (can_transition_in) then
-      self.current:transition_in()
-    end
-  end,
-
-  _update = function(self)
-    foreach(objects, function(o)
-      o._update()
-    end)
-
-    self.current:_update()
-  end,
-
-  _draw = function(self)
-    foreach(objects, function(o)
-      o._draw()
-    end)
-
-    self.current:_draw()
-  end
-}
+init_screen(screen_game_over())
 
 -->8
 -- game loop
@@ -821,16 +854,16 @@ screens = {
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  screens:go_to('title')
+  go_to_screen('title')
 end
 
 function _update()
-  screens:_update()
+  screens_update()
 end
 
 function _draw()
   cls()
-  screens:_draw()
+  screens_draw()
 end
 __gfx__
 aaaaaaaaaaaaaaaaaaaaaaa4a9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

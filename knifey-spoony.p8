@@ -507,14 +507,12 @@ function init_screen(props)
   end
 
   s._init = function()
-    printh('s._init')
     objects = clone({})
 
     local can_init          = table_has_key(s.props, '_init')
     local can_transition_in = table_has_key(s.props, 'transition_in')
 
     if (can_init) then
-      printh('s.props._init')
       s.props._init()
     end
 
@@ -612,7 +610,6 @@ init_screen(function ()
   end
 
   s._init = function()
-    printh('title._init')
     local bottom_line = tiles.title.bottom_line
     local knife       = tiles.title.knife
     local spoon       = tiles.title.spoon

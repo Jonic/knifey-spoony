@@ -317,38 +317,38 @@ tiles = {
 objects = {}
 
 function init_object(props)
-  local obj = {}
+  local o = {}
 
-  obj.delay            = props.delay or 0
-  obj.duration         = props.duration or 0
-  obj.easing           = props.easing or 'linear'
-  obj.frame_count      = 0
-  obj.pos_x            = 0
-  obj.pos_y            = 0
-  obj.repeat_after     = props.repeat_after or nil
-  obj.repeat_countdown = props.repeat_after or nil
-  obj.repeating        = props.repeat_after ~= nil
-  obj.tiles            = props.tiles
-  obj.updated          = false
-  obj.x                = { start = props.x1 or 0, dest = props.x2 or nil }
-  obj.y                = { start = props.y1 or 0, dest = props.y2 or nil }
+  o.delay            = props.delay or 0
+  o.duration         = props.duration or 0
+  o.easing           = props.easing or 'linear'
+  o.frame_count      = 0
+  o.pos_x            = 0
+  o.pos_y            = 0
+  o.repeat_after     = props.repeat_after or nil
+  o.repeat_countdown = props.repeat_after or nil
+  o.repeating        = props.repeat_after ~= nil
+  o.tiles            = props.tiles
+  o.updated          = false
+  o.x                = { start = props.x1 or 0, dest = props.x2 or nil }
+  o.y                = { start = props.y1 or 0, dest = props.y2 or nil }
 
-  obj.calculate_pos = function(pos_key)
-    local pos = obj[pos_key]
+  o.calculate_pos = function(pos_key)
+    local pos = o[pos_key]
 
-    if pos.dest == nil or obj.delay > 0 then
+    if pos.dest == nil or o.delay > 0 then
       return pos.start
     end
 
-    if obj.is_complete() then
+    if o.is_complete() then
       return pos.dest
     end
 
-    t = obj.frame_count     -- elapsed time
+    t = o.frame_count     -- elapsed time
     b = pos.start            -- begin
     c = pos.dest - pos.start -- change == ending - beginning
-    d = obj.duration        -- duration (total time)
-    e = obj.easing
+    d = o.duration        -- duration (total time)
+    e = o.easing
 
     if     e == 'outBack'   then calculated_pos = outBack(t, b, c, d)
     elseif e == 'outBounce' then calculated_pos = outBounce(t, b, c, d)
@@ -359,9 +359,9 @@ function init_object(props)
     return flr(calculated_pos)
   end
 
-  obj.draw_tile = function(t)
-    x  = (t.x or 0) + obj.pos_x
-    y  = (t.y or 0) + obj.pos_y
+  o.draw_tile = function(t)
+    x  = (t.x or 0) + o.pos_x
+    y  = (t.y or 0) + o.pos_y
     w  = t.w or 1
     h  = t.h or 1
     fx = t.fx or false
@@ -370,66 +370,66 @@ function init_object(props)
     spr(t.i, x, y, w, h, fx, fy)
   end
 
-  obj.draw_tiles = function(tiles)
+  o.draw_tiles = function(tiles)
     for t in all(tiles) do
       if t.i == nil then
-        return obj.draw_tiles(t)
+        return o.draw_tiles(t)
       end
 
-      obj.draw_tile(t)
+      o.draw_tile(t)
     end
   end
 
-  obj.is_complete = function()
-    return obj.frame_count > obj.duration
+  o.is_complete = function()
+    return o.frame_count > o.duration
   end
 
-  obj.is_delayed = function()
-    return obj.delay > 0
+  o.is_delayed = function()
+    return o.delay > 0
   end
 
-  obj.set_pos = function()
-    obj.pos_x = obj.calculate_pos('x')
-    obj.pos_y = obj.calculate_pos('y')
+  o.set_pos = function()
+    o.pos_x = o.calculate_pos('x')
+    o.pos_y = o.calculate_pos('y')
   end
 
-  obj.tick = function()
-    if obj.is_delayed() then
-      obj.delay -= 1
+  o.tick = function()
+    if o.is_delayed() then
+      o.delay -= 1
       return
     end
 
-    obj.frame_count += 1
+    o.frame_count += 1
   end
 
-  obj._update = function()
-    if not obj.is_complete() then
-      obj.tick()
+  o._update = function()
+    if not o.is_complete() then
+      o.tick()
     end
 
-    if obj.is_delayed() then
+    if o.is_delayed() then
       return
     end
 
-    obj.set_pos()
-    obj.updated = true
+    o.set_pos()
+    o.updated = true
   end
 
-  obj._draw = function()
-    if not obj.updated then
+  o._draw = function()
+    if not o.updated then
       return
     end
 
-    obj.draw_tiles(obj.tiles)
+    o.draw_tiles(o.tiles)
   end
 
-  add(objects, obj)
+  add(objects, o)
 
-  return obj
+  return o
 end
 
-function destroy_object(obj)
-	del(objects, obj)
+function destroy_object(o)
+	del(objects, o)
 end
 
 -->8
@@ -799,16 +799,16 @@ screens = {
   end,
 
   _update = function(self)
-    foreach(objects, function(obj)
-      obj:_update()
+    foreach(objects, function(o)
+      o._update()
     end)
 
     self.current:_update()
   end,
 
   _draw = function(self)
-    foreach(objects, function(obj)
-      obj:_draw()
+    foreach(objects, function(o)
+      o._draw()
     end)
 
     self.current:_draw()

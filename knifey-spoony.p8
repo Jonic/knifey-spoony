@@ -429,7 +429,7 @@ function init_object(props)
 end
 
 function destroy_object(o)
-	del(objects, o)
+  del(objects, o)
 end
 
 -->8

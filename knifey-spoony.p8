@@ -222,16 +222,16 @@ tiles = {
   },
   title = {
     bottom_line = {
-      { i = 19, x = 16, y = 80 },
-      { i = 19, x = 24, y = 80 },
-      { i = 32, x = 32, y = 80 },
-      { i = 33, x = 40, y = 80 },
-      { i = 33, x = 48, y = 80 },
-      { i = 33, x = 56, y = 80 },
-      { i = 33, x = 64, y = 80 },
-      { i = 33, x = 72, y = 80 },
-      { i = 33, x = 80, y = 80 },
-      { i = 33, x = 88, y = 80 },
+      { i = 19 },
+      { i = 32, x = 8 },
+      { i = 33, x = 16 },
+      { i = 33, x = 24 },
+      { i = 33, x = 32 },
+      { i = 33, x = 40 },
+      { i = 33, x = 48 },
+      { i = 33, x = 56 },
+      { i = 33, x = 64 },
+      { i = 33, x = 72 },
     },
     knife = {
       { i = 138, w = 2, h = 3 },
@@ -241,51 +241,75 @@ tiles = {
     },
     text = {
       -- k
-      { i = 192, x = 16, y = 48, w = 2, h = 2 },
+      k1 = {
+        { i = 192, w = 2, h = 2 },
+      },
       -- n
-      { i = 192, x = 32, y = 48, h = 2 },
-      { i = 194, x = 40, y = 48, h = 2 },
+      n1 = {
+        { i = 192, h = 2 },
+        { i = 194, x = 8, h = 2 },
+      },
       -- i
-      { i = 195, x = 48, y = 48 },
-      { i = 208, x = 48, y = 56 },
+      i1 = {
+        { i = 195 },
+        { i = 208, y = 8 },
+      },
       -- f
-      { i = 192, x = 56, y = 48, h = 2 },
-      { i = 196, x = 64, y = 48, h = 2 },
+      f1 = {
+        { i = 192, h = 2 },
+        { i = 196, x = 8, h = 2 },
+      },
       -- e
-      { i = 192, x = 72, y = 48, h = 2 },
-      { i = 197, x = 80, y = 48, h = 2 },
+      e1 = {
+        { i = 192, h = 2 },
+        { i = 197, x = 8, h = 2 },
+      },
       -- y
-      { i = 198, x = 88, y = 48, w = 2, h = 2 },
+      y1 = {
+        { i = 198, w = 2, h = 2 },
+      },
       -- s
-      { i = 224, x = 16, y = 64, w = 2, h = 2 },
+      s1 = {
+        { i = 224, w = 2, h = 2 },
+      },
       -- p
-      { i = 192, x = 32, y = 64, h = 2 },
-      { i = 227, x = 40, y = 64, h = 2 },
+      p1 = {
+        { i = 192, h = 2 },
+        { i = 227, x = 8, h = 2 },
+      },
       -- o
-      { i = 228, x = 48, y = 64, h = 2 },
-      { i = 194, x = 56, y = 64 },
-      { i = 245, x = 56, y = 72 },
+      o1 = {
+        { i = 228, h = 2 },
+        { i = 194, x = 8 },
+        { i = 245, x = 8, y = 8 },
+      },
       -- o
-      { i = 228, x = 64, y = 64, h = 2 },
-      { i = 194, x = 72, y = 64 },
-      { i = 245, x = 72, y = 72 },
+      o2 = {
+        { i = 228, h = 2 },
+        { i = 194, x = 8 },
+        { i = 245, x = 8, y = 8 },
+      },
       -- n
-      { i = 192, x = 80, y = 64, h = 2 },
-      { i = 194, x = 88, y = 64, h = 2 },
+      n2 = {
+        { i = 192, h = 2 },
+        { i = 194, x = 8, h = 2 },
+      },
       -- y
-      { i = 198, x = 96, y = 64, w = 2, h = 2 },
+      y2 = {
+        { i = 198, w = 2, h = 2 },
+      },
     },
     top_line = {
-      { i = 1, x = 32,  y = 40 },
-      { i = 1, x = 40,  y = 40 },
-      { i = 1, x = 48,  y = 40 },
-      { i = 1, x = 56,  y = 40 },
-      { i = 1, x = 64,  y = 40 },
-      { i = 1, x = 72,  y = 40 },
-      { i = 1, x = 80,  y = 40 },
-      { i = 1, x = 88,  y = 40 },
-      { i = 1, x = 96,  y = 40 },
-      { i = 1, x = 104, y = 40 },
+      { i = 1 },
+      { i = 1, x = 8 },
+      { i = 1, x = 16 },
+      { i = 1, x = 24 },
+      { i = 1, x = 32 },
+      { i = 1, x = 40 },
+      { i = 1, x = 48 },
+      { i = 1, x = 56 },
+      { i = 1, x = 64 },
+      { i = 1, x = 72 },
     },
   },
 }
@@ -457,14 +481,38 @@ text = {
 -->8
 -- screens
 
-function screen_title()
+function screen_title_animation()
   local s = {}
 
   s.start_text_flash = 0
 
+  s.init_text_animation = function()
+    local d   = 20
+    local e   = 'outBack'
+    local kx1 = 200
+    local ky  = 48
+    local sx1 = -200
+    local sy  = 64
+    local t   = tiles.title.text
+
+    init_object({ tiles = t.k1, x1 = kx1, y1 = ky, x2 = 16, delay = 0,  duration = d, easing = e })
+    init_object({ tiles = t.n1, x1 = kx1, y1 = ky, x2 = 32, delay = 3,  duration = d, easing = e })
+    init_object({ tiles = t.i1, x1 = kx1, y1 = ky, x2 = 48, delay = 6,  duration = d, easing = e })
+    init_object({ tiles = t.f1, x1 = kx1, y1 = ky, x2 = 56, delay = 9,  duration = d, easing = e })
+    init_object({ tiles = t.e1, x1 = kx1, y1 = ky, x2 = 72, delay = 12, duration = d, easing = e })
+    init_object({ tiles = t.y1, x1 = kx1, y1 = ky, x2 = 88, delay = 15, duration = d, easing = e })
+
+    init_object({ tiles = t.y2, x1 = sx1, y1 = sy, x2 = 96, delay = 0,  duration = d, easing = e })
+    init_object({ tiles = t.n2, x1 = sx1, y1 = sy, x2 = 80, delay = 3,  duration = d, easing = e })
+    init_object({ tiles = t.o2, x1 = sx1, y1 = sy, x2 = 64, delay = 6,  duration = d, easing = e })
+    init_object({ tiles = t.o1, x1 = sx1, y1 = sy, x2 = 48, delay = 9,  duration = d, easing = e })
+    init_object({ tiles = t.p1, x1 = sx1, y1 = sy, x2 = 32, delay = 12, duration = d, easing = e })
+    init_object({ tiles = t.s1, x1 = sx1, y1 = sy, x2 = 16, delay = 15, duration = d, easing = e })
+  end
+
   s.show_start_text = function(self)
     if self.start_text_flash < 12 then
-      text:show('start_game', 103, 7)
+      text:show('start_game', 100, 7)
     end
 
     self.start_text_flash += 1
@@ -475,27 +523,16 @@ function screen_title()
   end
 
   s._init = function()
-    init_object({
-      tiles = tiles.title.knife,
-      x1 = 16,
-      y1 = -100,
-      x2 = 16,
-      y2 = 24,
-      duration = 30,
-      easing = 'outBounce',
-    })
-    init_object({ tiles = tiles.title.top_line })
-    init_object({ tiles = tiles.title.text })
-    init_object({ tiles = tiles.title.bottom_line })
-    init_object({
-      tiles = tiles.title.spoon,
-      x1 = 96,
-      y1 = 227,
-      x2 = 96,
-      y2 = 80,
-      duration = 30,
-      easing = 'outBounce',
-    })
+    local bottom_line = tiles.title.bottom_line
+    local knife       = tiles.title.knife
+    local spoon       = tiles.title.spoon
+    local top_line    = tiles.title.top_line
+    
+    init_object({ tiles = knife, x1 = 16, y1 = -100, x2 = 16, y2 = 24, duration = 30, easing = 'outBounce' })
+    init_object({ tiles = top_line, x1 = 200, y1 = 40, x2 = 32, duration = 10 })
+    s:init_text_animation()
+    init_object({ tiles = bottom_line, x1 = -328, y1 = 80, x2 = 16, duration = 10 })
+    init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
   end
 
   s._update = function()
@@ -715,9 +752,9 @@ end
 screens = {
   current     = nil,
   definitions = {
-    game_over = screen_game_over,
-    playing   = screen_playing,
-    title     = screen_title,
+    game_over       = screen_game_over,
+    playing         = screen_playing,
+    title_animation = screen_title_animation,
   },
 
   go_to = function(self, name)
@@ -754,7 +791,7 @@ screens = {
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  screens:go_to('title')
+  screens:go_to('title_animation')
 end
 
 function _update()

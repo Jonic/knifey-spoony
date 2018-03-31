@@ -481,12 +481,55 @@ text = {
 -->8
 -- screens
 
-function screen_title_animation()
+function screen_title()
   local s = {}
 
-  s.start_text_flash = 0
+  s.transition_in_duration  = 100
+  s.transition_out_duration = 100
+  s.transition_state        = 'in'
 
-  s.init_text_animation = function()
+  s.is_transitioning = function()
+    return (not s.is_transitioning_in() and not s.is_transitioning_out())
+  end
+
+  s.is_transitioning_in = function()
+    return s.transition_state == 'in'
+  end
+
+  s.is_transitioning_out = function()
+    return s.transition_state == 'in'
+  end
+
+  s.show_start_text = function()
+    if (s.start_text_flash == nil) then
+      s.start_text_flash = 0
+    end
+
+    if s.start_text_flash < 12 then
+      text:show('start_game', 100, 7)
+    end
+
+    s.start_text_flash += 1
+
+    if s.start_text_flash == 24 then
+      s.start_text_flash = 0
+    end
+  end
+
+  s.transition_in = function()
+    local bottom_line = tiles.title.bottom_line
+    local knife       = tiles.title.knife
+    local spoon       = tiles.title.spoon
+    local top_line    = tiles.title.top_line
+    
+    init_object({ tiles = knife, x1 = 16, y1 = -100, x2 = 16, y2 = 24, duration = 30, easing = 'outBounce' })
+    init_object({ tiles = top_line, x1 = 200, y1 = 40, x2 = 32, duration = 10 })
+    s:transition_in_text_animation()
+    init_object({ tiles = bottom_line, x1 = -328, y1 = 80, x2 = 16, duration = 10 })
+    init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
+  end
+
+  s.transition_in_text_animation = function()
     local d   = 20
     local e   = 'outBack'
     local kx1 = 200
@@ -510,38 +553,16 @@ function screen_title_animation()
     init_object({ tiles = t.s1, x1 = sx1, y1 = sy, x2 = 16, delay = 15, duration = d, easing = e })
   end
 
-  s.show_start_text = function(self)
-    if self.start_text_flash < 12 then
-      text:show('start_game', 100, 7)
-    end
-
-    self.start_text_flash += 1
-
-    if self.start_text_flash == 24 then
-      self.start_text_flash = 0
-    end
-  end
-
-  s._init = function()
-    local bottom_line = tiles.title.bottom_line
-    local knife       = tiles.title.knife
-    local spoon       = tiles.title.spoon
-    local top_line    = tiles.title.top_line
-    
-    init_object({ tiles = knife, x1 = 16, y1 = -100, x2 = 16, y2 = 24, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = top_line, x1 = 200, y1 = 40, x2 = 32, duration = 10 })
-    s:init_text_animation()
-    init_object({ tiles = bottom_line, x1 = -328, y1 = 80, x2 = 16, duration = 10 })
-    init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
-  end
-
   s._update = function()
     if (btnp(5)) screens:go_to('playing')
   end
 
   s._draw = function(self)
-    s:show_start_text()
-    text:show('about', 117, 7)
+    if (not s.is_transitioning()) then
+      s:show_start_text()
+      text:show('about', 117, 7)
+    end
+
     map(0, 0)
   end
 
@@ -752,9 +773,9 @@ end
 screens = {
   current     = nil,
   definitions = {
-    game_over       = screen_game_over,
-    playing         = screen_playing,
-    title_animation = screen_title_animation,
+    game_over = screen_game_over,
+    playing   = screen_playing,
+    title     = screen_title,
   },
 
   go_to = function(self, name)
@@ -764,8 +785,17 @@ screens = {
 
   _init = function(self)
     objects = clone({})
-    local can_init = table_has_key(self.current, '_init')
-    if (can_init) self.current:_init()
+
+    local can_init          = table_has_key(self.current, '_init')
+    local can_transition_in = table_has_key(self.current, 'transition_in')
+
+    if (can_init) then
+      self.current:_init()
+    end
+
+    if (can_transition_in) then
+      self.current:transition_in()
+    end
   end,
 
   _update = function(self)
@@ -791,7 +821,7 @@ screens = {
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  screens:go_to('title_animation')
+  screens:go_to('title')
 end
 
 function _update()

@@ -290,7 +290,6 @@ function init_object(options)
   local obj = {}
 
   obj.delay            = options.delay or 0
-  obj.delay_countdown  = options.delay or 0
   obj.duration         = options.duration or 0
   obj.easing           = options.easing or 'linear'
   obj.frame_count      = 0
@@ -321,10 +320,12 @@ function init_object(options)
     d = self.duration        -- duration (total time)
     e = self.easing
 
-    if     e == 'outBounce' then return outBounce(t, b, c, d)
-    elseif e == 'inBounce'  then return inBounce(t, b, c, d)
-    else                         return linear(t, b, c, d)
+    if     e == 'outBounce' then calculated_pos = outBounce(t, b, c, d)
+    elseif e == 'inBounce'  then calculated_pos = inBounce(t, b, c, d)
+    else                         calculated_pos = linear(t, b, c, d)
     end
+
+    return flr(calculated_pos)
   end
 
   obj.draw_tile = function(self, t)
@@ -352,18 +353,22 @@ function init_object(options)
     return self.frame_count > self.duration
   end
 
+  obj.is_delayed = function(self)
+    return self.delay > 0
+  end
+
   obj.set_pos = function(self)
     self.pos_x = self:calculate_pos('x')
     self.pos_y = self:calculate_pos('y')
   end
 
   obj.tick = function(self)
-    self.delay_countdown -= 1
-    self.frame_count     += 1
-
-    if (self.delay_countdown < 0) then
-      self.delay_countdown = 0
+    if obj:is_delayed() then
+      self.delay -= 1
+      return
     end
+
+    self.frame_count += 1
   end
 
   obj._update = function(self)
@@ -371,8 +376,11 @@ function init_object(options)
       self:tick()
     end
 
-    self:set_pos()
+    if obj:is_delayed() then
+      return
+    end
 
+    self:set_pos()
     self.updated = true
   end
 

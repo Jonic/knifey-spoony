@@ -3,7 +3,7 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v0.7.0
+-- v0.8.0
 
 --[[
   "i see you've played knifey
@@ -316,39 +316,39 @@ tiles = {
 
 objects = {}
 
-function init_object(options)
-  local obj = {}
+function init_object(props)
+  local o = {}
 
-  obj.delay            = options.delay or 0
-  obj.duration         = options.duration or 0
-  obj.easing           = options.easing or 'linear'
-  obj.frame_count      = 0
-  obj.pos_x            = 0
-  obj.pos_y            = 0
-  obj.repeat_after     = options.repeat_after or nil
-  obj.repeat_countdown = options.repeat_after or nil
-  obj.repeating        = options.repeat_after ~= nil
-  obj.tiles            = options.tiles
-  obj.updated          = false
-  obj.x                = { start = options.x1 or 0, dest = options.x2 or nil }
-  obj.y                = { start = options.y1 or 0, dest = options.y2 or nil }
+  o.delay            = props.delay or 0
+  o.duration         = props.duration or 0
+  o.easing           = props.easing or 'linear'
+  o.frame_count      = 0
+  o.pos_x            = 0
+  o.pos_y            = 0
+  o.repeat_after     = props.repeat_after or nil
+  o.repeat_countdown = props.repeat_after or nil
+  o.repeating        = props.repeat_after ~= nil
+  o.tiles            = props.tiles
+  o.updated          = false
+  o.x                = { start = props.x1 or 0, dest = props.x2 or nil }
+  o.y                = { start = props.y1 or 0, dest = props.y2 or nil }
 
-  obj.calculate_pos = function(self, pos_key)
-    local pos = self[pos_key]
+  o.calculate_pos = function(pos_key)
+    local pos = o[pos_key]
 
-    if pos.dest == nil or self.delay > 0 then
+    if pos.dest == nil or o.delay > 0 then
       return pos.start
     end
 
-    if obj:is_complete() then
+    if o.is_complete() then
       return pos.dest
     end
 
-    t = self.frame_count     -- elapsed time
+    t = o.frame_count     -- elapsed time
     b = pos.start            -- begin
     c = pos.dest - pos.start -- change == ending - beginning
-    d = self.duration        -- duration (total time)
-    e = self.easing
+    d = o.duration        -- duration (total time)
+    e = o.easing
 
     if     e == 'outBack'   then calculated_pos = outBack(t, b, c, d)
     elseif e == 'outBounce' then calculated_pos = outBounce(t, b, c, d)
@@ -359,77 +359,77 @@ function init_object(options)
     return flr(calculated_pos)
   end
 
-  obj.draw_tile = function(self, t)
-    t.x  = t.x or 0
-    t.y  = t.y or 0
-    t.w  = t.w or 1
-    t.h  = t.h or 1
-    t.fx = t.fx or false
-    t.fy = t.fy or false
+  o.draw_tile = function(t)
+    x  = (t.x or 0) + o.pos_x
+    y  = (t.y or 0) + o.pos_y
+    w  = t.w or 1
+    h  = t.h or 1
+    fx = t.fx or false
+    fy = t.fy or false
 
-    spr(t.i, t.x + self.pos_x, t.y + self.pos_y, t.w, t.h, t.fx, t.fy)
+    spr(t.i, x, y, w, h, fx, fy)
   end
 
-  obj.draw_tiles = function(self, tiles)
+  o.draw_tiles = function(tiles)
     for t in all(tiles) do
       if t.i == nil then
-        return self:draw_tiles(t)
+        return o.draw_tiles(t)
       end
 
-      self:draw_tile(t)
+      o.draw_tile(t)
     end
   end
 
-  obj.is_complete = function(self)
-    return self.frame_count > self.duration
+  o.is_complete = function()
+    return o.frame_count > o.duration
   end
 
-  obj.is_delayed = function(self)
-    return self.delay > 0
+  o.is_delayed = function()
+    return o.delay > 0
   end
 
-  obj.set_pos = function(self)
-    self.pos_x = self:calculate_pos('x')
-    self.pos_y = self:calculate_pos('y')
+  o.set_pos = function()
+    o.pos_x = o.calculate_pos('x')
+    o.pos_y = o.calculate_pos('y')
   end
 
-  obj.tick = function(self)
-    if obj:is_delayed() then
-      self.delay -= 1
+  o.tick = function()
+    if o.is_delayed() then
+      o.delay -= 1
       return
     end
 
-    self.frame_count += 1
+    o.frame_count += 1
   end
 
-  obj._update = function(self)
-    if not obj:is_complete() then
-      self:tick()
+  o._update = function()
+    if not o.is_complete() then
+      o.tick()
     end
 
-    if obj:is_delayed() then
+    if o.is_delayed() then
       return
     end
 
-    self:set_pos()
-    self.updated = true
+    o.set_pos()
+    o.updated = true
   end
 
-  obj._draw = function(self)
-    if not self.updated then
+  o._draw = function()
+    if not o.updated then
       return
     end
 
-    self:draw_tiles(self.tiles)
+    o.draw_tiles(o.tiles)
   end
 
-  add(objects, obj)
+  add(objects, o)
 
-  return obj
+  return o
 end
 
-function destroy_object(obj)
-	del(objects, obj)
+function destroy_object(o)
+  del(objects, o)
 end
 
 -->8
@@ -481,12 +481,111 @@ text = {
 -->8
 -- screens
 
-function screen_title_animation()
+screens = {}
+
+function init_screen(props)
   local s = {}
 
-  s.start_text_flash = 0
+  s.props  = props()
+  s.name   = s.props.name
+  s.active = false
 
-  s.init_text_animation = function()
+  s.transition_in_duration  = 100
+  s.transition_out_duration = 100
+  s.transition_state        = 'in'
+
+  s.is_transitioning = function()
+    return (not s.is_transitioning_in() and not s.is_transitioning_out())
+  end
+
+  s.is_transitioning_in = function()
+    return s.transition_state == 'in'
+  end
+
+  s.is_transitioning_out = function()
+    return s.transition_state == 'in'
+  end
+
+  s._init = function()
+    objects = clone({})
+
+    local can_init          = table_has_key(s.props, '_init')
+    local can_transition_in = table_has_key(s.props, 'transition_in')
+
+    if (can_init) then
+      s.props._init()
+    end
+
+    if (can_transition_in) then
+      s.props.transition_in()
+    end
+  end
+
+  s._update = function()
+    foreach(objects, function(o)
+      o._update()
+    end)
+
+    s.props._update()
+  end
+
+  s._draw = function()
+    foreach(objects, function(o)
+      o._draw()
+    end)
+
+    s.props._draw()
+  end
+
+  add(screens, s)
+
+  return s
+end
+
+function screens_update()
+  foreach(screens, function(s)
+    if s.active then
+      s._update()
+    end
+  end)
+end
+
+function screens_draw()
+  foreach(screens, function(s)
+    if s.active then
+      s._draw()
+    end
+  end)
+end
+
+function go_to_screen(name)
+  next_scene = nil
+
+  foreach(screens, function(s)
+    s.active = s.name == name
+    if (s.active) next_scene = s
+  end)
+
+  next_scene.active = true
+  next_scene._init()
+end
+
+-->8
+-- init screens
+
+-- title screen
+init_screen(function ()
+  local s = {}
+
+  s.name = 'title'
+  s.show_start_text = function()
+    if (s.start_text_flash == nil) s.start_text_flash = 0
+    if (s.start_text_flash < 12) text:show('start_game', 100, 7)
+    s.start_text_flash += 1
+    if (s.start_text_flash == 24) s.start_text_flash = 0
+  end
+
+  s.transition_in_text_animation = function()
     local d   = 20
     local e   = 'outBack'
     local kx1 = 200
@@ -510,47 +609,37 @@ function screen_title_animation()
     init_object({ tiles = t.s1, x1 = sx1, y1 = sy, x2 = 16, delay = 15, duration = d, easing = e })
   end
 
-  s.show_start_text = function(self)
-    if self.start_text_flash < 12 then
-      text:show('start_game', 100, 7)
-    end
-
-    self.start_text_flash += 1
-
-    if self.start_text_flash == 24 then
-      self.start_text_flash = 0
-    end
-  end
-
   s._init = function()
     local bottom_line = tiles.title.bottom_line
     local knife       = tiles.title.knife
     local spoon       = tiles.title.spoon
     local top_line    = tiles.title.top_line
-    
+
     init_object({ tiles = knife, x1 = 16, y1 = -100, x2 = 16, y2 = 24, duration = 30, easing = 'outBounce' })
     init_object({ tiles = top_line, x1 = 200, y1 = 40, x2 = 32, duration = 10 })
-    s:init_text_animation()
+    s.transition_in_text_animation()
     init_object({ tiles = bottom_line, x1 = -328, y1 = 80, x2 = 16, duration = 10 })
     init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
   end
 
   s._update = function()
-    if (btnp(5)) screens:go_to('playing')
+    if (btnp(5)) go_to_screen('playing')
   end
 
-  s._draw = function(self)
-    s:show_start_text()
+  s._draw = function()
+    s.show_start_text()
     text:show('about', 117, 7)
     map(0, 0)
   end
 
   return s
-end
+end)
 
-function screen_playing()
+-- playing screen
+init_screen(function()
   local s = {}
-  
+
+  s.name = 'playing'
   s.defaults = {}
   s.defaults.button_animations = {
     knifey = {
@@ -590,40 +679,40 @@ function screen_playing()
     }
   }
 
-  s.animate_button = function(self, button)
-    self.button_animations[button].animating = true
+  s.animate_button = function(button)
+    s.button_animations[button].animating = true
   end
 
-  s.choose_utensil = function(self)
-    self.utensil.previous.type  = self.utensil.type
-    self.utensil.previous.index = self.utensil.index
+  s.choose_utensil = function()
+    s.utensil.previous.type  = s.utensil.type
+    s.utensil.previous.index = s.utensil.index
 
     local utensil_type  = rnd(1) > 0.5 and text.knifey or text.spoony
     local utensil_array = tiles.playing.utensils[utensil_type]
     local utensil_index = rndint(1, #utensil_array)
 
-    if (utensil_index == self.utensil.previous.index) and
-       (utensil_type  == self.utensil.previous.type) then
-      return self:choose_utensil()
+    if (utensil_index == s.utensil.previous.index) and
+       (utensil_type  == s.utensil.previous.type) then
+      return s.choose_utensil()
     end
 
-    self.utensil.type    = utensil_type
-    self.utensil.index   = utensil_index
-    self.utensil.sprites = utensil_array[utensil_index]
+    s.utensil.type    = utensil_type
+    s.utensil.index   = utensil_index
+    s.utensil.sprites = utensil_array[utensil_index]
   end
 
-  s.decrease_timeout_remaining = function(self)
-    self.timeout.remaining -= 1
-    if (self.timeout.remaining <= 0) screens:go_to('game_over')
+  s.decrease_timeout_remaining = function()
+    s.timeout.remaining -= 1
+    if (s.timeout.remaining <= 0) go_to_screen('game_over')
   end
 
-  s.decrease_timeout_start = function(self)
-    local new_timeout = self.timeout.start * self.timeout.multiplier
-    self.timeout.start = mid(self.timeout.min, new_timeout, self.timeout.start)
+  s.decrease_timeout_start = function()
+    local new_timeout = s.timeout.start * s.timeout.multiplier
+    s.timeout.start = mid(s.timeout.min, new_timeout, s.timeout.start)
   end
 
-  s.draw_button = function(self, button)
-    local button_animation = self.button_animations[button]
+  s.draw_button = function(button)
+    local button_animation = s.button_animations[button]
     local button_sprites   = tiles.playing.buttons[button]
 
     if (button_animation.animating) button_animation.frame += 1
@@ -636,96 +725,99 @@ function screen_playing()
     end
   end
 
-  s.draw_buttons = function(self)
-    self:draw_button(text.knifey)
-    self:draw_button(text.spoony)
+  s.draw_buttons = function()
+    s.draw_button(text.knifey)
+    s.draw_button(text.spoony)
   end 
 
-  s.draw_floor = function(self)
+  s.draw_floor = function()
     rectfill(4, 111, 123, 112, 15)
     rectfill(4, 113, 123, 119, 4)
     rectfill(4, 120, 123, 123, 2)
   end
 
-  s.draw_timer = function(self)
-    x = self.timer.start_x + self:timer_width()
-    y = self.timer.start_y + self.timer.height - 1
-    rectfill(self.timer.start_x, self.timer.start_y, x, y, self.timer.color)
+  s.draw_timer = function()
+    x = s.timer.start_x + s.timer_width()
+    y = s.timer.start_y + s.timer.height - 1
+    rectfill(s.timer.start_x, s.timer.start_y, x, y, s.timer.color)
   end
 
-  s.evaluate_input = function(self, choice)
-    if (choice == self.utensil.type) then
-      self:round_passed()
+  s.evaluate_input = function(choice)
+    if (choice == s.utensil.type) then
+      s.round_passed()
     else
-      self:round_failed()
+      s.round_failed()
     end
   end
 
-  s.get_input = function(self)
+  s.get_input = function()
     if (btnp(0)) then
-      self:animate_button(text.knifey)
-      self:evaluate_input(text.knifey)
+      s.animate_button(text.knifey)
+      s.evaluate_input(text.knifey)
     end
 
     if (btnp(1)) then
-      self:animate_button(text.spoony)
-      self:evaluate_input(text.spoony)
+      s.animate_button(text.spoony)
+      s.evaluate_input(text.spoony)
     end
   end
 
-  s.new_round = function(self)
-    self.timeout.remaining = self.timeout.start
-    self:choose_utensil()
+  s.new_round = function()
+    s.timeout.remaining = s.timeout.start
+    s.choose_utensil()
   end
 
-  s.reset = function(self)
-    self.timeout           = copy(self.defaults.timeout)
-    self.button_animations = clone(self.defaults.button_animations)
+  s.reset = function()
+    s.timeout           = copy(s.defaults.timeout)
+    s.button_animations = clone(s.defaults.button_animations)
     reset_globals()
   end
 
   s.round_failed = function()
-    screens:go_to('game_over')
+    go_to_screen('game_over')
   end
 
-  s.round_passed = function(self)
+  s.round_passed = function()
     update_score()
-    self:decrease_timeout_start()
-    self:new_round()
+    s.decrease_timeout_start()
+    s.new_round()
   end
 
-  s.timer_width = function(self)
-    local elapsed_percentage = self.timeout.remaining / self.timeout.start
-    return flr(elapsed_percentage * self.timer.max_width)
+  s.timer_width = function()
+    local elapsed_percentage = s.timeout.remaining / s.timeout.start
+    return flr(elapsed_percentage * s.timer.max_width)
   end
 
-  s._init = function(self)
-    self:reset()
-    self:new_round()
+  s._init = function()
+    s.reset()
+    s.new_round()
   end
 
-  s._update = function(self)
-    self:decrease_timeout_remaining()
-    self:get_input()
+  s._update = function()
+    s.decrease_timeout_remaining()
+    s.get_input()
   end
 
-  s._draw = function(self)
-    self:draw_timer()
-    draw_sprites(self.utensil.sprites)
+  s._draw = function()
+    s.draw_timer()
+    draw_sprites(s.utensil.sprites)
     draw_sprites(tiles.playing.score)
-    self:draw_buttons()
-    self:draw_floor()
+    s.draw_buttons()
+    s.draw_floor()
     map(0, 0)
   end
 
   return s
-end
+end)
 
-function screen_game_over()
+-- game_over screen
+init_screen(function()
   local s = {}
 
+  s.name = 'game_over'
+
   s._update = function()
-    if (btnp(5)) screens:go_to('playing')
+    if (btnp(5)) go_to_screen('playing')
   end
 
   s._draw = function()
@@ -745,45 +837,9 @@ function screen_game_over()
     text:show('play_again', 112, 7, 5)
     map(0, 0)
   end
-  
+
   return s
-end
-
-screens = {
-  current     = nil,
-  definitions = {
-    game_over       = screen_game_over,
-    playing         = screen_playing,
-    title_animation = screen_title_animation,
-  },
-
-  go_to = function(self, name)
-    self.current = self.definitions[name]()
-    self:_init()
-  end,
-
-  _init = function(self)
-    objects = clone({})
-    local can_init = table_has_key(self.current, '_init')
-    if (can_init) self.current:_init()
-  end,
-
-  _update = function(self)
-    foreach(objects, function(obj)
-      obj:_update()
-    end)
-
-    self.current:_update()
-  end,
-
-  _draw = function(self)
-    foreach(objects, function(obj)
-      obj:_draw()
-    end)
-
-    self.current:_draw()
-  end
-}
+end)
 
 -->8
 -- game loop
@@ -791,16 +847,16 @@ screens = {
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  screens:go_to('title_animation')
+  go_to_screen('title')
 end
 
 function _update()
-  screens:_update()
+  screens_update()
 end
 
 function _draw()
   cls()
-  screens:_draw()
+  screens_draw()
 end
 __gfx__
 aaaaaaaaaaaaaaaaaaaaaaa4a9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

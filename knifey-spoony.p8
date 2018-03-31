@@ -486,8 +486,8 @@ screens = {}
 function init_screen(props)
   local s = {}
 
-  s.props  = props
-  s.name   = props.name
+  s.props  = props()
+  s.name   = s.props.name
   s.active = false
 
   s.transition_in_duration  = 100
@@ -575,11 +575,11 @@ end
 -->8
 -- init screens
 
-function screen_title()
+-- title screen
+init_screen(function ()
   local s = {}
 
   s.name = 'title'
-
   s.show_start_text = function()
     if (s.start_text_flash == nil) s.start_text_flash = 0
     if (s.start_text_flash < 12) text:show('start_game', 100, 7)
@@ -636,11 +636,10 @@ function screen_title()
   end
 
   return s
-end
+end)
 
-init_screen(screen_title())
-
-function screen_playing()
+-- playing screen
+init_screen(function()
   local s = {}
 
   s.name = 'playing'
@@ -812,11 +811,10 @@ function screen_playing()
   end
 
   return s
-end
+end)
 
-init_screen(screen_playing())
-
-function screen_game_over()
+-- game_over screen
+init_screen(function()
   local s = {}
 
   s.name = 'game_over'
@@ -844,9 +842,7 @@ function screen_game_over()
   end
 
   return s
-end
-
-init_screen(screen_game_over())
+end)
 
 -->8
 -- game loop

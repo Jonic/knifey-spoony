@@ -496,9 +496,9 @@ function screen_title()
   end
 
   s._draw = function(self)
-    map(0, 0)
     s:show_start_text()
-    text:show('about', 119, 7)
+    text:show('about', 117, 7)
+    map(0, 0)
   end
 
   return s
@@ -666,12 +666,12 @@ function screen_playing()
   end
 
   s._draw = function(self)
-    map(0, 0)
     self:draw_timer()
     draw_sprites(self.utensil.sprites)
     draw_sprites(tiles.playing.score)
     self:draw_buttons()
     self:draw_floor()
+    map(0, 0)
   end
 
   return s
@@ -689,7 +689,6 @@ function screen_game_over()
     local score_text      = text:get('score') .. score
 
     rectfill(8, 8, 119, 119, 8)
-    map(0, 0)
 
     text:show('game_over',       16, 7, 0)
     text:output(score_text,      32, 7, 0)
@@ -700,6 +699,7 @@ function screen_game_over()
     end
 
     text:show('play_again', 112, 7, 5)
+    map(0, 0)
   end
   
   return s

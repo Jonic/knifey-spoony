@@ -117,6 +117,12 @@ local function linear(t, b, c, d)
   return c * t / d + b
 end
 
+local function outBack(t, b, c, d, s)
+  if not s then s = 1.70158 end
+  t = t / d - 1
+  return c * (t * t * ((s + 1) * t + s) + 1) + b
+end
+
 local function outBounce(t, b, c, d)
   t = t / d
   if t < 1 / 2.75 then
@@ -320,7 +326,8 @@ function init_object(options)
     d = self.duration        -- duration (total time)
     e = self.easing
 
-    if     e == 'outBounce' then calculated_pos = outBounce(t, b, c, d)
+    if     e == 'outBack'   then calculated_pos = outBack(t, b, c, d)
+    elseif e == 'outBounce' then calculated_pos = outBounce(t, b, c, d)
     elseif e == 'inBounce'  then calculated_pos = inBounce(t, b, c, d)
     else                         calculated_pos = linear(t, b, c, d)
     end

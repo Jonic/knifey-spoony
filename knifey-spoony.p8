@@ -316,39 +316,39 @@ tiles = {
 
 objects = {}
 
-function init_object(options)
+function init_object(props)
   local obj = {}
 
-  obj.delay            = options.delay or 0
-  obj.duration         = options.duration or 0
-  obj.easing           = options.easing or 'linear'
+  obj.delay            = props.delay or 0
+  obj.duration         = props.duration or 0
+  obj.easing           = props.easing or 'linear'
   obj.frame_count      = 0
   obj.pos_x            = 0
   obj.pos_y            = 0
-  obj.repeat_after     = options.repeat_after or nil
-  obj.repeat_countdown = options.repeat_after or nil
-  obj.repeating        = options.repeat_after ~= nil
-  obj.tiles            = options.tiles
+  obj.repeat_after     = props.repeat_after or nil
+  obj.repeat_countdown = props.repeat_after or nil
+  obj.repeating        = props.repeat_after ~= nil
+  obj.tiles            = props.tiles
   obj.updated          = false
-  obj.x                = { start = options.x1 or 0, dest = options.x2 or nil }
-  obj.y                = { start = options.y1 or 0, dest = options.y2 or nil }
+  obj.x                = { start = props.x1 or 0, dest = props.x2 or nil }
+  obj.y                = { start = props.y1 or 0, dest = props.y2 or nil }
 
-  obj.calculate_pos = function(self, pos_key)
-    local pos = self[pos_key]
+  obj.calculate_pos = function(pos_key)
+    local pos = obj[pos_key]
 
-    if pos.dest == nil or self.delay > 0 then
+    if pos.dest == nil or obj.delay > 0 then
       return pos.start
     end
 
-    if obj:is_complete() then
+    if obj.is_complete() then
       return pos.dest
     end
 
-    t = self.frame_count     -- elapsed time
+    t = obj.frame_count     -- elapsed time
     b = pos.start            -- begin
     c = pos.dest - pos.start -- change == ending - beginning
-    d = self.duration        -- duration (total time)
-    e = self.easing
+    d = obj.duration        -- duration (total time)
+    e = obj.easing
 
     if     e == 'outBack'   then calculated_pos = outBack(t, b, c, d)
     elseif e == 'outBounce' then calculated_pos = outBounce(t, b, c, d)
@@ -359,68 +359,68 @@ function init_object(options)
     return flr(calculated_pos)
   end
 
-  obj.draw_tile = function(self, t)
-    t.x  = t.x or 0
-    t.y  = t.y or 0
-    t.w  = t.w or 1
-    t.h  = t.h or 1
-    t.fx = t.fx or false
-    t.fy = t.fy or false
+  obj.draw_tile = function(t)
+    x  = (t.x or 0) + obj.pos_x
+    y  = (t.y or 0) + obj.pos_y
+    w  = t.w or 1
+    h  = t.h or 1
+    fx = t.fx or false
+    fy = t.fy or false
 
-    spr(t.i, t.x + self.pos_x, t.y + self.pos_y, t.w, t.h, t.fx, t.fy)
+    spr(t.i, x, y, w, h, fx, fy)
   end
 
-  obj.draw_tiles = function(self, tiles)
+  obj.draw_tiles = function(tiles)
     for t in all(tiles) do
       if t.i == nil then
-        return self:draw_tiles(t)
+        return obj.draw_tiles(t)
       end
 
-      self:draw_tile(t)
+      obj.draw_tile(t)
     end
   end
 
-  obj.is_complete = function(self)
-    return self.frame_count > self.duration
+  obj.is_complete = function()
+    return obj.frame_count > obj.duration
   end
 
-  obj.is_delayed = function(self)
-    return self.delay > 0
+  obj.is_delayed = function()
+    return obj.delay > 0
   end
 
-  obj.set_pos = function(self)
-    self.pos_x = self:calculate_pos('x')
-    self.pos_y = self:calculate_pos('y')
+  obj.set_pos = function()
+    obj.pos_x = obj.calculate_pos('x')
+    obj.pos_y = obj.calculate_pos('y')
   end
 
-  obj.tick = function(self)
-    if obj:is_delayed() then
-      self.delay -= 1
+  obj.tick = function()
+    if obj.is_delayed() then
+      obj.delay -= 1
       return
     end
 
-    self.frame_count += 1
+    obj.frame_count += 1
   end
 
-  obj._update = function(self)
-    if not obj:is_complete() then
-      self:tick()
+  obj._update = function()
+    if not obj.is_complete() then
+      obj.tick()
     end
 
-    if obj:is_delayed() then
+    if obj.is_delayed() then
       return
     end
 
-    self:set_pos()
-    self.updated = true
+    obj.set_pos()
+    obj.updated = true
   end
 
-  obj._draw = function(self)
-    if not self.updated then
+  obj._draw = function()
+    if not obj.updated then
       return
     end
 
-    self:draw_tiles(self.tiles)
+    obj.draw_tiles(obj.tiles)
   end
 
   add(objects, obj)
@@ -557,9 +557,9 @@ function screen_title()
     if (btnp(5)) screens:go_to('playing')
   end
 
-  s._draw = function(self)
+  s._draw = function()
     if (not s.is_transitioning()) then
-      s:show_start_text()
+      s.show_start_text()
       text:show('about', 117, 7)
     end
 
@@ -611,40 +611,40 @@ function screen_playing()
     }
   }
 
-  s.animate_button = function(self, button)
-    self.button_animations[button].animating = true
+  s.animate_button = function(button)
+    s.button_animations[button].animating = true
   end
 
-  s.choose_utensil = function(self)
-    self.utensil.previous.type  = self.utensil.type
-    self.utensil.previous.index = self.utensil.index
+  s.choose_utensil = function()
+    s.utensil.previous.type  = s.utensil.type
+    s.utensil.previous.index = s.utensil.index
 
     local utensil_type  = rnd(1) > 0.5 and text.knifey or text.spoony
     local utensil_array = tiles.playing.utensils[utensil_type]
     local utensil_index = rndint(1, #utensil_array)
 
-    if (utensil_index == self.utensil.previous.index) and
-       (utensil_type  == self.utensil.previous.type) then
-      return self:choose_utensil()
+    if (utensil_index == s.utensil.previous.index) and
+       (utensil_type  == s.utensil.previous.type) then
+      return s.choose_utensil()
     end
 
-    self.utensil.type    = utensil_type
-    self.utensil.index   = utensil_index
-    self.utensil.sprites = utensil_array[utensil_index]
+    s.utensil.type    = utensil_type
+    s.utensil.index   = utensil_index
+    s.utensil.sprites = utensil_array[utensil_index]
   end
 
-  s.decrease_timeout_remaining = function(self)
-    self.timeout.remaining -= 1
-    if (self.timeout.remaining <= 0) screens:go_to('game_over')
+  s.decrease_timeout_remaining = function()
+    s.timeout.remaining -= 1
+    if (s.timeout.remaining <= 0) screens:go_to('game_over')
   end
 
-  s.decrease_timeout_start = function(self)
-    local new_timeout = self.timeout.start * self.timeout.multiplier
-    self.timeout.start = mid(self.timeout.min, new_timeout, self.timeout.start)
+  s.decrease_timeout_start = function()
+    local new_timeout = s.timeout.start * s.timeout.multiplier
+    s.timeout.start = mid(s.timeout.min, new_timeout, s.timeout.start)
   end
 
-  s.draw_button = function(self, button)
-    local button_animation = self.button_animations[button]
+  s.draw_button = function(button)
+    local button_animation = s.button_animations[button]
     local button_sprites   = tiles.playing.buttons[button]
 
     if (button_animation.animating) button_animation.frame += 1
@@ -657,51 +657,51 @@ function screen_playing()
     end
   end
 
-  s.draw_buttons = function(self)
-    self:draw_button(text.knifey)
-    self:draw_button(text.spoony)
+  s.draw_buttons = function()
+    s.draw_button(text.knifey)
+    s.draw_button(text.spoony)
   end 
 
-  s.draw_floor = function(self)
+  s.draw_floor = function()
     rectfill(4, 111, 123, 112, 15)
     rectfill(4, 113, 123, 119, 4)
     rectfill(4, 120, 123, 123, 2)
   end
 
-  s.draw_timer = function(self)
-    x = self.timer.start_x + self:timer_width()
-    y = self.timer.start_y + self.timer.height - 1
-    rectfill(self.timer.start_x, self.timer.start_y, x, y, self.timer.color)
+  s.draw_timer = function()
+    x = s.timer.start_x + s.timer_width()
+    y = s.timer.start_y + s.timer.height - 1
+    rectfill(s.timer.start_x, s.timer.start_y, x, y, s.timer.color)
   end
 
-  s.evaluate_input = function(self, choice)
-    if (choice == self.utensil.type) then
-      self:round_passed()
+  s.evaluate_input = function(choice)
+    if (choice == s.utensil.type) then
+      s.round_passed()
     else
-      self:round_failed()
+      s.round_failed()
     end
   end
 
-  s.get_input = function(self)
+  s.get_input = function()
     if (btnp(0)) then
-      self:animate_button(text.knifey)
-      self:evaluate_input(text.knifey)
+      s.animate_button(text.knifey)
+      s.evaluate_input(text.knifey)
     end
 
     if (btnp(1)) then
-      self:animate_button(text.spoony)
-      self:evaluate_input(text.spoony)
+      s.animate_button(text.spoony)
+      s.evaluate_input(text.spoony)
     end
   end
 
-  s.new_round = function(self)
-    self.timeout.remaining = self.timeout.start
-    self:choose_utensil()
+  s.new_round = function()
+    s.timeout.remaining = s.timeout.start
+    s.choose_utensil()
   end
 
-  s.reset = function(self)
-    self.timeout           = copy(self.defaults.timeout)
-    self.button_animations = clone(self.defaults.button_animations)
+  s.reset = function()
+    s.timeout           = copy(s.defaults.timeout)
+    s.button_animations = clone(s.defaults.button_animations)
     reset_globals()
   end
 
@@ -709,33 +709,33 @@ function screen_playing()
     screens:go_to('game_over')
   end
 
-  s.round_passed = function(self)
+  s.round_passed = function()
     update_score()
-    self:decrease_timeout_start()
-    self:new_round()
+    s.decrease_timeout_start()
+    s.new_round()
   end
 
-  s.timer_width = function(self)
-    local elapsed_percentage = self.timeout.remaining / self.timeout.start
-    return flr(elapsed_percentage * self.timer.max_width)
+  s.timer_width = function()
+    local elapsed_percentage = s.timeout.remaining / s.timeout.start
+    return flr(elapsed_percentage * s.timer.max_width)
   end
 
-  s._init = function(self)
-    self:reset()
-    self:new_round()
+  s._init = function()
+    s.reset()
+    s.new_round()
   end
 
-  s._update = function(self)
-    self:decrease_timeout_remaining()
-    self:get_input()
+  s._update = function()
+    s.decrease_timeout_remaining()
+    s.get_input()
   end
 
-  s._draw = function(self)
-    self:draw_timer()
-    draw_sprites(self.utensil.sprites)
+  s._draw = function()
+    s.draw_timer()
+    draw_sprites(s.utensil.sprites)
     draw_sprites(tiles.playing.score)
-    self:draw_buttons()
-    self:draw_floor()
+    s.draw_buttons()
+    s.draw_floor()
     map(0, 0)
   end
 

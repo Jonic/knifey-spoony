@@ -36,9 +36,10 @@ local high_score        = 0
 local high_score_beaten = false
 local score             = 0
 
-local objects = {}
-local screens = {}
-local screen  = nil
+local objects     = {}
+local screens     = {}
+local screen      = nil
+local screen_next = nil
 
 local transition_countdown = 0
 local transition_state     = nil
@@ -467,25 +468,30 @@ text = {
 -->8
 -- screen transitions
 
-transition_state_update = function()
-  destroy_objects()
-  local new_state = transitioning_to('in') and 'transitioned_in' or 'transitioned_out'
-  transition_state = new_state
-end
-
-transition_in = function()
+function transition_in()
   transition_countdown = screen.props.transition_in_duration
   transition_state     = 'in'
   screen.props.transition_in()
 end
 
-transition_out = function()
+function transition_out()
   transition_countdown = screen.props.transition_out_duration
   transition_state     = 'out'
   screen.props.transition_out()
 end
 
-transition_tick = function()
+function transition_state_update()
+  destroy_objects()
+  local new_state = transitioning_to('in') and 'transitioned_in' or 'transitioned_out'
+  transition_state = new_state
+
+  if (transition_state == 'transitioned_out') then
+    go_to(screen_next)
+    screen_next = nil
+  end
+end
+
+function transition_tick()
   if (transition_countdown > 0) then
     transition_countdown -= 1
 
@@ -495,7 +501,7 @@ transition_tick = function()
   end
 end
 
-transitioning_to = function(target_state)
+function transitioning_to(target_state)
   if (target_state ~= nil) return transition_state == target_state
   return (not transitioning_to('in') and not transitioning_to('out'))
 end
@@ -543,7 +549,14 @@ function init_screen(name, props)
 end
 
 function go_to(name)
-  if (transition_countdown > 0) return
+  if (screen ~= nil) and
+     (screen.can('transition_out')) and
+     (transition_state ~= 'transitioned_out') then
+    screen_next = name
+    transition_out()
+    return
+  end
+
   screen = screens[name]
   screen.init()
 end

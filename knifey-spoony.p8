@@ -542,7 +542,7 @@ function init_screen(name, props)
   return s
 end
 
-function go_to_screen(name)
+function go_to(name)
   screen = screens[name]
   screen.init()
 end
@@ -599,7 +599,7 @@ init_screen('title',  function ()
   end
 
   s.update = function()
-    if (btnp(5)) go_to_screen('playing')
+    if (btnp(5)) go_to('playing')
   end
 
   s.draw = function()
@@ -678,7 +678,7 @@ init_screen('playing', function()
 
   s.decrease_timeout_remaining = function()
     s.timeout.remaining -= 1
-    if (s.timeout.remaining <= 0) go_to_screen('game_over')
+    if (s.timeout.remaining <= 0) go_to('game_over')
   end
 
   s.decrease_timeout_start = function()
@@ -749,7 +749,7 @@ init_screen('playing', function()
   end
 
   s.round_failed = function()
-    go_to_screen('game_over')
+    go_to('game_over')
   end
 
   s.round_passed = function()
@@ -790,7 +790,7 @@ init_screen('game_over', function()
   local s = {}
 
   s.update = function()
-    if (btnp(5)) go_to_screen('playing')
+    if (btnp(5)) go_to('playing')
   end
 
   s.draw = function()
@@ -820,7 +820,7 @@ end)
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  go_to_screen('title')
+  go_to('title')
 end
 
 function _update()

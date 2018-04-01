@@ -482,14 +482,12 @@ text = {
 -- screens
 
 screens = {}
+screen  = nil
 
-function init_screen(props)
+function init_screen(name, props)
   local s = {}
 
-  s.props  = props()
-  s.name   = s.props.name
-  s.active = false
-
+  s.props                   = props()
   s.transition_in_duration  = 100
   s.transition_out_duration = 100
   s.transition_state        = 'in'
@@ -537,47 +535,23 @@ function init_screen(props)
     s.props._draw()
   end
 
-  add(screens, s)
+  screens[name] = s
 
   return s
 end
 
-function screens_update()
-  foreach(screens, function(s)
-    if s.active then
-      s._update()
-    end
-  end)
-end
-
-function screens_draw()
-  foreach(screens, function(s)
-    if s.active then
-      s._draw()
-    end
-  end)
-end
-
 function go_to_screen(name)
-  next_scene = nil
-
-  foreach(screens, function(s)
-    s.active = s.name == name
-    if (s.active) next_scene = s
-  end)
-
-  next_scene.active = true
-  next_scene._init()
+  screen = screens[name]
+  screen._init()
 end
 
 -->8
 -- init screens
 
 -- title screen
-init_screen(function ()
+init_screen('title',  function ()
   local s = {}
 
-  s.name = 'title'
   s.show_start_text = function()
     if (s.start_text_flash == nil) s.start_text_flash = 0
     if (s.start_text_flash < 12) text.show('start_game', 100, 7)
@@ -636,10 +610,9 @@ init_screen(function ()
 end)
 
 -- playing screen
-init_screen(function()
+init_screen('playing', function()
   local s = {}
 
-  s.name = 'playing'
   s.defaults = {}
   s.defaults.button_animations = {
     knifey = {
@@ -811,10 +784,8 @@ init_screen(function()
 end)
 
 -- game_over screen
-init_screen(function()
+init_screen('game_over', function()
   local s = {}
-
-  s.name = 'game_over'
 
   s._update = function()
     if (btnp(5)) go_to_screen('playing')
@@ -851,12 +822,12 @@ function _init()
 end
 
 function _update()
-  screens_update()
+  screen._update()
 end
 
 function _draw()
   cls()
-  screens_draw()
+  screen._draw()
 end
 __gfx__
 aaaaaaaaaaaaaaaaaaaaaaa4a9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

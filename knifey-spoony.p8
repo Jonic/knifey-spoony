@@ -402,7 +402,7 @@ function init_object(props)
     o.frame_count += 1
   end
 
-  o._update = function()
+  o.update = function()
     if not o.is_complete() then
       o.tick()
     end
@@ -415,7 +415,7 @@ function init_object(props)
     o.updated = true
   end
 
-  o._draw = function()
+  o.draw = function()
     if not o.updated then
       return
     end
@@ -488,9 +488,14 @@ function init_screen(name, props)
   local s = {}
 
   s.props                   = props()
-  s.transition_in_duration  = 100
-  s.transition_out_duration = 100
-  s.transition_state        = 'in'
+
+  s.transition_in_duration  = s.props.transition_in_duration or 0
+  s.transition_out_duration = s.props.transition_out_duration or 0
+  s.transition_state        = s.props.transition_state or 'in'
+
+  s.can = function(key)
+    return table_has_key(s.props, key)
+  end
 
   s.is_transitioning = function()
     return (not s.is_transitioning_in() and not s.is_transitioning_out())
@@ -504,35 +509,32 @@ function init_screen(name, props)
     return s.transition_state == 'in'
   end
 
-  s._init = function()
+  s.init = function()
     objects = clone({})
 
-    local can_init          = table_has_key(s.props, '_init')
-    local can_transition_in = table_has_key(s.props, 'transition_in')
-
-    if (can_init) then
-      s.props._init()
+    if (s.can('init')) then
+      s.props.init()
     end
 
-    if (can_transition_in) then
+    if (s.can('transition_in')) then
       s.props.transition_in()
     end
   end
 
-  s._update = function()
+  s.update = function()
     foreach(objects, function(o)
-      o._update()
+      o.update()
     end)
 
-    s.props._update()
+    s.props.update()
   end
 
-  s._draw = function()
+  s.draw = function()
     foreach(objects, function(o)
-      o._draw()
+      o.draw()
     end)
 
-    s.props._draw()
+    s.props.draw()
   end
 
   screens[name] = s
@@ -542,7 +544,7 @@ end
 
 function go_to_screen(name)
   screen = screens[name]
-  screen._init()
+  screen.init()
 end
 
 -->8
@@ -583,7 +585,7 @@ init_screen('title',  function ()
     init_object({ tiles = t.s1, x1 = sx1, y1 = sy, x2 = 16, delay = 15, duration = d, easing = e })
   end
 
-  s._init = function()
+  s.init = function()
     local bottom_line = tiles.title.bottom_line
     local knife       = tiles.title.knife
     local spoon       = tiles.title.spoon
@@ -596,11 +598,11 @@ init_screen('title',  function ()
     init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
   end
 
-  s._update = function()
+  s.update = function()
     if (btnp(5)) go_to_screen('playing')
   end
 
-  s._draw = function()
+  s.draw = function()
     s.show_start_text()
     text.show('about', 117, 7)
     map(0, 0)
@@ -761,17 +763,17 @@ init_screen('playing', function()
     return flr(elapsed_percentage * s.timer.max_width)
   end
 
-  s._init = function()
+  s.init = function()
     s.reset()
     s.new_round()
   end
 
-  s._update = function()
+  s.update = function()
     s.decrease_timeout_remaining()
     s.get_input()
   end
 
-  s._draw = function()
+  s.draw = function()
     s.draw_timer()
     draw_sprites(s.utensil.sprites)
     draw_sprites(tiles.playing.score)
@@ -787,11 +789,11 @@ end)
 init_screen('game_over', function()
   local s = {}
 
-  s._update = function()
+  s.update = function()
     if (btnp(5)) go_to_screen('playing')
   end
 
-  s._draw = function()
+  s.draw = function()
     local high_score_text = text['high_score'] .. high_score
     local score_text      = text['score'] .. score
 
@@ -822,12 +824,12 @@ function _init()
 end
 
 function _update()
-  screen._update()
+  screen.update()
 end
 
 function _draw()
   cls()
-  screen._draw()
+  screen.draw()
 end
 __gfx__
 aaaaaaaaaaaaaaaaaaaaaaa4a9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

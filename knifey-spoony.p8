@@ -32,36 +32,36 @@ __lua__
 -->8
 -- global vars
 
-high_score        = 0
-high_score_beaten = false
-score             = 0
+local high_score        = 0
+local high_score_beaten = false
+local score             = 0
 
 -->8
 -- helper functions
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table
-    if type(t) ~= "table" then return t end
-    local meta = getmetatable(t)
-    local target = {}
-    for k, v in pairs(t) do
-        if type(v) == "table" then
-            target[k] = clone(v)
-        else
-            target[k] = v
-        end
+  if type(t) ~= "table" then return t end
+  local meta = getmetatable(t)
+  local target = {}
+  for k, v in pairs(t) do
+    if type(v) == "table" then
+      target[k] = clone(v)
+    else
+      target[k] = v
     end
-    setmetatable(target, meta)
-    return target
+  end
+  setmetatable(target, meta)
+  return target
 end
 
 function copy(t) -- shallow-copy a table
-    if type(t) ~= "table" then return t end
-    local meta = getmetatable(t)
-    local target = {}
-    for k, v in pairs(t) do target[k] = v end
-    setmetatable(target, meta)
-    return target
+  if type(t) ~= "table" then return t end
+  local meta = getmetatable(t)
+  local target = {}
+  for k, v in pairs(t) do target[k] = v end
+  setmetatable(target, meta)
+  return target
 end
 
 function draw_sprite(s)
@@ -77,9 +77,7 @@ function draw_sprite(s)
 end
 
 function draw_sprites(sprites)
-  for s in all(sprites) do
-    draw_sprite(s)
-  end
+  foreach(sprites, draw_sprite)
 end
 
 function reset_globals()
@@ -101,8 +99,6 @@ function update_high_score()
     high_score_beaten = true
     dset(0, high_score)
   end
-
-  global_score = score
 end
 
 function update_score()
@@ -146,7 +142,7 @@ end
 -->8
 -- sprites
 
-tiles = {
+local tiles = {
   playing = {
     buttons = {
       knifey = {
@@ -314,7 +310,7 @@ tiles = {
   },
 }
 
-objects = {}
+local objects = {}
 
 function init_object(props)
   local o = {}
@@ -336,48 +332,41 @@ function init_object(props)
   o.calculate_pos = function(pos_key)
     local pos = o[pos_key]
 
-    if pos.dest == nil or o.delay > 0 then
-      return pos.start
+    if (pos.dest == nil or o.delay > 0) return pos.start
+    if (o.is_complete()) return pos.dest
+
+    local t = o.frame_count        -- elapsed time
+    local b = pos.start            -- begin
+    local c = pos.dest - pos.start -- change == ending - beginning
+    local d = o.duration           -- duration (total time)
+    local e = o.easing
+    local new_pos = 0
+
+    if     e == 'outBack'   then new_pos = outBack(t, b, c, d)
+    elseif e == 'outBounce' then new_pos = outBounce(t, b, c, d)
+    elseif e == 'inBounce'  then new_pos = inBounce(t, b, c, d)
+    else                         new_pos = linear(t, b, c, d)
     end
 
-    if o.is_complete() then
-      return pos.dest
-    end
-
-    t = o.frame_count     -- elapsed time
-    b = pos.start            -- begin
-    c = pos.dest - pos.start -- change == ending - beginning
-    d = o.duration        -- duration (total time)
-    e = o.easing
-
-    if     e == 'outBack'   then calculated_pos = outBack(t, b, c, d)
-    elseif e == 'outBounce' then calculated_pos = outBounce(t, b, c, d)
-    elseif e == 'inBounce'  then calculated_pos = inBounce(t, b, c, d)
-    else                         calculated_pos = linear(t, b, c, d)
-    end
-
-    return flr(calculated_pos)
+    return flr(new_pos)
   end
 
   o.draw_tile = function(t)
-    x  = (t.x or 0) + o.pos_x
-    y  = (t.y or 0) + o.pos_y
-    w  = t.w or 1
-    h  = t.h or 1
-    fx = t.fx or false
-    fy = t.fy or false
+    local x  = (t.x or 0) + o.pos_x
+    local y  = (t.y or 0) + o.pos_y
+    local w  = t.w or 1
+    local h  = t.h or 1
+    local fx = t.fx or false
+    local fy = t.fy or false
 
     spr(t.i, x, y, w, h, fx, fy)
   end
 
   o.draw_tiles = function(tiles)
-    for t in all(tiles) do
-      if t.i == nil then
-        return o.draw_tiles(t)
-      end
-
+    foreach(tiles, function(t)
+      if (t.i == nil) return o.draw_tiles(t)
       o.draw_tile(t)
-    end
+    end)
   end
 
   o.is_complete = function()
@@ -403,23 +392,14 @@ function init_object(props)
   end
 
   o.update = function()
-    if not o.is_complete() then
-      o.tick()
-    end
-
-    if o.is_delayed() then
-      return
-    end
-
+    if (not o.is_complete()) o.tick()
+    if (o.is_delayed()) return
     o.set_pos()
     o.updated = true
   end
 
   o.draw = function()
-    if not o.updated then
-      return
-    end
-
+    if (not o.updated) return
     o.draw_tiles(o.tiles)
   end
 
@@ -481,44 +461,34 @@ text = {
 -->8
 -- screens
 
-screens = {}
-screen  = nil
+local screens = {}
+local screen  = nil
 
 function init_screen(name, props)
   local s = {}
 
-  s.props                   = props()
+  -- take everything from level object and add it to this `props` key
+  s.props = props()
 
   s.transition_in_duration  = s.props.transition_in_duration or 0
   s.transition_out_duration = s.props.transition_out_duration or 0
   s.transition_state        = s.props.transition_state or 'in'
+  s.transition_countdown    = 0
 
   s.can = function(key)
     return table_has_key(s.props, key)
   end
 
-  s.is_transitioning = function()
-    return (not s.is_transitioning_in() and not s.is_transitioning_out())
-  end
-
-  s.is_transitioning_in = function()
-    return s.transition_state == 'in'
-  end
-
-  s.is_transitioning_out = function()
-    return s.transition_state == 'in'
+  s.is_transitioning = function(state)
+    if (state ~= nil) return s.transition_state == state
+    return (not s.is_transitioning('in') and not s.is_transitioning('out'))
   end
 
   s.init = function()
     objects = clone({})
 
-    if (s.can('init')) then
-      s.props.init()
-    end
-
-    if (s.can('transition_in')) then
-      s.props.transition_in()
-    end
+    if (s.can('init')) s.props.init()
+    if (s.can('transition_in')) s.props.transition_in()
   end
 
   s.update = function()
@@ -801,10 +771,7 @@ init_screen('game_over', function()
     text.output(score_text,      32, 7, 0)
     text.output(high_score_text, 40, 7, 0)
 
-    if (high_score_beaten) then
-      text.show('high_score_beaten', 56, 7, 0)
-    end
-
+    if (high_score_beaten) text.show('high_score_beaten', 56, 7, 0)
     text.show('play_again', 112, 7, 5)
   end
 

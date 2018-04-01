@@ -176,53 +176,53 @@ local tiles = {
       knifey = {
         {
           -- red knife
-          { i = 75,  x = 56, y = 16, w = 2, h = 4 },
-          { i = 77,  x = 56, y = 48, w = 2 },
-          { i = 93,  x = 48, y = 56 },
-          { i = 94,  x = 56, y = 56 },
-          { i = 79,  x = 64, y = 56 },
-          { i = 95,  x = 72, y = 56 },
-          { i = 105, x = 56, y = 64, w = 2, h = 2 },
+          { i = 75,  x = 8,  y = 0, w = 2, h = 4 },
+          { i = 77,  x = 8,  y = 32, w = 2 },
+          { i = 93,  y = 40 },
+          { i = 94,  x = 8,  y = 40 },
+          { i = 79,  x = 16, y = 40 },
+          { i = 95,  x = 24, y = 40 },
+          { i = 105, x = 8,  y = 48, w = 2, h = 2 },
         },
         {
           -- thin knife
-          { i = 64, x = 56, y = 16, w = 2, h = 4 },
-          { i = 66, x = 56, y = 48, w = 2, h = 4 },
+          { i = 64, x = 8,         w = 2, h = 4 },
+          { i = 66, x = 8, y = 32, w = 2, h = 4 },
         },
         {
           -- metal knife
-          { i = 64,  x = 56, y = 16, w = 2, h = 2 },
-          { i = 68,  x = 56, y = 32 },
-          { i = 113, x = 64, y = 32 },
-          { i = 112, x = 56, y = 40, w = 2 },
-          { i = 84,  x = 56, y = 48, w = 2, h = 3 },
-          { i = 69,  x = 56, y = 72, w = 2 },
+          { i = 64,  x = 8,  y = 0,  w = 2, h = 2 },
+          { i = 68,  x = 8,  y = 16 },
+          { i = 113, x = 16, y = 16 },
+          { i = 112, x = 8,  y = 24, w = 2 },
+          { i = 84,  x = 8,  y = 32, w = 2, h = 3 },
+          { i = 69,  x = 8,  y = 56, w = 2 },
         },
         {
           -- master sword
-          { i = 71, x = 56, y = 16, w = 2, h = 4 },
-          { i = 73, x = 56, y = 48, w = 2, h = 4 },
+          { i = 71, x = 8, y = 0,  w = 2, h = 4 },
+          { i = 73, x = 8, y = 32, w = 2, h = 4 },
         },
       },
       spoony = {
         {
           -- white spoon
-          { i = 130, x = 56, y = 16, w = 2, h = 4 },
-          { i = 132, x = 56, y = 48, w = 1, h = 2 },
-          { i = 164, x = 56, y = 64, w = 2, h = 2 },
+          { i = 130, x = 8,         w = 2, h = 4 },
+          { i = 132, x = 8, y = 32, w = 1, h = 2 },
+          { i = 164, x = 8, y = 48, w = 2, h = 2 },
         },
         {
           -- metal spoon
-          { i = 109, x = 56, y = 16, w = 2, h = 2 },
-          { i = 128, x = 56, y = 32, w = 2, h = 4 },
-          { i = 116, x = 56, y = 64, w = 2 },
-          { i = 69,  x = 56, y = 72, w = 2 },
+          { i = 109, x = 8,         w = 2, h = 2 },
+          { i = 128, x = 8, y = 16, w = 2, h = 4 },
+          { i = 116, x = 8, y = 48, w = 2 },
+          { i = 69,  x = 8, y = 56, w = 2 },
         },
         {
           -- wood handle spoon
-          { i = 109, x = 56, y = 16, w = 2, h = 2 },
-          { i = 128, x = 56, y = 32, w = 2, h = 4 },
-          { i = 105, x = 56, y = 64, w = 2, h = 2 },
+          { i = 109, x = 8,         w = 2, h = 2 },
+          { i = 128, x = 8, y = 16, w = 2, h = 4 },
+          { i = 105, x = 8, y = 48, w = 2, h = 2 },
         },
       },
     },
@@ -785,7 +785,13 @@ init_screen('playing', function()
 
     s.utensil.type    = utensil_type
     s.utensil.index   = utensil_index
-    s.utensil.sprites = utensil_array[utensil_index]
+    s.utensil.sprites = init_object({
+      tiles    = utensil_array[utensil_index],
+      x1       = 48,
+      y1       = 10,
+      y2       = 16,
+      duration = 3,
+    })
   end
 
   s.decrease_timeout_remaining = function()
@@ -865,6 +871,7 @@ init_screen('playing', function()
   end
 
   s.round_passed = function()
+    destroy_object(s.utensil.sprites)
     update_score()
     s.decrease_timeout_start()
     s.new_round()
@@ -887,7 +894,6 @@ init_screen('playing', function()
 
   s.draw = function()
     s.draw_timer()
-    draw_sprites(s.utensil.sprites)
     draw_sprites(tiles.playing.score)
     s.draw_buttons()
     s.draw_floor()
@@ -928,7 +934,7 @@ end)
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  go_to('title')
+  go_to('playing')
 end
 
 function _update()

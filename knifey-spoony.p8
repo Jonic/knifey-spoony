@@ -446,15 +446,15 @@ text = {
   spoony            = 'spoony',
   start_game        = 'press x to start',
 
-  center = function(self, str)
+  center = function(str)
     return 64 - #str * 2
   end,
 
-  get = function(self, key)
-    return self[key]
+  get = function(key)
+    return text[key]
   end,
 
-  outline = function(self, str, x, y, color, outline)
+  outline = function(str, x, y, color, outline)
     print(str, x - 1, y, outline)
     print(str, x + 1, y, outline)
     print(str, x, y - 1, outline)
@@ -462,19 +462,19 @@ text = {
     print(str, x, y,     color)
   end,
 
-  output = function(self, str, y, color, outline)
+  output = function(str, y, color, outline)
     local outline = outline or nil
-    local x       = self:center(str)
+    local x       = text.center(str)
 
     if (outline != nil) then
-      return self:outline(str, x, y, color, outline)
+      return text.outline(str, x, y, color, outline)
     end
 
     print(str, x, y, color)
   end,
 
-  show = function(self, key, y, color, outline)
-    self:output(self:get(key), y, color, outline)
+  show = function(key, y, color, outline)
+    text.output(text[key], y, color, outline)
   end
 }
 
@@ -580,7 +580,7 @@ init_screen(function ()
   s.name = 'title'
   s.show_start_text = function()
     if (s.start_text_flash == nil) s.start_text_flash = 0
-    if (s.start_text_flash < 12) text:show('start_game', 100, 7)
+    if (s.start_text_flash < 12) text.show('start_game', 100, 7)
     s.start_text_flash += 1
     if (s.start_text_flash == 24) s.start_text_flash = 0
   end
@@ -628,7 +628,7 @@ init_screen(function ()
 
   s._draw = function()
     s.show_start_text()
-    text:show('about', 117, 7)
+    text.show('about', 117, 7)
     map(0, 0)
   end
 
@@ -821,20 +821,20 @@ init_screen(function()
   end
 
   s._draw = function()
-    local high_score_text = text:get('high_score') .. high_score
-    local score_text      = text:get('score') .. score
+    local high_score_text = text['high_score'] .. high_score
+    local score_text      = text['score'] .. score
 
     rectfill(8, 8, 119, 119, 8)
 
-    text:show('game_over',       16, 7, 0)
-    text:output(score_text,      32, 7, 0)
-    text:output(high_score_text, 40, 7, 0)
+    text.show('game_over',       16, 7, 0)
+    text.output(score_text,      32, 7, 0)
+    text.output(high_score_text, 40, 7, 0)
 
     if (high_score_beaten) then
-      text:show('high_score_beaten', 56, 7, 0)
+      text.show('high_score_beaten', 56, 7, 0)
     end
 
-    text:show('play_again', 112, 7, 5)
+    text.show('play_again', 112, 7, 5)
     map(0, 0)
   end
 

@@ -382,17 +382,13 @@ function init_object(props)
     return o.frame_count > o.duration
   end
 
-  o.is_delayed = function()
-    return o.delay > 0
-  end
-
   o.set_pos = function()
     o.pos_x = o.calculate_pos('x')
     o.pos_y = o.calculate_pos('y')
   end
 
   o.tick = function()
-    if o.is_delayed() then
+    if o.delay > 0 then
       o.delay -= 1
       return
     end
@@ -402,7 +398,6 @@ function init_object(props)
 
   o.update = function()
     if (not o.is_complete()) o.tick()
-    if (o.is_delayed()) return
     o.set_pos()
     o.updated = true
   end

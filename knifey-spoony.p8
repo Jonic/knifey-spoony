@@ -412,6 +412,10 @@ function destroy_object(o)
   del(objects, o)
 end
 
+function destroy_objects()
+  objects = copy({})
+end
+
 -->8
 -- text
 
@@ -485,8 +489,7 @@ function init_screen(name, props)
   end
 
   s.init = function()
-    objects = clone({})
-
+    destroy_objects()
     if (s.can('init')) s.props.init()
     if (s.can('transition_in')) s.props.transition_in()
   end

@@ -3,7 +3,7 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v0.8.0
+-- v0.9.0
 
 --[[
   "i see you've played knifey
@@ -30,38 +30,43 @@ __lua__
 ]]
 
 -->8
--- global vars
+-- global vars and helpers
 
-high_score        = 0
-high_score_beaten = false
-score             = 0
+local high_score        = 0
+local high_score_beaten = false
+local score             = 0
 
--->8
--- helper functions
+local objects     = {}
+local screens     = {}
+local screen      = nil
+local screen_next = nil
+
+local transition_countdown = 0
+local transition_state     = nil
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table
-    if type(t) ~= "table" then return t end
-    local meta = getmetatable(t)
-    local target = {}
-    for k, v in pairs(t) do
-        if type(v) == "table" then
-            target[k] = clone(v)
-        else
-            target[k] = v
-        end
+  if type(t) ~= "table" then return t end
+  local meta = getmetatable(t)
+  local target = {}
+  for k, v in pairs(t) do
+    if type(v) == "table" then
+      target[k] = clone(v)
+    else
+      target[k] = v
     end
-    setmetatable(target, meta)
-    return target
+  end
+  setmetatable(target, meta)
+  return target
 end
 
 function copy(t) -- shallow-copy a table
-    if type(t) ~= "table" then return t end
-    local meta = getmetatable(t)
-    local target = {}
-    for k, v in pairs(t) do target[k] = v end
-    setmetatable(target, meta)
-    return target
+  if type(t) ~= "table" then return t end
+  local meta = getmetatable(t)
+  local target = {}
+  for k, v in pairs(t) do target[k] = v end
+  setmetatable(target, meta)
+  return target
 end
 
 function draw_sprite(s)
@@ -77,9 +82,7 @@ function draw_sprite(s)
 end
 
 function draw_sprites(sprites)
-  for s in all(sprites) do
-    draw_sprite(s)
-  end
+  foreach(sprites, draw_sprite)
 end
 
 function reset_globals()
@@ -101,8 +104,6 @@ function update_high_score()
     high_score_beaten = true
     dset(0, high_score)
   end
-
-  global_score = score
 end
 
 function update_score()
@@ -121,6 +122,12 @@ local function outBack(t, b, c, d, s)
   if not s then s = 1.70158 end
   t = t / d - 1
   return c * (t * t * ((s + 1) * t + s) + 1) + b
+end
+
+local function inBack(t, b, c, d, s)
+  if not s then s = 1.70158 end
+  t = t / d
+  return c * t * t * ((s + 1) * t - s) + b
 end
 
 local function outBounce(t, b, c, d)
@@ -146,7 +153,7 @@ end
 -->8
 -- sprites
 
-tiles = {
+local tiles = {
   playing = {
     buttons = {
       knifey = {
@@ -314,8 +321,6 @@ tiles = {
   },
 }
 
-objects = {}
-
 function init_object(props)
   local o = {}
 
@@ -336,56 +341,46 @@ function init_object(props)
   o.calculate_pos = function(pos_key)
     local pos = o[pos_key]
 
-    if pos.dest == nil or o.delay > 0 then
-      return pos.start
+    if (pos.dest == nil or o.delay > 0) return pos.start
+    if (o.is_complete()) return pos.dest
+
+    local t = o.frame_count        -- elapsed time
+    local b = pos.start            -- begin
+    local c = pos.dest - pos.start -- change == ending - beginning
+    local d = o.duration           -- duration (total time)
+    local e = o.easing
+    local new_pos = 0
+
+    if     e == 'outBack'   then new_pos = outBack(t, b, c, d)
+    elseif e == 'inBack'    then new_pos = inBack(t, b, c, d)
+    elseif e == 'outBounce' then new_pos = outBounce(t, b, c, d)
+    elseif e == 'inBounce'  then new_pos = inBounce(t, b, c, d)
+    else                         new_pos = linear(t, b, c, d)
     end
 
-    if o.is_complete() then
-      return pos.dest
-    end
-
-    t = o.frame_count     -- elapsed time
-    b = pos.start            -- begin
-    c = pos.dest - pos.start -- change == ending - beginning
-    d = o.duration        -- duration (total time)
-    e = o.easing
-
-    if     e == 'outBack'   then calculated_pos = outBack(t, b, c, d)
-    elseif e == 'outBounce' then calculated_pos = outBounce(t, b, c, d)
-    elseif e == 'inBounce'  then calculated_pos = inBounce(t, b, c, d)
-    else                         calculated_pos = linear(t, b, c, d)
-    end
-
-    return flr(calculated_pos)
+    return flr(new_pos)
   end
 
   o.draw_tile = function(t)
-    x  = (t.x or 0) + o.pos_x
-    y  = (t.y or 0) + o.pos_y
-    w  = t.w or 1
-    h  = t.h or 1
-    fx = t.fx or false
-    fy = t.fy or false
+    local x  = (t.x or 0) + o.pos_x
+    local y  = (t.y or 0) + o.pos_y
+    local w  = t.w or 1
+    local h  = t.h or 1
+    local fx = t.fx or false
+    local fy = t.fy or false
 
     spr(t.i, x, y, w, h, fx, fy)
   end
 
   o.draw_tiles = function(tiles)
-    for t in all(tiles) do
-      if t.i == nil then
-        return o.draw_tiles(t)
-      end
-
+    foreach(tiles, function(t)
+      if (t.i == nil) return o.draw_tiles(t)
       o.draw_tile(t)
-    end
+    end)
   end
 
   o.is_complete = function()
     return o.frame_count > o.duration
-  end
-
-  o.is_delayed = function()
-    return o.delay > 0
   end
 
   o.set_pos = function()
@@ -394,7 +389,7 @@ function init_object(props)
   end
 
   o.tick = function()
-    if o.is_delayed() then
+    if o.delay > 0 then
       o.delay -= 1
       return
     end
@@ -402,24 +397,14 @@ function init_object(props)
     o.frame_count += 1
   end
 
-  o._update = function()
-    if not o.is_complete() then
-      o.tick()
-    end
-
-    if o.is_delayed() then
-      return
-    end
-
+  o.update = function()
+    if (not o.is_complete()) o.tick()
     o.set_pos()
     o.updated = true
   end
 
-  o._draw = function()
-    if not o.updated then
-      return
-    end
-
+  o.draw = function()
+    if (not o.updated) return
     o.draw_tiles(o.tiles)
   end
 
@@ -430,6 +415,10 @@ end
 
 function destroy_object(o)
   del(objects, o)
+end
+
+function destroy_objects()
+  objects = copy({})
 end
 
 -->8
@@ -446,15 +435,15 @@ text = {
   spoony            = 'spoony',
   start_game        = 'press x to start',
 
-  center = function(self, str)
+  center = function(str)
     return 64 - #str * 2
   end,
 
-  get = function(self, key)
-    return self[key]
+  get = function(key)
+    return text[key]
   end,
 
-  outline = function(self, str, x, y, color, outline)
+  outline = function(str, x, y, color, outline)
     print(str, x - 1, y, outline)
     print(str, x + 1, y, outline)
     print(str, x, y - 1, outline)
@@ -462,127 +451,160 @@ text = {
     print(str, x, y,     color)
   end,
 
-  output = function(self, str, y, color, outline)
+  output = function(str, y, color, outline)
     local outline = outline or nil
-    local x       = self:center(str)
+    local x       = text.center(str)
 
     if (outline != nil) then
-      return self:outline(str, x, y, color, outline)
+      return text.outline(str, x, y, color, outline)
     end
 
     print(str, x, y, color)
   end,
 
-  show = function(self, key, y, color, outline)
-    self:output(self:get(key), y, color, outline)
+  show = function(key, y, color, outline)
+    text.output(text[key], y, color, outline)
   end
 }
 
 -->8
+-- screen transitions
+
+function transition_in()
+  destroy_objects()
+  transition_countdown = screen.props.transition_in_duration
+  transition_state     = 'in'
+  screen.props.transition_in()
+end
+
+function transition_out()
+  destroy_objects()
+  transition_countdown = screen.props.transition_out_duration
+  transition_state     = 'out'
+  screen.props.transition_out()
+end
+
+function transition_state_update()
+  destroy_objects()
+  local new_state = transitioning_to('in') and 'transitioned_in' or 'transitioned_out'
+  transition_state = new_state
+
+  if (transition_state == 'transitioned_out') then
+    go_to(screen_next)
+    screen_next = nil
+  end
+end
+
+function transition_tick()
+  if (transition_countdown > 0) then
+    transition_countdown -= 1
+
+    if (transition_countdown == 0) then
+      transition_state_update()
+    end
+  end
+end
+
+function transitioning_to(target_state)
+  if (target_state ~= nil) return transition_state == target_state
+  return (not transitioning_to('in') and not transitioning_to('out'))
+end
+
+-->8
 -- screens
 
-screens = {}
-
-function init_screen(props)
+function init_screen(name, props)
   local s = {}
 
-  s.props  = props()
-  s.name   = s.props.name
-  s.active = false
+  -- take everything from level object and add it to this `props` key
+  s.props = props()
 
-  s.transition_in_duration  = 100
-  s.transition_out_duration = 100
-  s.transition_state        = 'in'
-
-  s.is_transitioning = function()
-    return (not s.is_transitioning_in() and not s.is_transitioning_out())
+  s.can = function(key)
+    return table_has_key(s.props, key)
   end
 
-  s.is_transitioning_in = function()
-    return s.transition_state == 'in'
-  end
-
-  s.is_transitioning_out = function()
-    return s.transition_state == 'in'
-  end
-
-  s._init = function()
-    objects = clone({})
-
-    local can_init          = table_has_key(s.props, '_init')
-    local can_transition_in = table_has_key(s.props, 'transition_in')
-
-    if (can_init) then
-      s.props._init()
-    end
-
-    if (can_transition_in) then
-      s.props.transition_in()
+  s.init = function()
+    destroy_objects()
+    if (s.can('init')) s.props.init()
+    if (s.can('transition_in')) then
+      transition_in()
     end
   end
 
-  s._update = function()
+  s.update = function()
     foreach(objects, function(o)
-      o._update()
+      o.update()
     end)
 
-    s.props._update()
+    s.props.update()
   end
 
-  s._draw = function()
+  s.draw = function()
     foreach(objects, function(o)
-      o._draw()
+      o.draw()
     end)
 
-    s.props._draw()
+    s.props.draw()
   end
 
-  add(screens, s)
+  screens[name] = s
 
   return s
 end
 
-function screens_update()
-  foreach(screens, function(s)
-    if s.active then
-      s._update()
-    end
-  end)
-end
+function go_to(name)
+  if (screen ~= nil) and
+     (screen.can('transition_out')) and
+     (transition_state ~= 'transitioned_out') then
+    screen_next = name
+    transition_out()
+    return
+  end
 
-function screens_draw()
-  foreach(screens, function(s)
-    if s.active then
-      s._draw()
-    end
-  end)
-end
-
-function go_to_screen(name)
-  next_scene = nil
-
-  foreach(screens, function(s)
-    s.active = s.name == name
-    if (s.active) next_scene = s
-  end)
-
-  next_scene.active = true
-  next_scene._init()
+  screen = screens[name]
+  screen.init()
 end
 
 -->8
 -- init screens
 
 -- title screen
-init_screen(function ()
+init_screen('title',  function ()
   local s = {}
 
-  s.name = 'title'
+  s.transition_in_duration  = 40
+  s.transition_out_duration = 50
+
+  s.idle_text_animation = function()
+    local d   = 10
+    local dir = 'inOut'
+    local ky1 = 48
+    local ky2 = 44
+    local sy1 = 64
+    local sy2 = 68
+    local t   = tiles.title.text
+
+    init_object({ tiles = t.k1, x1 = 16, y1 = ky1 })
+    init_object({ tiles = t.n1, x1 = 32, y1 = ky1 })
+    init_object({ tiles = t.i1, x1 = 48, y1 = ky1 })
+    init_object({ tiles = t.f1, x1 = 56, y1 = ky1 })
+    init_object({ tiles = t.e1, x1 = 72, y1 = ky1 })
+    init_object({ tiles = t.y1, x1 = 88, y1 = ky1 })
+
+    init_object({ tiles = t.y2, x1 = 96, y1 = sy1 })
+    init_object({ tiles = t.n2, x1 = 80, y1 = sy1 })
+    init_object({ tiles = t.o2, x1 = 64, y1 = sy1 })
+    init_object({ tiles = t.o1, x1 = 48, y1 = sy1 })
+    init_object({ tiles = t.p1, x1 = 32, y1 = sy1 })
+    init_object({ tiles = t.s1, x1 = 16, y1 = sy1 })
+  end
+
+  s.start_text_flash = 0
+
   s.show_start_text = function()
-    if (s.start_text_flash == nil) s.start_text_flash = 0
-    if (s.start_text_flash < 12) text:show('start_game', 100, 7)
     s.start_text_flash += 1
     if (s.start_text_flash == 24) s.start_text_flash = 0
+    if (s.start_text_flash < 12) text.show('start_game', 100, 7)
   end
 
   s.transition_in_text_animation = function()
@@ -609,37 +631,93 @@ init_screen(function ()
     init_object({ tiles = t.s1, x1 = sx1, y1 = sy, x2 = 16, delay = 15, duration = d, easing = e })
   end
 
-  s._init = function()
+  s.transition_out_text_animation = function()
+    local d   = 20
+    local e   = 'inBack'
+    local kx2 = 200
+    local ky  = 48
+    local sx2 = -200
+    local sy  = 64
+    local t   = tiles.title.text
+
+    init_object({ tiles = t.k1, x1 = 16, y1 = ky, x2 = kx2, delay = 15, duration = d, easing = e })
+    init_object({ tiles = t.n1, x1 = 32, y1 = ky, x2 = kx2, delay = 12, duration = d, easing = e })
+    init_object({ tiles = t.i1, x1 = 48, y1 = ky, x2 = kx2, delay = 9,  duration = d, easing = e })
+    init_object({ tiles = t.f1, x1 = 56, y1 = ky, x2 = kx2, delay = 6,  duration = d, easing = e })
+    init_object({ tiles = t.e1, x1 = 72, y1 = ky, x2 = kx2, delay = 3,  duration = d, easing = e })
+    init_object({ tiles = t.y1, x1 = 88, y1 = ky, x2 = kx2, delay = 0,  duration = d, easing = e })
+
+    init_object({ tiles = t.y2, x1 = 96, y1 = sy, x2 = sx2, delay = 15, duration = d, easing = e })
+    init_object({ tiles = t.n2, x1 = 80, y1 = sy, x2 = sx2, delay = 12, duration = d, easing = e })
+    init_object({ tiles = t.o2, x1 = 64, y1 = sy, x2 = sx2, delay = 9,  duration = d, easing = e })
+    init_object({ tiles = t.o1, x1 = 48, y1 = sy, x2 = sx2, delay = 6,  duration = d, easing = e })
+    init_object({ tiles = t.p1, x1 = 32, y1 = sy, x2 = sx2, delay = 3,  duration = d, easing = e })
+    init_object({ tiles = t.s1, x1 = 16, y1 = sy, x2 = sx2, delay = 0,  duration = d, easing = e })
+  end
+
+  s.transition_in = function()
     local bottom_line = tiles.title.bottom_line
     local knife       = tiles.title.knife
     local spoon       = tiles.title.spoon
     local top_line    = tiles.title.top_line
 
     init_object({ tiles = knife, x1 = 16, y1 = -100, x2 = 16, y2 = 24, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = top_line, x1 = 200, y1 = 40, x2 = 32, duration = 10 })
+    init_object({ tiles = top_line, x1 = 200, y1 = 40, x2 = 32, duration = 10, easing = 'outBack' })
     s.transition_in_text_animation()
-    init_object({ tiles = bottom_line, x1 = -328, y1 = 80, x2 = 16, duration = 10 })
+    init_object({ tiles = bottom_line, x1 = -328, y1 = 80, x2 = 16, duration = 10, easing = 'outBack' })
     init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
   end
 
-  s._update = function()
-    if (btnp(5)) go_to_screen('playing')
+  s.transition_out = function()
+    local bottom_line = tiles.title.bottom_line
+    local knife       = tiles.title.knife
+    local spoon       = tiles.title.spoon
+    local top_line    = tiles.title.top_line
+
+    init_object({ tiles = knife, x1 = 16, y1 = 24, x2 = 16, y2 = -100, delay = 10, duration = 30, easing = 'inBack' })
+    init_object({ tiles = top_line, x1 = 32, y1 = 40, x2 = 200, delay = 10, duration = 10, easing = 'inBack' })
+    s.transition_out_text_animation()
+    init_object({ tiles = bottom_line, x1 = 16, y1 = 80, x2 = -328, delay = 10, duration = 10, easing = 'inBack' })
+    init_object({ tiles = spoon, x1 = 96, y1 = 80, x2 = 96, y2 = 227, delay = 10, duration = 30, easing = 'inBack' })
   end
 
-  s._draw = function()
-    s.show_start_text()
-    text:show('about', 117, 7)
-    map(0, 0)
+  s.update = function()
+    if (transition_state == 'transitioned_in') and
+      (#objects == 0) then
+      local bottom_line = tiles.title.bottom_line
+      local knife       = tiles.title.knife
+      local spoon       = tiles.title.spoon
+      local top_line    = tiles.title.top_line
+
+      init_object({ tiles = knife, x1 = 16, y1 = 24 })
+      init_object({ tiles = top_line, x1 = 32, y1 = 40 })
+      s.idle_text_animation()
+      init_object({ tiles = bottom_line, x1 = 16, y1 = 80 })
+      init_object({ tiles = spoon, x1 = 96, y1 = 80 })
+    end
+
+    if (btnp(5)) go_to('playing')
+  end
+
+  s.draw = function()
+    if (transition_state == 'in'  and transition_countdown == 1) or
+       (transition_state == 'out' and transition_countdown == s.transition_out_duration) then
+      rectfill(0, 0, 127, 127, 7)
+    end
+
+    if (transition_state == 'transitioned_in') then
+      s.show_start_text()
+      text.show('about', 117, 7)
+    end
   end
 
   return s
 end)
 
 -- playing screen
-init_screen(function()
+init_screen('playing', function()
   local s = {}
 
-  s.name = 'playing'
   s.defaults = {}
   s.defaults.button_animations = {
     knifey = {
@@ -703,7 +781,7 @@ init_screen(function()
 
   s.decrease_timeout_remaining = function()
     s.timeout.remaining -= 1
-    if (s.timeout.remaining <= 0) go_to_screen('game_over')
+    if (s.timeout.remaining <= 0) go_to('game_over')
   end
 
   s.decrease_timeout_start = function()
@@ -774,7 +852,7 @@ init_screen(function()
   end
 
   s.round_failed = function()
-    go_to_screen('game_over')
+    go_to('game_over')
   end
 
   s.round_passed = function()
@@ -788,54 +866,48 @@ init_screen(function()
     return flr(elapsed_percentage * s.timer.max_width)
   end
 
-  s._init = function()
+  s.init = function()
     s.reset()
     s.new_round()
   end
 
-  s._update = function()
+  s.update = function()
     s.decrease_timeout_remaining()
     s.get_input()
   end
 
-  s._draw = function()
+  s.draw = function()
     s.draw_timer()
     draw_sprites(s.utensil.sprites)
     draw_sprites(tiles.playing.score)
     s.draw_buttons()
     s.draw_floor()
-    map(0, 0)
   end
 
   return s
 end)
 
 -- game_over screen
-init_screen(function()
+init_screen('game_over', function()
   local s = {}
 
-  s.name = 'game_over'
-
-  s._update = function()
-    if (btnp(5)) go_to_screen('playing')
+  s.update = function()
+    if (btnp(4)) go_to('title')
+    if (btnp(5)) go_to('playing')
   end
 
-  s._draw = function()
-    local high_score_text = text:get('high_score') .. high_score
-    local score_text      = text:get('score') .. score
+  s.draw = function()
+    local high_score_text = text['high_score'] .. high_score
+    local score_text      = text['score'] .. score
 
     rectfill(8, 8, 119, 119, 8)
 
-    text:show('game_over',       16, 7, 0)
-    text:output(score_text,      32, 7, 0)
-    text:output(high_score_text, 40, 7, 0)
+    text.show('game_over',       16, 7, 0)
+    text.output(score_text,      32, 7, 0)
+    text.output(high_score_text, 40, 7, 0)
 
-    if (high_score_beaten) then
-      text:show('high_score_beaten', 56, 7, 0)
-    end
-
-    text:show('play_again', 112, 7, 5)
-    map(0, 0)
+    if (high_score_beaten) text.show('high_score_beaten', 56, 7, 0)
+    text.show('play_again', 112, 7, 5)
   end
 
   return s
@@ -847,16 +919,18 @@ end)
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  go_to_screen('title')
+  go_to('title')
 end
 
 function _update()
-  screens_update()
+  transition_tick()
+  screen.update()
 end
 
 function _draw()
   cls()
-  screens_draw()
+  screen.draw()
+  map(0, 0)
 end
 __gfx__
 aaaaaaaaaaaaaaaaaaaaaaa4a9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

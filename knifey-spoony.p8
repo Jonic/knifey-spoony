@@ -471,12 +471,14 @@ text = {
 -- screen transitions
 
 function transition_in()
+  destroy_objects()
   transition_countdown = screen.props.transition_in_duration
   transition_state     = 'in'
   screen.props.transition_in()
 end
 
 function transition_out()
+  destroy_objects()
   transition_countdown = screen.props.transition_out_duration
   transition_state     = 'out'
   screen.props.transition_out()

@@ -352,6 +352,7 @@ function init_object(props)
     local new_pos = 0
 
     if     e == 'outBack'   then new_pos = outBack(t, b, c, d)
+    elseif e == 'inBack'    then new_pos = inBack(t, b, c, d)
     elseif e == 'outBounce' then new_pos = outBounce(t, b, c, d)
     elseif e == 'inBounce'  then new_pos = inBounce(t, b, c, d)
     else                         new_pos = linear(t, b, c, d)

@@ -30,14 +30,18 @@ __lua__
 ]]
 
 -->8
--- global vars
+-- global vars and helpers
 
 local high_score        = 0
 local high_score_beaten = false
 local score             = 0
 
--->8
--- helper functions
+local objects = {}
+local screens = {}
+local screen  = nil
+
+local transition_countdown = 0
+local transition_state     = nil
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table
@@ -310,8 +314,6 @@ local tiles = {
   },
 }
 
-local objects = {}
-
 function init_object(props)
   local o = {}
 
@@ -463,10 +465,43 @@ text = {
 }
 
 -->8
--- screens
+-- screen transitions
 
-local screens = {}
-local screen  = nil
+transition_state_update = function()
+  destroy_objects()
+  local new_state = transitioning_to('in') and 'transitioned_in' or 'transitioned_out'
+  transition_state = new_state
+end
+
+transition_in = function()
+  transition_countdown = screen.props.transition_in_duration
+  transition_state     = 'in'
+  screen.props.transition_in()
+end
+
+transition_out = function()
+  transition_countdown = screen.props.transition_out_duration
+  transition_state     = 'out'
+  screen.props.transition_out()
+end
+
+transition_tick = function()
+  if (transition_countdown > 0) then
+    transition_countdown -= 1
+
+    if (transition_countdown == 0) then
+      transition_state_update()
+    end
+  end
+end
+
+transitioning_to = function(target_state)
+  if (target_state ~= nil) return transition_state == target_state
+  return (not transitioning_to('in') and not transitioning_to('out'))
+end
+
+-->8
+-- screens
 
 function init_screen(name, props)
   local s = {}
@@ -474,24 +509,16 @@ function init_screen(name, props)
   -- take everything from level object and add it to this `props` key
   s.props = props()
 
-  s.transition_in_duration  = s.props.transition_in_duration or 0
-  s.transition_out_duration = s.props.transition_out_duration or 0
-  s.transition_state        = s.props.transition_state or 'in'
-  s.transition_countdown    = 0
-
   s.can = function(key)
     return table_has_key(s.props, key)
-  end
-
-  s.is_transitioning = function(state)
-    if (state ~= nil) return s.transition_state == state
-    return (not s.is_transitioning('in') and not s.is_transitioning('out'))
   end
 
   s.init = function()
     destroy_objects()
     if (s.can('init')) s.props.init()
-    if (s.can('transition_in')) s.props.transition_in()
+    if (s.can('transition_in')) then
+      transition_in()
+    end
   end
 
   s.update = function()
@@ -516,6 +543,7 @@ function init_screen(name, props)
 end
 
 function go_to(name)
+  if (transition_countdown > 0) return
   screen = screens[name]
   screen.init()
 end
@@ -526,6 +554,9 @@ end
 -- title screen
 init_screen('title',  function ()
   local s = {}
+
+  s.transition_in_duration  = 35
+  s.transition_out_duration = 90
 
   s.start_text_flash = 0
 
@@ -559,7 +590,7 @@ init_screen('title',  function ()
     init_object({ tiles = t.s1, x1 = sx1, y1 = sy, x2 = 16, delay = 15, duration = d, easing = e })
   end
 
-  s.init = function()
+  s.transition_in = function()
     local bottom_line = tiles.title.bottom_line
     local knife       = tiles.title.knife
     local spoon       = tiles.title.spoon
@@ -572,13 +603,22 @@ init_screen('title',  function ()
     init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
   end
 
+  s.transition_out = function()
+
+  end
+
+  s.init = function()
+  end
+
   s.update = function()
     if (btnp(5)) go_to('playing')
   end
 
   s.draw = function()
-    s.show_start_text()
-    text.show('about', 117, 7)
+    if (transition_state == 'transitioned_in') then
+      s.show_start_text()
+      text.show('about', 117, 7)
+    end
   end
 
   return s
@@ -762,6 +802,7 @@ init_screen('game_over', function()
   local s = {}
 
   s.update = function()
+    if (btnp(4)) go_to('title')
     if (btnp(5)) go_to('playing')
   end
 
@@ -792,6 +833,7 @@ function _init()
 end
 
 function _update()
+  transition_tick()
   screen.update()
 end
 

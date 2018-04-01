@@ -527,11 +527,12 @@ end
 init_screen('title',  function ()
   local s = {}
 
+  s.start_text_flash = 0
+
   s.show_start_text = function()
-    if (s.start_text_flash == nil) s.start_text_flash = 0
-    if (s.start_text_flash < 12) text.show('start_game', 100, 7)
     s.start_text_flash += 1
     if (s.start_text_flash == 24) s.start_text_flash = 0
+    if (s.start_text_flash < 12) text.show('start_game', 100, 7)
   end
 
   s.transition_in_text_animation = function()

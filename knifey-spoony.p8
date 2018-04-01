@@ -124,6 +124,12 @@ local function outBack(t, b, c, d, s)
   return c * (t * t * ((s + 1) * t + s) + 1) + b
 end
 
+local function inBack(t, b, c, d, s)
+  if not s then s = 1.70158 end
+  t = t / d
+  return c * t * t * ((s + 1) * t - s) + b
+end
+
 local function outBounce(t, b, c, d)
   t = t / d
   if t < 1 / 2.75 then

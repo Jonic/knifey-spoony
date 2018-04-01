@@ -605,7 +605,6 @@ init_screen('title',  function ()
   s.draw = function()
     s.show_start_text()
     text.show('about', 117, 7)
-    map(0, 0)
   end
 
   return s
@@ -779,7 +778,6 @@ init_screen('playing', function()
     draw_sprites(tiles.playing.score)
     s.draw_buttons()
     s.draw_floor()
-    map(0, 0)
   end
 
   return s
@@ -808,7 +806,6 @@ init_screen('game_over', function()
     end
 
     text.show('play_again', 112, 7, 5)
-    map(0, 0)
   end
 
   return s
@@ -830,6 +827,7 @@ end
 function _draw()
   cls()
   screen.draw()
+  map(0, 0)
 end
 __gfx__
 aaaaaaaaaaaaaaaaaaaaaaa4a9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

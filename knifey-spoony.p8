@@ -547,7 +547,7 @@ function init_screen(name, props)
       o.draw()
     end)
 
-    s.props.draw()
+    if (s.can('draw')) s.props.draw()
   end
 
   screens[name] = s

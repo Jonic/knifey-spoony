@@ -3,7 +3,7 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v0.9.0
+-- v0.10.0
 
 --[[
   "i see you've played knifey
@@ -170,59 +170,60 @@ local tiles = {
       },
     },
     score = {
-      { i = 134, x = 48, y = 88, w = 4, h = 4 },
+      { i = 134, w = 3, h = 3 },
+      { i = 50,  x = 10, y = 21},
     },
     utensils = {
       knifey = {
         {
           -- red knife
-          { i = 75,  x = 56, y = 16, w = 2, h = 4 },
-          { i = 77,  x = 56, y = 48, w = 2 },
-          { i = 93,  x = 48, y = 56 },
-          { i = 94,  x = 56, y = 56 },
-          { i = 79,  x = 64, y = 56 },
-          { i = 95,  x = 72, y = 56 },
-          { i = 105, x = 56, y = 64, w = 2, h = 2 },
+          { i = 75,  x = 8,  y = 0, w = 2, h = 4 },
+          { i = 77,  x = 8,  y = 32, w = 2 },
+          { i = 93,  y = 40 },
+          { i = 94,  x = 8,  y = 40 },
+          { i = 79,  x = 16, y = 40 },
+          { i = 95,  x = 24, y = 40 },
+          { i = 105, x = 8,  y = 48, w = 2, h = 2 },
         },
         {
           -- thin knife
-          { i = 64, x = 56, y = 16, w = 2, h = 4 },
-          { i = 66, x = 56, y = 48, w = 2, h = 4 },
+          { i = 64, x = 8,         w = 2, h = 4 },
+          { i = 66, x = 8, y = 32, w = 2, h = 4 },
         },
         {
           -- metal knife
-          { i = 64,  x = 56, y = 16, w = 2, h = 2 },
-          { i = 68,  x = 56, y = 32 },
-          { i = 113, x = 64, y = 32 },
-          { i = 112, x = 56, y = 40, w = 2 },
-          { i = 84,  x = 56, y = 48, w = 2, h = 3 },
-          { i = 69,  x = 56, y = 72, w = 2 },
+          { i = 64,  x = 8,  y = 0,  w = 2, h = 2 },
+          { i = 68,  x = 8,  y = 16 },
+          { i = 113, x = 16, y = 16 },
+          { i = 112, x = 8,  y = 24, w = 2 },
+          { i = 84,  x = 8,  y = 32, w = 2, h = 3 },
+          { i = 69,  x = 8,  y = 56, w = 2 },
         },
         {
           -- master sword
-          { i = 71, x = 56, y = 16, w = 2, h = 4 },
-          { i = 73, x = 56, y = 48, w = 2, h = 4 },
+          { i = 71, x = 8, y = 0,  w = 2, h = 4 },
+          { i = 73, x = 8, y = 32, w = 2, h = 4 },
         },
       },
       spoony = {
         {
           -- white spoon
-          { i = 130, x = 56, y = 16, w = 2, h = 4 },
-          { i = 132, x = 56, y = 48, w = 1, h = 2 },
-          { i = 164, x = 56, y = 64, w = 2, h = 2 },
+          { i = 130, x = 8,         w = 2, h = 4 },
+          { i = 132, x = 8, y = 32, w = 1, h = 2 },
+          { i = 164, x = 8, y = 48, w = 2, h = 2 },
         },
         {
           -- metal spoon
-          { i = 109, x = 56, y = 16, w = 2, h = 2 },
-          { i = 128, x = 56, y = 32, w = 2, h = 4 },
-          { i = 116, x = 56, y = 64, w = 2 },
-          { i = 69,  x = 56, y = 72, w = 2 },
+          { i = 109, x = 8,         w = 2, h = 2 },
+          { i = 128, x = 8, y = 16, w = 2, h = 4 },
+          { i = 116, x = 8, y = 48, w = 2 },
+          { i = 69,  x = 8, y = 56, w = 2 },
         },
         {
           -- wood handle spoon
-          { i = 109, x = 56, y = 16, w = 2, h = 2 },
-          { i = 128, x = 56, y = 32, w = 2, h = 4 },
-          { i = 105, x = 56, y = 64, w = 2, h = 2 },
+          { i = 109, x = 8,         w = 2, h = 2 },
+          { i = 128, x = 8, y = 16, w = 2, h = 4 },
+          { i = 105, x = 8, y = 48, w = 2, h = 2 },
         },
       },
     },
@@ -335,8 +336,8 @@ function init_object(props)
   o.repeating        = props.repeat_after ~= nil
   o.tiles            = props.tiles
   o.updated          = false
-  o.x                = { start = props.x1 or 0, dest = props.x2 or nil }
-  o.y                = { start = props.y1 or 0, dest = props.y2 or nil }
+  o.x                = props.x or { start = props.x1 or 0, dest = props.x2 or nil }
+  o.y                = props.y or { start = props.y1 or 0, dest = props.y2 or nil }
 
   o.calculate_pos = function(pos_key)
     local pos = o[pos_key]
@@ -384,8 +385,11 @@ function init_object(props)
   end
 
   o.set_pos = function()
-    o.pos_x = o.calculate_pos('x')
-    o.pos_y = o.calculate_pos('y')
+    o.pos_x = o.x
+    o.pos_y = o.y
+
+    if (type(o.x) == 'table') o.pos_x = o.calculate_pos('x')
+    if (type(o.y) == 'table') o.pos_y = o.calculate_pos('y')
   end
 
   o.tick = function()
@@ -468,49 +472,6 @@ text = {
 }
 
 -->8
--- screen transitions
-
-function transition_in()
-  destroy_objects()
-  transition_countdown = screen.props.transition_in_duration
-  transition_state     = 'in'
-  screen.props.transition_in()
-end
-
-function transition_out()
-  destroy_objects()
-  transition_countdown = screen.props.transition_out_duration
-  transition_state     = 'out'
-  screen.props.transition_out()
-end
-
-function transition_state_update()
-  destroy_objects()
-  local new_state = transitioning_to('in') and 'transitioned_in' or 'transitioned_out'
-  transition_state = new_state
-
-  if (transition_state == 'transitioned_out') then
-    go_to(screen_next)
-    screen_next = nil
-  end
-end
-
-function transition_tick()
-  if (transition_countdown > 0) then
-    transition_countdown -= 1
-
-    if (transition_countdown == 0) then
-      transition_state_update()
-    end
-  end
-end
-
-function transitioning_to(target_state)
-  if (target_state ~= nil) return transition_state == target_state
-  return (not transitioning_to('in') and not transitioning_to('out'))
-end
-
--->8
 -- screens
 
 function init_screen(name, props)
@@ -526,9 +487,6 @@ function init_screen(name, props)
   s.init = function()
     destroy_objects()
     if (s.can('init')) s.props.init()
-    if (s.can('transition_in')) then
-      transition_in()
-    end
   end
 
   s.update = function()
@@ -544,7 +502,7 @@ function init_screen(name, props)
       o.draw()
     end)
 
-    s.props.draw()
+    if (s.can('draw')) s.props.draw()
   end
 
   screens[name] = s
@@ -553,14 +511,6 @@ function init_screen(name, props)
 end
 
 function go_to(name)
-  if (screen ~= nil) and
-     (screen.can('transition_out')) and
-     (transition_state ~= 'transitioned_out') then
-    screen_next = name
-    transition_out()
-    return
-  end
-
   screen = screens[name]
   screen.init()
 end
@@ -568,44 +518,11 @@ end
 -->8
 -- init screens
 
--- title screen
-init_screen('title',  function ()
+init_screen('title_transition_in', function()
   local s = {}
 
-  s.transition_in_duration  = 40
-  s.transition_out_duration = 50
-
-  s.idle_text_animation = function()
-    local d   = 10
-    local dir = 'inOut'
-    local ky1 = 48
-    local ky2 = 44
-    local sy1 = 64
-    local sy2 = 68
-    local t   = tiles.title.text
-
-    init_object({ tiles = t.k1, x1 = 16, y1 = ky1 })
-    init_object({ tiles = t.n1, x1 = 32, y1 = ky1 })
-    init_object({ tiles = t.i1, x1 = 48, y1 = ky1 })
-    init_object({ tiles = t.f1, x1 = 56, y1 = ky1 })
-    init_object({ tiles = t.e1, x1 = 72, y1 = ky1 })
-    init_object({ tiles = t.y1, x1 = 88, y1 = ky1 })
-
-    init_object({ tiles = t.y2, x1 = 96, y1 = sy1 })
-    init_object({ tiles = t.n2, x1 = 80, y1 = sy1 })
-    init_object({ tiles = t.o2, x1 = 64, y1 = sy1 })
-    init_object({ tiles = t.o1, x1 = 48, y1 = sy1 })
-    init_object({ tiles = t.p1, x1 = 32, y1 = sy1 })
-    init_object({ tiles = t.s1, x1 = 16, y1 = sy1 })
-  end
-
-  s.start_text_flash = 0
-
-  s.show_start_text = function()
-    s.start_text_flash += 1
-    if (s.start_text_flash == 24) s.start_text_flash = 0
-    if (s.start_text_flash < 12) text.show('start_game', 100, 7)
-  end
+  s.animation_timeout = 85
+  s.frame_count       = 0
 
   s.transition_in_text_animation = function()
     local d   = 20
@@ -616,19 +533,130 @@ init_screen('title',  function ()
     local sy  = 64
     local t   = tiles.title.text
 
-    init_object({ tiles = t.k1, x1 = kx1, y1 = ky, x2 = 16, delay = 0,  duration = d, easing = e })
-    init_object({ tiles = t.n1, x1 = kx1, y1 = ky, x2 = 32, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.i1, x1 = kx1, y1 = ky, x2 = 48, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.f1, x1 = kx1, y1 = ky, x2 = 56, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.e1, x1 = kx1, y1 = ky, x2 = 72, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.y1, x1 = kx1, y1 = ky, x2 = 88, delay = 15, duration = d, easing = e })
+    init_object({ tiles = t.k1, x1 = kx1, x2 = 16, y = ky, delay = 20, duration = d, easing = e })
+    init_object({ tiles = t.n1, x1 = kx1, x2 = 32, y = ky, delay = 23, duration = d, easing = e })
+    init_object({ tiles = t.i1, x1 = kx1, x2 = 48, y = ky, delay = 26, duration = d, easing = e })
+    init_object({ tiles = t.f1, x1 = kx1, x2 = 56, y = ky, delay = 29, duration = d, easing = e })
+    init_object({ tiles = t.e1, x1 = kx1, x2 = 72, y = ky, delay = 32, duration = d, easing = e })
+    init_object({ tiles = t.y1, x1 = kx1, x2 = 88, y = ky, delay = 35, duration = d, easing = e })
 
-    init_object({ tiles = t.y2, x1 = sx1, y1 = sy, x2 = 96, delay = 0,  duration = d, easing = e })
-    init_object({ tiles = t.n2, x1 = sx1, y1 = sy, x2 = 80, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.o2, x1 = sx1, y1 = sy, x2 = 64, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.o1, x1 = sx1, y1 = sy, x2 = 48, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.p1, x1 = sx1, y1 = sy, x2 = 32, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.s1, x1 = sx1, y1 = sy, x2 = 16, delay = 15, duration = d, easing = e })
+    init_object({ tiles = t.y2, x1 = sx1, x2 = 96, y = sy, delay = 20, duration = d, easing = e })
+    init_object({ tiles = t.n2, x1 = sx1, x2 = 80, y = sy, delay = 23, duration = d, easing = e })
+    init_object({ tiles = t.o2, x1 = sx1, x2 = 64, y = sy, delay = 26, duration = d, easing = e })
+    init_object({ tiles = t.o1, x1 = sx1, x2 = 48, y = sy, delay = 29, duration = d, easing = e })
+    init_object({ tiles = t.p1, x1 = sx1, x2 = 32, y = sy, delay = 32, duration = d, easing = e })
+    init_object({ tiles = t.s1, x1 = sx1, x2 = 16, y = sy, delay = 35, duration = d, easing = e })
+  end
+
+  s.init = function()
+    s.frame_count = 0
+
+    local bline = tiles.title.bottom_line
+    local knife = tiles.title.knife
+    local spoon = tiles.title.spoon
+    local tline = tiles.title.top_line
+
+    s.transition_in_text_animation()
+
+    init_object({ tiles = knife, x1 = 16,   y1 = -100, x2 = 16, y2 = 24, delay = 40, duration = 30, easing = 'outBounce' })
+    init_object({ tiles = spoon, x1 = 96,   y1 = 227,  x2 = 96, y2 = 80, delay = 40, duration = 30, easing = 'outBounce' })
+    init_object({ tiles = tline, x1 = 200,  y  = 40,   x2 = 32,          delay = 10, duration = 10, easing = 'outBack'   })
+    init_object({ tiles = bline, x1 = -328, y  = 80,   x2 = 16,          delay = 10, duration = 10, easing = 'outBack'   })
+  end
+
+  s.update = function()
+    s.frame_count += 1
+    if (btnp(5) or s.frame_count > s.animation_timeout) go_to('title')
+  end
+
+  return s
+end)
+
+-- title screen
+init_screen('title',  function ()
+  local s = {}
+
+  s.screen_flash     = true
+  s.start_text_flash = 0
+
+  s.flash = function()
+    if s.screen_flash then
+      rectfill(0, 0, 127, 127, 7)
+      s.screen_flash = false
+    end
+  end
+
+  s.idle_text_animation = function()
+    local d   = 10
+    local dir = 'inOut'
+    local ky1 = 48
+    local ky2 = 44
+    local sy1 = 64
+    local sy2 = 68
+    local t   = tiles.title.text
+
+    init_object({ tiles = t.k1, x = 16, y = ky1 })
+    init_object({ tiles = t.n1, x = 32, y = ky1 })
+    init_object({ tiles = t.i1, x = 48, y = ky1 })
+    init_object({ tiles = t.f1, x = 56, y = ky1 })
+    init_object({ tiles = t.e1, x = 72, y = ky1 })
+    init_object({ tiles = t.y1, x = 88, y = ky1 })
+
+    init_object({ tiles = t.y2, x = 96, y = sy1 })
+    init_object({ tiles = t.n2, x = 80, y = sy1 })
+    init_object({ tiles = t.o2, x = 64, y = sy1 })
+    init_object({ tiles = t.o1, x = 48, y = sy1 })
+    init_object({ tiles = t.p1, x = 32, y = sy1 })
+    init_object({ tiles = t.s1, x = 16, y = sy1 })
+  end
+
+  s.show_start_text = function()
+    s.start_text_flash += 1
+    if (s.start_text_flash == 24) s.start_text_flash = 0
+    if (s.start_text_flash < 12) text.show('start_game', 100, 7)
+  end
+
+  s.init = function()
+    s.screen_flash = true
+
+    local bline = tiles.title.bottom_line
+    local knife = tiles.title.knife
+    local spoon = tiles.title.spoon
+    local tline = tiles.title.top_line
+
+    init_object({ tiles = knife, x = 16, y = 24 })
+    init_object({ tiles = tline, x = 32, y = 40 })
+    init_object({ tiles = bline, x = 16, y = 80 })
+    init_object({ tiles = spoon, x = 96, y = 80 })
+
+    s.idle_text_animation()
+  end
+
+  s.update = function()
+    if (btnp(5)) go_to('title_transition_out')
+  end
+
+  s.draw = function()
+    s.show_start_text()
+    text.show('about', 117, 7)
+    s.flash()
+  end
+
+  return s
+end)
+
+init_screen('title_transition_out', function()
+  local s = {}
+
+  s.frame_count       = 0
+  s.animation_timeout = 50
+  s.screen_flash      = true
+
+  s.flash = function()
+    if s.screen_flash then
+      rectfill(0, 0, 127, 127, 7)
+      s.screen_flash = false
+    end
   end
 
   s.transition_out_text_animation = function()
@@ -640,75 +668,45 @@ init_screen('title',  function ()
     local sy  = 64
     local t   = tiles.title.text
 
-    init_object({ tiles = t.k1, x1 = 16, y1 = ky, x2 = kx2, delay = 15, duration = d, easing = e })
-    init_object({ tiles = t.n1, x1 = 32, y1 = ky, x2 = kx2, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.i1, x1 = 48, y1 = ky, x2 = kx2, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.f1, x1 = 56, y1 = ky, x2 = kx2, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.e1, x1 = 72, y1 = ky, x2 = kx2, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.y1, x1 = 88, y1 = ky, x2 = kx2, delay = 0,  duration = d, easing = e })
+    init_object({ tiles = t.k1, x1 = 16, x2 = kx2, y = ky, delay = 15, duration = d, easing = e })
+    init_object({ tiles = t.n1, x1 = 32, x2 = kx2, y = ky, delay = 12, duration = d, easing = e })
+    init_object({ tiles = t.i1, x1 = 48, x2 = kx2, y = ky, delay = 9,  duration = d, easing = e })
+    init_object({ tiles = t.f1, x1 = 56, x2 = kx2, y = ky, delay = 6,  duration = d, easing = e })
+    init_object({ tiles = t.e1, x1 = 72, x2 = kx2, y = ky, delay = 3,  duration = d, easing = e })
+    init_object({ tiles = t.y1, x1 = 88, x2 = kx2, y = ky, delay = 0,  duration = d, easing = e })
 
-    init_object({ tiles = t.y2, x1 = 96, y1 = sy, x2 = sx2, delay = 15, duration = d, easing = e })
-    init_object({ tiles = t.n2, x1 = 80, y1 = sy, x2 = sx2, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.o2, x1 = 64, y1 = sy, x2 = sx2, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.o1, x1 = 48, y1 = sy, x2 = sx2, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.p1, x1 = 32, y1 = sy, x2 = sx2, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.s1, x1 = 16, y1 = sy, x2 = sx2, delay = 0,  duration = d, easing = e })
+    init_object({ tiles = t.y2, x1 = 96, x2 = sx2, y = sy, delay = 15, duration = d, easing = e })
+    init_object({ tiles = t.n2, x1 = 80, x2 = sx2, y = sy, delay = 12, duration = d, easing = e })
+    init_object({ tiles = t.o2, x1 = 64, x2 = sx2, y = sy, delay = 9,  duration = d, easing = e })
+    init_object({ tiles = t.o1, x1 = 48, x2 = sx2, y = sy, delay = 6,  duration = d, easing = e })
+    init_object({ tiles = t.p1, x1 = 32, x2 = sx2, y = sy, delay = 3,  duration = d, easing = e })
+    init_object({ tiles = t.s1, x1 = 16, x2 = sx2, y = sy, delay = 0,  duration = d, easing = e })
   end
 
-  s.transition_in = function()
-    local bottom_line = tiles.title.bottom_line
-    local knife       = tiles.title.knife
-    local spoon       = tiles.title.spoon
-    local top_line    = tiles.title.top_line
+  s.init = function()
+    s.frame_count  = 0
+    s.screen_flash = true
 
-    init_object({ tiles = knife, x1 = 16, y1 = -100, x2 = 16, y2 = 24, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = top_line, x1 = 200, y1 = 40, x2 = 32, duration = 10, easing = 'outBack' })
-    s.transition_in_text_animation()
-    init_object({ tiles = bottom_line, x1 = -328, y1 = 80, x2 = 16, duration = 10, easing = 'outBack' })
-    init_object({ tiles = spoon, x1 = 96, y1 = 227, x2 = 96, y2 = 80, duration = 30, easing = 'outBounce' })
-  end
+    local bline = tiles.title.bottom_line
+    local knife = tiles.title.knife
+    local spoon = tiles.title.spoon
+    local tline = tiles.title.top_line
 
-  s.transition_out = function()
-    local bottom_line = tiles.title.bottom_line
-    local knife       = tiles.title.knife
-    local spoon       = tiles.title.spoon
-    local top_line    = tiles.title.top_line
+    init_object({ tiles = knife, x1 = 16, y1 = 24, x2 = 16,   y2 = -100, delay = 5,  duration = 30, easing = 'inBack' })
+    init_object({ tiles = spoon, x1 = 96, y1 = 80, x2 = 96,   y2 = 227,  delay = 5,  duration = 30, easing = 'inBack' })
+    init_object({ tiles = tline, x1 = 32, y  = 40, x2 = 200,             delay = 15, duration = 10, easing = 'inBack' })
+    init_object({ tiles = bline, x1 = 16, y  = 80, x2 = -328,            delay = 15, duration = 10, easing = 'inBack' })
 
-    init_object({ tiles = knife, x1 = 16, y1 = 24, x2 = 16, y2 = -100, delay = 10, duration = 30, easing = 'inBack' })
-    init_object({ tiles = top_line, x1 = 32, y1 = 40, x2 = 200, delay = 10, duration = 10, easing = 'inBack' })
     s.transition_out_text_animation()
-    init_object({ tiles = bottom_line, x1 = 16, y1 = 80, x2 = -328, delay = 10, duration = 10, easing = 'inBack' })
-    init_object({ tiles = spoon, x1 = 96, y1 = 80, x2 = 96, y2 = 227, delay = 10, duration = 30, easing = 'inBack' })
   end
 
   s.update = function()
-    if (transition_state == 'transitioned_in') and
-      (#objects == 0) then
-      local bottom_line = tiles.title.bottom_line
-      local knife       = tiles.title.knife
-      local spoon       = tiles.title.spoon
-      local top_line    = tiles.title.top_line
-
-      init_object({ tiles = knife, x1 = 16, y1 = 24 })
-      init_object({ tiles = top_line, x1 = 32, y1 = 40 })
-      s.idle_text_animation()
-      init_object({ tiles = bottom_line, x1 = 16, y1 = 80 })
-      init_object({ tiles = spoon, x1 = 96, y1 = 80 })
-    end
-
-    if (btnp(5)) go_to('playing')
+    s.frame_count += 1
+    if (s.frame_count > s.animation_timeout) go_to('playing')
   end
 
   s.draw = function()
-    if (transition_state == 'in'  and transition_countdown == 1) or
-       (transition_state == 'out' and transition_countdown == s.transition_out_duration) then
-      rectfill(0, 0, 127, 127, 7)
-    end
-
-    if (transition_state == 'transitioned_in') then
-      s.show_start_text()
-      text.show('about', 117, 7)
-    end
+    s.flash()
   end
 
   return s
@@ -776,7 +774,13 @@ init_screen('playing', function()
 
     s.utensil.type    = utensil_type
     s.utensil.index   = utensil_index
-    s.utensil.sprites = utensil_array[utensil_index]
+    s.utensil.sprites = init_object({
+      tiles    = utensil_array[utensil_index],
+      x        = 48,
+      y1       = 10,
+      y2       = 16,
+      duration = 3,
+    })
   end
 
   s.decrease_timeout_remaining = function()
@@ -842,6 +846,7 @@ init_screen('playing', function()
 
   s.new_round = function()
     s.timeout.remaining = s.timeout.start
+    init_object({ tiles = tiles.playing.score, x = 52, y = 88 })
     s.choose_utensil()
   end
 
@@ -856,6 +861,7 @@ init_screen('playing', function()
   end
 
   s.round_passed = function()
+    destroy_object(s.utensil.sprites)
     update_score()
     s.decrease_timeout_start()
     s.new_round()
@@ -878,8 +884,6 @@ init_screen('playing', function()
 
   s.draw = function()
     s.draw_timer()
-    draw_sprites(s.utensil.sprites)
-    draw_sprites(tiles.playing.score)
     s.draw_buttons()
     s.draw_floor()
   end
@@ -892,7 +896,7 @@ init_screen('game_over', function()
   local s = {}
 
   s.update = function()
-    if (btnp(4)) go_to('title')
+    if (btnp(4)) go_to('title_transition_in')
     if (btnp(5)) go_to('playing')
   end
 
@@ -919,16 +923,16 @@ end)
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  go_to('title')
+  go_to('title_transition_in')
 end
 
 function _update()
-  transition_tick()
   screen.update()
 end
 
 function _draw()
   cls()
+  -- rectfill(0, 0, 63, 127, 3)
   screen.draw()
   map(0, 0)
 end
@@ -957,14 +961,14 @@ a9000000990000009900000000000000002222222222222222222222222222000222222222222222
 00000000000000000000000000000000007777070000777707777070770077000077770777707077070770707707777000777707777077770777707777070770
 aa9999a9999999999999999999999999000000000000000000000000000000000000770700007077070770707700770000777707777077770777707777070770
 99999999999999994999944444444444000000000000000000000000000000000077770700007777077770707700770000700007077070770707707077070770
-000000940000009400000000aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000777707777070770707707077077770
-000000940000009400000000a9999999000bbbbbbbbbbbbbbbbbbbbbbbbbb0000000000000000000000000000000000000007707000070770707707077007700
-000000940000009400000000a900000000bbbbbbbbbbbbbbbbbbbbbbbbbbbb00000bbbbbbbbbbbbbbbbbbbbbbbbbb00000777707000077770777707077007700
+000000940000009499940000aaaaaaaa000000000000000000000000000000000000000000000000000000000000000000777707777070770707707077077770
+000000940000009499940000a9999999000bbbbbbbbbbbbbbbbbbbbbbbbbb0000000000000000000000000000000000000007707000070770707707077007700
+000000940000009499940000a900000000bbbbbbbbbbbbbbbbbbbbbbbbbbbb00000bbbbbbbbbbbbbbbbbbbbbbbbbb00000777707000077770777707077007700
 000000940000009400000000a900000000bbbbbbbbbbbbbbbbbbbbbbbbbbbb000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 000000940000009400000000a9000000003333333333333333333333333333000bbbbbbbbbbbbbbbbbbbbbbbbbbbbbb0bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
 000000940000009400000000a90000000033333333333333333333333333330003333333333333333333333333333330bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
-999999940000009400000099a9000000003333333333333333333333333333000333333333333333333333333333333033333333333333333333333333333333
-444444440000009400000099a9000000001111111111111111111111111111000111111111111111111111111111111011111111111111111111111111111111
+999999940000009400000000a9000000003333333333333333333333333333000333333333333333333333333333333033333333333333333333333333333333
+444444440000009400000000a9000000001111111111111111111111111111000111111111111111111111111111111011111111111111111111111111111111
 0000000007600000000555555555000000665555000056555505000076600000000000007666666655555555000000077000000088888888f000000800000000
 000000076655000000055555555500000056555500005655550500007666600000000000766666665555555500000077f800000088888888f0000000dddddddd
 000000766555000000055555555500000005555500005555500500007666660000000000766666665555555500000778f880000088888888f000000866666665
@@ -997,27 +1001,27 @@ aa9999a9999999999999999999999999000000000000000000000000000000000000770700007077
 006555555555000000005555555500000000656555550000000000007666666655555555000022222221000088888888f0000008650555555566665500000000
 006555555555000000000555555000000000656555550000000000007666666655555555000666666655500088888888f0000008550555555566655500000000
 005555555555000000000055550000000000556555550000000000007666666655555555000655555551100088888888f0000008555555555666655500000000
-0555555566666550007776660000000007766600ffffffff00000aaaaaaa9aaa9999999999990000000000000000000000000000000000000000000000000000
-0555556666665550077777666600000077766600444444440000999999999999999999999999900000000000000000000000000bbb0000000000000000000000
-0055666666655500777777766660000077766600444444440000900000000000000000000000900000000000000000000000000bbb0000000000000000000000
-0005556666555000771777776666000077776600444444440000900000000000000000000000900000800000000000000000000bbb0000000000000000000000
-0000555555550000711177777666600077776600444444440000901111111111111111111110900000880000000000000000000bbb0000000000000000000000
-000005555550000071d117777666660077777600444444440000901111111111111111111110900000888000000000000000000bbb0000000000000000000000
-00000055550000007ddd11777766660077777600444444440000901111111111111111111110900000888800000000000000000bbb0000000000000000000000
-00000005500000007ddd11177766660077777600444444440000901111111111111111111110900000888880000000000000000bbb0000000000000000000000
-00000005500000007dddd1177766666077777660444444440000901111111111111111111110900000888888000000000000000bbb0000000000000000000000
-00000005500000007dddd1117766666077777760222222220000901111111111111111111110900000888888800000000000000bbb0000000000000000000000
-00000005500000007dddd111776666600777776022222222000090111111111111111111111090000088888888000000000000bbbbb000000000000000000000
-00000005500000007ddddd1177766666077777602222222200009011111111111111111111109000008888888800000000000bbbbbbb00000000000000000000
-00000005500000007ddddd117776666607777766222222220000901111111111111111111110900000888888880000000000bbbbbbbbb0000000000000000000
-00000005500000007ddddd111776666607777776000000000000901111111111111111111110900000888888880000000000bbbbbbbbb0000000000000000000
-00000005500000007ddddd111776666600777776000000000000901111111111111111111110900000888888880000000000bbbbbbbbb0000000000000000000
-00000005500000007ddddd111776666600777776000000000000901111111111111111111110900000888888880000000000bbbbbbbbb0000000000000000000
-000000655500000077dddd111776666600777777600000000000901111111111111111111110900000888888880000000000bbbbbbbbb0000000000000000000
-000000655500000007dddd1117766666007777776000000000009001111111111111111111009000008888888800000000000bbbbbbb00000000000000000000
-000000655500000007ddd11117766666007777777600000000009000000000000000000000009000008888888800000000000bbbbbbb00000000000000000000
-000000655500000007ddd11117666660000777777600000000009aaaaaaaaaaaaaa99aaa999990000088888888000000000000bbbbb000000000000000000000
-000000555500000007ddd1117766666000077777776000000000099999999999999999999999000000888888880000000000000bbb0000000000000000000000
+0555555566666550007776660000000007766600ffffffff0aaaaaaa9aaa99999999999000000000000000000000000000000000000000000000000000000000
+0555556666665550077777666600000077766600444444449999999999999999999999990000000000000000000000000000000bbb0000000000000000000000
+0055666666655500777777766660000077766600444444449000000000000000000000090000000000000000000000000000000bbb0000000000000000000000
+0005556666555000771777776666000077776600444444449000000000000000000000090000000000800000000000000000000bbb0000000000000000000000
+0000555555550000711177777666600077776600444444449011111111111111111111090000000000880000000000000000000bbb0000000000000000000000
+000005555550000071d117777666660077777600444444449011111111111111111111090000000000888000000000000000000bbb0000000000000000000000
+00000055550000007ddd11777766660077777600444444449011111111111111111111090000000000888800000000000000000bbb0000000000000000000000
+00000005500000007ddd11177766660077777600444444449011111111111111111111090000000000888880000000000000000bbb0000000000000000000000
+00000005500000007dddd1177766666077777660444444449011111111111111111111090000000000888888000000000000000bbb0000000000000000000000
+00000005500000007dddd1117766666077777760222222229011111111111111111111090000000000888888800000000000000bbb0000000000000000000000
+00000005500000007dddd111776666600777776022222222901111111111111111111109000000000088888888000000000000bbbbb000000000000000000000
+00000005500000007ddddd1177766666077777602222222290111111111111111111110900000000008888888800000000000bbbbbbb00000000000000000000
+00000005500000007ddddd117776666607777766222222229011111111111111111111090000000000888888880000000000bbbbbbbbb0000000000000000000
+00000005500000007ddddd111776666607777776000000009011111111111111111111090000000000888888880000000000bbbbbbbbb0000000000000000000
+00000005500000007ddddd111776666600777776000000009011111111111111111111090000000000888888880000000000bbbbbbbbb0000000000000000000
+00000005500000007ddddd111776666600777776000000009011111111111111111111090000000000888888880000000000bbbbbbbbb0000000000000000000
+000000655500000077dddd111776666600777777600000009011111111111111111111090000000000888888880000000000bbbbbbbbb0000000000000000000
+000000655500000007dddd1117766666007777776000000090011111111111111111100900000000008888888800000000000bbbbbbb00000000000000000000
+000000655500000007ddd11117766666007777777600000090000000000000000000000900000000008888888800000000000bbbbbbb00000000000000000000
+000000655500000007ddd1111766666000077777760000009aaaaaaaaaaaaaa99aaa9999000000000088888888000000000000bbbbb000000000000000000000
+000000555500000007ddd1117766666000077777776000000999999999999999999999900000000000888888880000000000000bbb0000000000000000000000
 0000005555000000077d111177666600000777777760000000000000000000000000000000000000008888888800000000000000000000000000000000000000
 00000055550000000071111177666600000077777766000000000000000000000000000000000000008888888800000000000000000000000000000000000000
 00000055550000000077111776666000000077777776000000000000000000000000000000000000000000000000000000000000000000000000000000000000

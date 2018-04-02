@@ -923,16 +923,16 @@ end)
 function _init()
   cartdata('knifeyspoony')
   high_score = dget(0)
-  go_to('playing')
+  go_to('title_transition_in')
 end
 
 function _update()
-  transition_tick()
   screen.update()
 end
 
 function _draw()
   cls()
+  -- rectfill(0, 0, 63, 127, 3)
   screen.draw()
   map(0, 0)
 end

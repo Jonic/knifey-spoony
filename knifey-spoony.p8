@@ -170,7 +170,8 @@ local tiles = {
       },
     },
     score = {
-      { i = 134, x = 48, y = 88, w = 4, h = 4 },
+      { i = 134, w = 3, h = 3 },
+      { i = 50,  x = 10, y = 21},
     },
     utensils = {
       knifey = {
@@ -790,7 +791,7 @@ init_screen('playing', function()
     s.utensil.index   = utensil_index
     s.utensil.sprites = init_object({
       tiles    = utensil_array[utensil_index],
-      x1       = 48,
+      x        = 48,
       y1       = 10,
       y2       = 16,
       duration = 3,
@@ -860,6 +861,7 @@ init_screen('playing', function()
 
   s.new_round = function()
     s.timeout.remaining = s.timeout.start
+    init_object({ tiles = tiles.playing.score, x = 52, y = 88 })
     s.choose_utensil()
   end
 
@@ -897,7 +899,6 @@ init_screen('playing', function()
 
   s.draw = function()
     s.draw_timer()
-    draw_sprites(tiles.playing.score)
     s.draw_buttons()
     s.draw_floor()
   end

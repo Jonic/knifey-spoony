@@ -896,7 +896,7 @@ init_screen('game_over', function()
   local s = {}
 
   s.update = function()
-    if (btnp(4)) go_to('title')
+    if (btnp(4)) go_to('title_transition_in')
     if (btnp(5)) go_to('playing')
   end
 

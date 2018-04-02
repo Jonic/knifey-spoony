@@ -518,58 +518,11 @@ end
 -->8
 -- init screens
 
--- title screen
-init_screen('title',  function ()
+init_screen('title_transition_in', function()
   local s = {}
 
-  s.transition_in_duration  = 85
-  s.transition_out_duration = 50
-
-  s.idle_text_animation = function()
-    local d   = 10
-    local dir = 'inOut'
-    local ky1 = 48
-    local ky2 = 44
-    local sy1 = 64
-    local sy2 = 68
-    local t   = tiles.title.text
-
-    init_object({ tiles = t.k1, x1 = 16, y1 = ky1 })
-    init_object({ tiles = t.n1, x1 = 32, y1 = ky1 })
-    init_object({ tiles = t.i1, x1 = 48, y1 = ky1 })
-    init_object({ tiles = t.f1, x1 = 56, y1 = ky1 })
-    init_object({ tiles = t.e1, x1 = 72, y1 = ky1 })
-    init_object({ tiles = t.y1, x1 = 88, y1 = ky1 })
-
-    init_object({ tiles = t.y2, x1 = 96, y1 = sy1 })
-    init_object({ tiles = t.n2, x1 = 80, y1 = sy1 })
-    init_object({ tiles = t.o2, x1 = 64, y1 = sy1 })
-    init_object({ tiles = t.o1, x1 = 48, y1 = sy1 })
-    init_object({ tiles = t.p1, x1 = 32, y1 = sy1 })
-    init_object({ tiles = t.s1, x1 = 16, y1 = sy1 })
-  end
-
-  s.start_text_flash = 0
-
-  s.show_start_text = function()
-    s.start_text_flash += 1
-    if (s.start_text_flash == 24) s.start_text_flash = 0
-    if (s.start_text_flash < 12) text.show('start_game', 100, 7)
-  end
-
-  s.transition_in = function()
-    local bline = tiles.title.bottom_line
-    local knife = tiles.title.knife
-    local spoon = tiles.title.spoon
-    local tline = tiles.title.top_line
-
-    s.transition_in_text_animation()
-
-    init_object({ tiles = knife, x1 = 16,   y1 = -100, x2 = 16, y2 = 24, delay = 40, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = spoon, x1 = 96,   y1 = 227,  x2 = 96, y2 = 80, delay = 40, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = tline, x1 = 200,  y1 = 40,   x2 = 32,          delay = 10, duration = 10, easing = 'outBack'   })
-    init_object({ tiles = bline, x1 = -328, y1 = 80,   x2 = 16,          delay = 10, duration = 10, easing = 'outBack'   })
-  end
+  s.animation_timeout = 85
+  s.frame_count       = 0
 
   s.transition_in_text_animation = function()
     local d   = 20
@@ -580,33 +533,130 @@ init_screen('title',  function ()
     local sy  = 64
     local t   = tiles.title.text
 
-    init_object({ tiles = t.k1, x1 = kx1, y1 = ky, x2 = 16, delay = 20, duration = d, easing = e })
-    init_object({ tiles = t.n1, x1 = kx1, y1 = ky, x2 = 32, delay = 23, duration = d, easing = e })
-    init_object({ tiles = t.i1, x1 = kx1, y1 = ky, x2 = 48, delay = 26, duration = d, easing = e })
-    init_object({ tiles = t.f1, x1 = kx1, y1 = ky, x2 = 56, delay = 29, duration = d, easing = e })
-    init_object({ tiles = t.e1, x1 = kx1, y1 = ky, x2 = 72, delay = 32, duration = d, easing = e })
-    init_object({ tiles = t.y1, x1 = kx1, y1 = ky, x2 = 88, delay = 35, duration = d, easing = e })
+    init_object({ tiles = t.k1, x1 = kx1, x2 = 16, y = ky, delay = 20, duration = d, easing = e })
+    init_object({ tiles = t.n1, x1 = kx1, x2 = 32, y = ky, delay = 23, duration = d, easing = e })
+    init_object({ tiles = t.i1, x1 = kx1, x2 = 48, y = ky, delay = 26, duration = d, easing = e })
+    init_object({ tiles = t.f1, x1 = kx1, x2 = 56, y = ky, delay = 29, duration = d, easing = e })
+    init_object({ tiles = t.e1, x1 = kx1, x2 = 72, y = ky, delay = 32, duration = d, easing = e })
+    init_object({ tiles = t.y1, x1 = kx1, x2 = 88, y = ky, delay = 35, duration = d, easing = e })
 
-    init_object({ tiles = t.y2, x1 = sx1, y1 = sy, x2 = 96, delay = 20, duration = d, easing = e })
-    init_object({ tiles = t.n2, x1 = sx1, y1 = sy, x2 = 80, delay = 23, duration = d, easing = e })
-    init_object({ tiles = t.o2, x1 = sx1, y1 = sy, x2 = 64, delay = 26, duration = d, easing = e })
-    init_object({ tiles = t.o1, x1 = sx1, y1 = sy, x2 = 48, delay = 29, duration = d, easing = e })
-    init_object({ tiles = t.p1, x1 = sx1, y1 = sy, x2 = 32, delay = 32, duration = d, easing = e })
-    init_object({ tiles = t.s1, x1 = sx1, y1 = sy, x2 = 16, delay = 35, duration = d, easing = e })
+    init_object({ tiles = t.y2, x1 = sx1, x2 = 96, y = sy, delay = 20, duration = d, easing = e })
+    init_object({ tiles = t.n2, x1 = sx1, x2 = 80, y = sy, delay = 23, duration = d, easing = e })
+    init_object({ tiles = t.o2, x1 = sx1, x2 = 64, y = sy, delay = 26, duration = d, easing = e })
+    init_object({ tiles = t.o1, x1 = sx1, x2 = 48, y = sy, delay = 29, duration = d, easing = e })
+    init_object({ tiles = t.p1, x1 = sx1, x2 = 32, y = sy, delay = 32, duration = d, easing = e })
+    init_object({ tiles = t.s1, x1 = sx1, x2 = 16, y = sy, delay = 35, duration = d, easing = e })
   end
 
-  s.transition_out = function()
+  s.init = function()
+    s.frame_count = 0
+
     local bline = tiles.title.bottom_line
     local knife = tiles.title.knife
     local spoon = tiles.title.spoon
     local tline = tiles.title.top_line
 
-    init_object({ tiles = knife, x1 = 16, y1 = 24, x2 = 16,   y2 = -100, delay = 5,  duration = 30, easing = 'inBack' })
-    init_object({ tiles = spoon, x1 = 96, y1 = 80, x2 = 96,   y2 = 227,  delay = 5,  duration = 30, easing = 'inBack' })
-    init_object({ tiles = tline, x1 = 32, y1 = 40, x2 = 200,             delay = 15, duration = 10, easing = 'inBack' })
-    init_object({ tiles = bline, x1 = 16, y1 = 80, x2 = -328,            delay = 15, duration = 10, easing = 'inBack' })
+    s.transition_in_text_animation()
 
-    s.transition_out_text_animation()
+    init_object({ tiles = knife, x1 = 16,   y1 = -100, x2 = 16, y2 = 24, delay = 40, duration = 30, easing = 'outBounce' })
+    init_object({ tiles = spoon, x1 = 96,   y1 = 227,  x2 = 96, y2 = 80, delay = 40, duration = 30, easing = 'outBounce' })
+    init_object({ tiles = tline, x1 = 200,  y  = 40,   x2 = 32,          delay = 10, duration = 10, easing = 'outBack'   })
+    init_object({ tiles = bline, x1 = -328, y  = 80,   x2 = 16,          delay = 10, duration = 10, easing = 'outBack'   })
+  end
+
+  s.update = function()
+    s.frame_count += 1
+    if (btnp(5) or s.frame_count > s.animation_timeout) go_to('title')
+  end
+
+  return s
+end)
+
+-- title screen
+init_screen('title',  function ()
+  local s = {}
+
+  s.screen_flash     = true
+  s.start_text_flash = 0
+
+  s.flash = function()
+    if s.screen_flash then
+      rectfill(0, 0, 127, 127, 7)
+      s.screen_flash = false
+    end
+  end
+
+  s.idle_text_animation = function()
+    local d   = 10
+    local dir = 'inOut'
+    local ky1 = 48
+    local ky2 = 44
+    local sy1 = 64
+    local sy2 = 68
+    local t   = tiles.title.text
+
+    init_object({ tiles = t.k1, x = 16, y = ky1 })
+    init_object({ tiles = t.n1, x = 32, y = ky1 })
+    init_object({ tiles = t.i1, x = 48, y = ky1 })
+    init_object({ tiles = t.f1, x = 56, y = ky1 })
+    init_object({ tiles = t.e1, x = 72, y = ky1 })
+    init_object({ tiles = t.y1, x = 88, y = ky1 })
+
+    init_object({ tiles = t.y2, x = 96, y = sy1 })
+    init_object({ tiles = t.n2, x = 80, y = sy1 })
+    init_object({ tiles = t.o2, x = 64, y = sy1 })
+    init_object({ tiles = t.o1, x = 48, y = sy1 })
+    init_object({ tiles = t.p1, x = 32, y = sy1 })
+    init_object({ tiles = t.s1, x = 16, y = sy1 })
+  end
+
+  s.show_start_text = function()
+    s.start_text_flash += 1
+    if (s.start_text_flash == 24) s.start_text_flash = 0
+    if (s.start_text_flash < 12) text.show('start_game', 100, 7)
+  end
+
+  s.init = function()
+    s.screen_flash = true
+
+    local bline = tiles.title.bottom_line
+    local knife = tiles.title.knife
+    local spoon = tiles.title.spoon
+    local tline = tiles.title.top_line
+
+    init_object({ tiles = knife, x = 16, y = 24 })
+    init_object({ tiles = tline, x = 32, y = 40 })
+    init_object({ tiles = bline, x = 16, y = 80 })
+    init_object({ tiles = spoon, x = 96, y = 80 })
+
+    s.idle_text_animation()
+  end
+
+  s.update = function()
+    if (btnp(5)) go_to('title_transition_out')
+  end
+
+  s.draw = function()
+    s.show_start_text()
+    text.show('about', 117, 7)
+    s.flash()
+  end
+
+  return s
+end)
+
+init_screen('title_transition_out', function()
+  local s = {}
+
+  s.frame_count       = 0
+  s.animation_timeout = 50
+  s.screen_flash      = true
+
+  s.flash = function()
+    if s.screen_flash then
+      rectfill(0, 0, 127, 127, 7)
+      s.screen_flash = false
+    end
   end
 
   s.transition_out_text_animation = function()
@@ -618,56 +668,45 @@ init_screen('title',  function ()
     local sy  = 64
     local t   = tiles.title.text
 
-    init_object({ tiles = t.k1, x1 = 16, y1 = ky, x2 = kx2, delay = 15, duration = d, easing = e })
-    init_object({ tiles = t.n1, x1 = 32, y1 = ky, x2 = kx2, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.i1, x1 = 48, y1 = ky, x2 = kx2, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.f1, x1 = 56, y1 = ky, x2 = kx2, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.e1, x1 = 72, y1 = ky, x2 = kx2, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.y1, x1 = 88, y1 = ky, x2 = kx2, delay = 0,  duration = d, easing = e })
+    init_object({ tiles = t.k1, x1 = 16, x2 = kx2, y = ky, delay = 15, duration = d, easing = e })
+    init_object({ tiles = t.n1, x1 = 32, x2 = kx2, y = ky, delay = 12, duration = d, easing = e })
+    init_object({ tiles = t.i1, x1 = 48, x2 = kx2, y = ky, delay = 9,  duration = d, easing = e })
+    init_object({ tiles = t.f1, x1 = 56, x2 = kx2, y = ky, delay = 6,  duration = d, easing = e })
+    init_object({ tiles = t.e1, x1 = 72, x2 = kx2, y = ky, delay = 3,  duration = d, easing = e })
+    init_object({ tiles = t.y1, x1 = 88, x2 = kx2, y = ky, delay = 0,  duration = d, easing = e })
 
-    init_object({ tiles = t.y2, x1 = 96, y1 = sy, x2 = sx2, delay = 15, duration = d, easing = e })
-    init_object({ tiles = t.n2, x1 = 80, y1 = sy, x2 = sx2, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.o2, x1 = 64, y1 = sy, x2 = sx2, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.o1, x1 = 48, y1 = sy, x2 = sx2, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.p1, x1 = 32, y1 = sy, x2 = sx2, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.s1, x1 = 16, y1 = sy, x2 = sx2, delay = 0,  duration = d, easing = e })
+    init_object({ tiles = t.y2, x1 = 96, x2 = sx2, y = sy, delay = 15, duration = d, easing = e })
+    init_object({ tiles = t.n2, x1 = 80, x2 = sx2, y = sy, delay = 12, duration = d, easing = e })
+    init_object({ tiles = t.o2, x1 = 64, x2 = sx2, y = sy, delay = 9,  duration = d, easing = e })
+    init_object({ tiles = t.o1, x1 = 48, x2 = sx2, y = sy, delay = 6,  duration = d, easing = e })
+    init_object({ tiles = t.p1, x1 = 32, x2 = sx2, y = sy, delay = 3,  duration = d, easing = e })
+    init_object({ tiles = t.s1, x1 = 16, x2 = sx2, y = sy, delay = 0,  duration = d, easing = e })
   end
 
   s.init = function()
-    s.start_pressed = false
+    s.frame_count  = 0
+    s.screen_flash = true
+
+    local bline = tiles.title.bottom_line
+    local knife = tiles.title.knife
+    local spoon = tiles.title.spoon
+    local tline = tiles.title.top_line
+
+    init_object({ tiles = knife, x1 = 16, y1 = 24, x2 = 16,   y2 = -100, delay = 5,  duration = 30, easing = 'inBack' })
+    init_object({ tiles = spoon, x1 = 96, y1 = 80, x2 = 96,   y2 = 227,  delay = 5,  duration = 30, easing = 'inBack' })
+    init_object({ tiles = tline, x1 = 32, y  = 40, x2 = 200,             delay = 15, duration = 10, easing = 'inBack' })
+    init_object({ tiles = bline, x1 = 16, y  = 80, x2 = -328,            delay = 15, duration = 10, easing = 'inBack' })
+
+    s.transition_out_text_animation()
   end
 
   s.update = function()
-    if (transition_state == 'transitioned_in') and
-      (#objects == 0) then
-      local bottom_line = tiles.title.bottom_line
-      local knife       = tiles.title.knife
-      local spoon       = tiles.title.spoon
-      local top_line    = tiles.title.top_line
-
-      init_object({ tiles = knife, x1 = 16, y1 = 24 })
-      init_object({ tiles = top_line, x1 = 32, y1 = 40 })
-      s.idle_text_animation()
-      init_object({ tiles = bottom_line, x1 = 16, y1 = 80 })
-      init_object({ tiles = spoon, x1 = 96, y1 = 80 })
-    end
-
-    if (btnp(5) and not s.start_pressed) then
-      s.start_pressed = true
-      go_to('playing')
-    end
+    s.frame_count += 1
+    if (s.frame_count > s.animation_timeout) go_to('playing')
   end
 
   s.draw = function()
-    if (transition_state == 'in'  and transition_countdown == 1) or
-       (transition_state == 'out' and transition_countdown == s.transition_out_duration) then
-      rectfill(0, 0, 127, 127, 7)
-    end
-
-    if (transition_state == 'transitioned_in') then
-      s.show_start_text()
-      text.show('about', 117, 7)
-    end
+    s.flash()
   end
 
   return s

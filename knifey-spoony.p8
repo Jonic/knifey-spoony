@@ -335,8 +335,8 @@ function init_object(props)
   o.repeating        = props.repeat_after ~= nil
   o.tiles            = props.tiles
   o.updated          = false
-  o.x                = { start = props.x1 or 0, dest = props.x2 or nil }
-  o.y                = { start = props.y1 or 0, dest = props.y2 or nil }
+  o.x                = props.x or { start = props.x1 or 0, dest = props.x2 or nil }
+  o.y                = props.y or { start = props.y1 or 0, dest = props.y2 or nil }
 
   o.calculate_pos = function(pos_key)
     local pos = o[pos_key]
@@ -384,8 +384,11 @@ function init_object(props)
   end
 
   o.set_pos = function()
-    o.pos_x = o.calculate_pos('x')
-    o.pos_y = o.calculate_pos('y')
+    o.pos_x = o.x
+    o.pos_y = o.y
+
+    if (type(o.x) == 'table') o.pos_x = o.calculate_pos('x')
+    if (type(o.y) == 'table') o.pos_y = o.calculate_pos('y')
   end
 
   o.tick = function()

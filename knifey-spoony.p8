@@ -472,49 +472,6 @@ text = {
 }
 
 -->8
--- screen transitions
-
-function transition_in()
-  destroy_objects()
-  transition_countdown = screen.props.transition_in_duration
-  transition_state     = 'in'
-  screen.props.transition_in()
-end
-
-function transition_out()
-  destroy_objects()
-  transition_countdown = screen.props.transition_out_duration
-  transition_state     = 'out'
-  screen.props.transition_out()
-end
-
-function transition_state_update()
-  destroy_objects()
-  local new_state = transitioning_to('in') and 'transitioned_in' or 'transitioned_out'
-  transition_state = new_state
-
-  if (transition_state == 'transitioned_out') then
-    go_to(screen_next)
-    screen_next = nil
-  end
-end
-
-function transition_tick()
-  if (transition_countdown > 0) then
-    transition_countdown -= 1
-
-    if (transition_countdown == 0) then
-      transition_state_update()
-    end
-  end
-end
-
-function transitioning_to(target_state)
-  if (target_state ~= nil) return transition_state == target_state
-  return (not transitioning_to('in') and not transitioning_to('out'))
-end
-
--->8
 -- screens
 
 function init_screen(name, props)
@@ -530,9 +487,6 @@ function init_screen(name, props)
   s.init = function()
     destroy_objects()
     if (s.can('init')) s.props.init()
-    if (s.can('transition_in')) then
-      transition_in()
-    end
   end
 
   s.update = function()
@@ -557,14 +511,6 @@ function init_screen(name, props)
 end
 
 function go_to(name)
-  if (screen ~= nil) and
-     (screen.can('transition_out')) and
-     (transition_state ~= 'transitioned_out') then
-    screen_next = name
-    transition_out()
-    return
-  end
-
   screen = screens[name]
   screen.init()
 end

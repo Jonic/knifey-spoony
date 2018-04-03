@@ -489,6 +489,9 @@ function init_screen(name, props)
   -- take everything from level object and add it to this `props` key
   s.props = props()
 
+  s.frame_count = 0
+  s.transition  = s.props.transition
+
   s.can = function(key)
     return table_has_key(s.props, key)
   end
@@ -498,12 +501,21 @@ function init_screen(name, props)
     if (s.can('init')) s.props.init()
   end
 
+  s.tick = function()
+    s.frame_count += 1
+    if (s.frame_count == s.transition.timeout) then
+      go_to(s.transition.destination)
+    end
+  end
+
   s.update = function()
+    if (s.transition ~= nil) s.tick()
+
     foreach(objects, function(o)
       o.update()
     end)
 
-    s.props.update()
+    if (s.can('update')) s.props.update()
   end
 
   s.draw = function()
@@ -530,8 +542,10 @@ end
 init_screen('title_transition_in', function()
   local s = {}
 
-  s.animation_timeout = 85
-  s.frame_count       = 0
+  s.transition = {
+    destination = 'title',
+    timeout     = 85,
+  }
 
   s.transition_in_text_animation = function()
     local d   = 20
@@ -558,8 +572,6 @@ init_screen('title_transition_in', function()
   end
 
   s.init = function()
-    s.frame_count = 0
-
     local bline = tiles.title.bottom_line
     local knife = tiles.title.knife
     local spoon = tiles.title.spoon
@@ -574,8 +586,7 @@ init_screen('title_transition_in', function()
   end
 
   s.update = function()
-    s.frame_count += 1
-    if (btnp(5) or s.frame_count > s.animation_timeout) go_to('title')
+    if (btnp(5)) go_to('title')
   end
 
   return s
@@ -657,9 +668,11 @@ end)
 init_screen('title_transition_out', function()
   local s = {}
 
-  s.frame_count       = 0
-  s.animation_timeout = 50
-  s.screen_flash      = true
+  s.screen_flash = true
+  s.transition   = {
+    destination = 'playing',
+    timeout     = 50,
+  }
 
   s.flash = function()
     if s.screen_flash then
@@ -693,7 +706,6 @@ init_screen('title_transition_out', function()
   end
 
   s.init = function()
-    s.frame_count  = 0
     s.screen_flash = true
 
     local bline = tiles.title.bottom_line
@@ -707,11 +719,6 @@ init_screen('title_transition_out', function()
     init_object({ tiles = bline, x1 = 16, y  = 80, x2 = -328,            delay = 15, duration = 10, easing = 'inBack' })
 
     s.transition_out_text_animation()
-  end
-
-  s.update = function()
-    s.frame_count += 1
-    if (s.frame_count > s.animation_timeout) go_to('playing')
   end
 
   s.draw = function()

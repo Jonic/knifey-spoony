@@ -151,26 +151,34 @@ end
 
 local rects = {
   floor = {
-    { w = 119, h = 1, color = 15 },
-    { y = 2, w = 119, h = 7, color = 4 },
-    { y = 9, w = 119, h = 3, color = 2 },
+    {        w = 119, h = 1, color = 15 },
+    { y = 2, w = 119, h = 7, color = 4  },
+    { y = 9, w = 119, h = 3, color = 2  },
   },
 }
 
 local tiles = {
   playing = {
-    buttons = {
+    transition_buttons = {
       knifey = {
-        { i = 4,  x = 10, y = 96, w = 4, h = 2 },
-        { i = 8,  x = 10, y = 96, w = 4, h = 2 },
-        { i = 12, x = 10, y = 96, w = 4, h = 2 },
-        { i = 8,  x = 10, y = 96, w = 4, h = 2 },
+        { i = 4,  w = 4, h = 2 },
       },
       spoony = {
-        { i = 36, x = 86, y = 96, w = 4, h = 2 },
-        { i = 40, x = 86, y = 96, w = 4, h = 2 },
-        { i = 44, x = 86, y = 96, w = 4, h = 2 },
-        { i = 40, x = 86, y = 96, w = 4, h = 2 },
+        { i = 36, w = 4, h = 2 },
+      },
+    },
+    buttons = {
+      knifey = {
+        { i = 4,  x = 10, y = 95, w = 4, h = 2 },
+        { i = 8,  x = 10, y = 95, w = 4, h = 2 },
+        { i = 12, x = 10, y = 95, w = 4, h = 2 },
+        { i = 8,  x = 10, y = 95, w = 4, h = 2 },
+      },
+      spoony = {
+        { i = 36, x = 86, y = 95, w = 4, h = 2 },
+        { i = 40, x = 86, y = 95, w = 4, h = 2 },
+        { i = 44, x = 86, y = 95, w = 4, h = 2 },
+        { i = 40, x = 86, y = 95, w = 4, h = 2 },
       },
     },
     score = {

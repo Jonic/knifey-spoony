@@ -947,7 +947,7 @@ init_screen('playing', function()
   end
 
   s.update_score_display = function()
-    local score_display_y1 = 88
+    local score_display_y1 = 87
 
     if s.score_display ~= nil then
       score_display_y1 = 86
@@ -955,11 +955,11 @@ init_screen('playing', function()
     end
 
     s.score_display = init_object({
-      delay    = 4,
       tiles    = tiles.playing.score,
       x        = 48,
       y1       = score_display_y1,
-      y2       = 88,
+      y2       = 87,
+      delay    = 3,
       duration = 2,
     })
   end

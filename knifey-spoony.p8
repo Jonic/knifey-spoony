@@ -3,7 +3,7 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v0.10.4
+-- v0.11.0
 
 --[[
   "i see you've played knifey
@@ -94,10 +94,6 @@ function rndint(min, max)
   return flr(rnd(max)) + min
 end
 
-function table_has_key(table, key)
-  return table[key] ~= nil
-end
-
 function update_high_score()
   if (score > high_score) then
     high_score        = score
@@ -153,20 +149,36 @@ end
 -->8
 -- sprites
 
+local rects = {
+  floor = {
+    {        w = 119, h = 1, color = 15 },
+    { y = 2, w = 119, h = 7, color = 4  },
+    { y = 9, w = 119, h = 3, color = 2  },
+  },
+}
+
 local tiles = {
   playing = {
-    buttons = {
+    transition_buttons = {
       knifey = {
-        { i = 4,  x = 10, y = 96, w = 4, h = 2 },
-        { i = 8,  x = 10, y = 96, w = 4, h = 2 },
-        { i = 12, x = 10, y = 96, w = 4, h = 2 },
-        { i = 8,  x = 10, y = 96, w = 4, h = 2 },
+        { i = 4,  w = 4, h = 2 },
       },
       spoony = {
-        { i = 36, x = 86, y = 96, w = 4, h = 2 },
-        { i = 40, x = 86, y = 96, w = 4, h = 2 },
-        { i = 44, x = 86, y = 96, w = 4, h = 2 },
-        { i = 40, x = 86, y = 96, w = 4, h = 2 },
+        { i = 36, w = 4, h = 2 },
+      },
+    },
+    buttons = {
+      knifey = {
+        { i = 4,  x = 10, y = 95, w = 4, h = 2 },
+        { i = 8,  x = 10, y = 95, w = 4, h = 2 },
+        { i = 12, x = 10, y = 95, w = 4, h = 2 },
+        { i = 8,  x = 10, y = 95, w = 4, h = 2 },
+      },
+      spoony = {
+        { i = 36, x = 86, y = 95, w = 4, h = 2 },
+        { i = 40, x = 86, y = 95, w = 4, h = 2 },
+        { i = 44, x = 86, y = 95, w = 4, h = 2 },
+        { i = 40, x = 86, y = 95, w = 4, h = 2 },
       },
     },
     score = {
@@ -335,6 +347,8 @@ function init_object(props)
   o.repeat_countdown = props.repeat_after or nil
   o.repeating        = props.repeat_after ~= nil
   o.tiles            = props.tiles
+  o.rects            = props.rects
+  o.type             = props.type or 'tiles'
   o.updated          = false
   o.x                = props.x or { start = props.x1 or 0, dest = props.x2 or nil }
   o.y                = props.y or { start = props.y1 or 0, dest = props.y2 or nil }
@@ -360,6 +374,23 @@ function init_object(props)
     end
 
     return flr(new_pos)
+  end
+
+  o.draw_rect = function(r)
+    local x1  = (r.x or 0) + o.pos_x
+    local y1  = (r.y or 0) + o.pos_y
+    local x2  = x1 + r.w
+    local y2  = y1 + r.h
+    local color = r.color
+
+    rectfill(x1, y1, x2, y2, color)
+  end
+
+  o.draw_rects = function(rects)
+    foreach(rects, function(r)
+      if (r.w == nil) return o.draw_rects(r)
+      o.draw_rect(r)
+    end)
   end
 
   o.draw_tile = function(t)
@@ -409,7 +440,9 @@ function init_object(props)
 
   o.draw = function()
     if (not o.updated) return
-    o.draw_tiles(o.tiles)
+
+    if (o.type == 'tiles') o.draw_tiles(o.tiles)
+    if (o.type == 'rects') o.draw_rects(o.rects)
   end
 
   add(objects, o)
@@ -418,6 +451,7 @@ function init_object(props)
 end
 
 function destroy_object(o)
+  if (o == nil) return
   del(objects, o)
 end
 
@@ -489,20 +523,28 @@ function init_screen(name, props)
   -- take everything from level object and add it to this `props` key
   s.props = props()
 
-  s.frame_count = 0
-  s.transition  = s.props.transition
-
-  s.can = function(key)
-    return table_has_key(s.props, key)
-  end
+  s.frame_count  = 0
+  s.screen_flash = s.props.screen_flash or false
+  s.reset_flash  = s.props.screen_flash or false
+  s.transition   = s.props.transition
 
   s.init = function()
     destroy_objects()
-    if (s.can('init')) s.props.init()
+    s.frame_count = 0
+    if (s.reset_flash) s.screen_flash = true
+    if (s.props.init) s.props.init()
+  end
+
+  s.flash = function()
+    if s.screen_flash then
+      rectfill(0, 0, 127, 127, 7)
+      s.screen_flash = false
+    end
   end
 
   s.tick = function()
     s.frame_count += 1
+
     if (s.frame_count == s.transition.timeout) then
       go_to(s.transition.destination)
     end
@@ -515,15 +557,17 @@ function init_screen(name, props)
       o.update()
     end)
 
-    if (s.can('update')) s.props.update()
+    if (s.props.update) s.props.update()
   end
 
   s.draw = function()
+    if (s.screen_flash) return s.flash()
+
     foreach(objects, function(o)
       o.draw()
     end)
 
-    if (s.can('draw')) s.props.draw()
+    if (s.props.draw) s.props.draw()
   end
 
   screens[name] = s
@@ -599,13 +643,6 @@ init_screen('title',  function ()
   s.screen_flash     = true
   s.start_text_flash = 0
 
-  s.flash = function()
-    if s.screen_flash then
-      rectfill(0, 0, 127, 127, 7)
-      s.screen_flash = false
-    end
-  end
-
   s.idle_text_animation = function()
     local d   = 10
     local dir = 'inOut'
@@ -637,8 +674,6 @@ init_screen('title',  function ()
   end
 
   s.init = function()
-    s.screen_flash = true
-
     local bline = tiles.title.bottom_line
     local knife = tiles.title.knife
     local spoon = tiles.title.spoon
@@ -659,7 +694,6 @@ init_screen('title',  function ()
   s.draw = function()
     s.show_start_text()
     text.show_center('about', 117, 7)
-    s.flash()
   end
 
   return s
@@ -670,16 +704,9 @@ init_screen('title_transition_out', function()
 
   s.screen_flash = true
   s.transition   = {
-    destination = 'playing',
-    timeout     = 50,
+    destination = 'playing_transition_in',
+    timeout     = 35,
   }
-
-  s.flash = function()
-    if s.screen_flash then
-      rectfill(0, 0, 127, 127, 7)
-      s.screen_flash = false
-    end
-  end
 
   s.transition_out_text_animation = function()
     local d   = 20
@@ -706,8 +733,6 @@ init_screen('title_transition_out', function()
   end
 
   s.init = function()
-    s.screen_flash = true
-
     local bline = tiles.title.bottom_line
     local knife = tiles.title.knife
     local spoon = tiles.title.spoon
@@ -721,14 +746,48 @@ init_screen('title_transition_out', function()
     s.transition_out_text_animation()
   end
 
+  return s
+end)
+
+-- playing screen
+init_screen('playing_transition_in', function()
+  local s = {}
+
+  s.count_in       = 0
+  s.count_in_timer = 0
+  s.transition     = {
+    destination = 'playing',
+    timeout     = 130,
+  }
+
+  s.init = function()
+    s.count_in       = 0
+    s.count_in_timer = 0
+
+    local k = tiles.playing.transition_buttons.knifey
+    local s = tiles.playing.transition_buttons.spoony
+
+    init_object({ tiles = k, x = 10, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ tiles = s, x = 86, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ tiles = tiles.playing.score, x = 48, y1 = -24, y2 = 87, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ type  = 'rects', rects = rects.floor, x = 4, y1 = 143, y2 = 111, duration = 20, easing = 'outBounce' })
+  end
+
+  s.update = function()
+    s.count_in_timer += 1
+  end
+
   s.draw = function()
-    s.flash()
+    if (s.count_in_timer >= 40)  s.count_in = 3
+    if (s.count_in_timer >= 70)  s.count_in = 2
+    if (s.count_in_timer >= 100) s.count_in = 1
+
+    if (s.count_in > 0) print(s.count_in, 62, 44, 7)
   end
 
   return s
 end)
 
--- playing screen
 init_screen('playing', function()
   local s = {}
 
@@ -753,7 +812,9 @@ init_screen('playing', function()
   }
 
   s.button_animations = {}
+  s.floor = nil
   s.score_display = nil
+  s.screen_flash = true
   s.timeout = {}
   s.timer = {
     color     = 8,
@@ -831,12 +892,6 @@ init_screen('playing', function()
     s.draw_button(text.spoony)
   end 
 
-  s.draw_floor = function()
-    rectfill(4, 111, 123, 112, 15)
-    rectfill(4, 113, 123, 119, 4)
-    rectfill(4, 120, 123, 123, 2)
-  end
-
   s.draw_timer = function()
     x = s.timer.start_x + s.timer_width()
     y = s.timer.start_y + s.timer.height - 1
@@ -892,10 +947,10 @@ init_screen('playing', function()
   end
 
   s.update_score_display = function()
-    local score_display_y1 = 88
+    local score_display_y1 = 87
 
     if s.score_display ~= nil then
-      score_display_y1 = 90
+      score_display_y1 = 86
       destroy_object(s.score_display)
     end
 
@@ -903,14 +958,22 @@ init_screen('playing', function()
       tiles    = tiles.playing.score,
       x        = 48,
       y1       = score_display_y1,
-      y2       = 88,
-      duration = 3,
+      y2       = 87,
+      delay    = 3,
+      duration = 2,
     })
   end
 
   s.init = function()
     s.reset()
     s.new_round()
+
+    s.floor = init_object({
+      type  = 'rects',
+      rects = rects.floor,
+      x     = 4,
+      y     = 111,
+    })
   end
 
   s.update = function()
@@ -921,10 +984,9 @@ init_screen('playing', function()
   s.draw = function()
     s.draw_timer()
     s.draw_buttons()
-    s.draw_floor()
 
-    text.show_center('score', 93, 7)
-    text.output_center(score, 100, 7)
+    text.show_center('score', 92, 7)
+    text.output_center(score, 99, 7)
     text.output(high_score,   113, 8, 7, 0)
   end
 
@@ -942,7 +1004,7 @@ init_screen('game_over', function()
 
   s.draw = function()
     local high_score_text = text['high_score'] .. high_score
-    local score_text      = text['score'] .. score
+    local score_text      = text['score'] .. ': ' .. score
 
     rectfill(8, 8, 119, 119, 8)
 

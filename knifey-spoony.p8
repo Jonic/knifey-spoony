@@ -684,7 +684,7 @@ init_screen('title_transition_out', function()
 
   s.screen_flash = true
   s.transition   = {
-    destination = 'playing',
+    destination = 'playing_transition_in',
     timeout     = 50,
   }
 

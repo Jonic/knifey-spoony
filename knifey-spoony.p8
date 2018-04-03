@@ -1004,7 +1004,7 @@ init_screen('game_over', function()
 
   s.draw = function()
     local high_score_text = text['high_score'] .. high_score
-    local score_text      = text['score'] .. score
+    local score_text      = text['score'] .. ': ' .. score
 
     rectfill(8, 8, 119, 119, 8)
 

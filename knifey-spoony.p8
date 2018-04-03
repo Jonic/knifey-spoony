@@ -523,17 +523,28 @@ function init_screen(name, props)
   -- take everything from level object and add it to this `props` key
   s.props = props()
 
-  s.frame_count = 0
-  s.transition  = s.props.transition
+  s.frame_count  = 0
+  s.screen_flash = s.props.screen_flash or false
+  s.reset_flash  = s.props.screen_flash or false
+  s.transition   = s.props.transition
 
   s.init = function()
     destroy_objects()
     s.frame_count = 0
+    if (s.reset_flash) s.screen_flash = true
     if (s.props.init) s.props.init()
+  end
+
+  s.flash = function()
+    if s.screen_flash then
+      rectfill(0, 0, 127, 127, 7)
+      s.screen_flash = false
+    end
   end
 
   s.tick = function()
     s.frame_count += 1
+
     if (s.frame_count == s.transition.timeout) then
       go_to(s.transition.destination)
     end
@@ -550,6 +561,8 @@ function init_screen(name, props)
   end
 
   s.draw = function()
+    if (s.screen_flash) return s.flash()
+
     foreach(objects, function(o)
       o.draw()
     end)
@@ -809,6 +822,7 @@ init_screen('playing', function()
   s.button_animations = {}
   s.floor = nil
   s.score_display = nil
+  s.screen_flash = true
   s.timeout = {}
   s.timer = {
     color     = 8,

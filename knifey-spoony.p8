@@ -949,22 +949,24 @@ init_screen('playing', function()
     local score_display_y1 = 88
 
     if s.score_display ~= nil then
-      score_display_y1 = 90
+      score_display_y1 = 86
       destroy_object(s.score_display)
     end
 
     s.score_display = init_object({
+      delay    = 4,
       tiles    = tiles.playing.score,
       x        = 48,
       y1       = score_display_y1,
       y2       = 88,
-      duration = 3,
+      duration = 2,
     })
   end
 
   s.init = function()
     s.reset()
     s.new_round()
+    s.draw_floor()
   end
 
   s.update = function()
@@ -975,7 +977,6 @@ init_screen('playing', function()
   s.draw = function()
     s.draw_timer()
     s.draw_buttons()
-    s.draw_floor()
 
     text.show_center('score', 93, 7)
     text.output_center(score, 100, 7)

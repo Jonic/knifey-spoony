@@ -331,6 +331,8 @@ function init_object(props)
   o.repeat_countdown = props.repeat_after or nil
   o.repeating        = props.repeat_after ~= nil
   o.tiles            = props.tiles
+  o.rects            = props.rects
+  o.type             = props.type or 'tiles'
   o.updated          = false
   o.x                = props.x or { start = props.x1 or 0, dest = props.x2 or nil }
   o.y                = props.y or { start = props.y1 or 0, dest = props.y2 or nil }
@@ -356,6 +358,23 @@ function init_object(props)
     end
 
     return flr(new_pos)
+  end
+
+  o.draw_rect = function(r)
+    local x1  = (r.x or 0) + o.pos_x
+    local y1  = (r.y or 0) + o.pos_y
+    local x2  = x1 + r.w
+    local y2  = y1 + r.h
+    local color = r.color
+
+    rectfill(x1, y1, x2, y2, color)
+  end
+
+  o.draw_rects = function(rects)
+    foreach(rects, function(r)
+      if (r.w == nil) return o.draw_rects(r)
+      o.draw_rect(r)
+    end)
   end
 
   o.draw_tile = function(t)
@@ -405,7 +424,9 @@ function init_object(props)
 
   o.draw = function()
     if (not o.updated) return
-    o.draw_tiles(o.tiles)
+
+    if (o.type == 'tiles') o.draw_tiles(o.tiles)
+    if (o.type == 'rects') o.draw_rects(o.rects)
   end
 
   add(objects, o)

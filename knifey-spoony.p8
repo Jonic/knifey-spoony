@@ -3,7 +3,7 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v0.10.2
+-- v0.10.3
 
 --[[
   "i see you've played knifey
@@ -69,10 +69,10 @@ function copy(t) -- shallow-copy a table
   return target
 end
 
-function draw_sprite(s)
+function draw_sprite(s, x, y)
   local i  = s.i
-  local x  = s.x
-  local y  = s.y
+  local x  = s.x + (x or 0)
+  local y  = s.y + (y or 0)
   local w  = s.w or 1
   local h  = s.h or 1
   local fx = s.fx or false
@@ -81,8 +81,8 @@ function draw_sprite(s)
   spr(i, x, y, w, h, fx, fy)
 end
 
-function draw_sprites(sprites)
-  foreach(sprites, draw_sprite)
+function draw_sprites(sprites, x, y)
+  foreach(sprites, draw_sprite, x, y)
 end
 
 function reset_globals()
@@ -797,7 +797,7 @@ init_screen('playing', function()
 
   s.decrease_timeout_remaining = function()
     s.timeout.remaining -= 1
-    -- if (s.timeout.remaining <= 0) go_to('game_over')
+    if (s.timeout.remaining <= 0) go_to('game_over')
   end
 
   s.decrease_timeout_start = function()

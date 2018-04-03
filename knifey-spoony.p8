@@ -643,13 +643,6 @@ init_screen('title',  function ()
   s.screen_flash     = true
   s.start_text_flash = 0
 
-  s.flash = function()
-    if s.screen_flash then
-      rectfill(0, 0, 127, 127, 7)
-      s.screen_flash = false
-    end
-  end
-
   s.idle_text_animation = function()
     local d   = 10
     local dir = 'inOut'
@@ -681,8 +674,6 @@ init_screen('title',  function ()
   end
 
   s.init = function()
-    s.screen_flash = true
-
     local bline = tiles.title.bottom_line
     local knife = tiles.title.knife
     local spoon = tiles.title.spoon
@@ -703,7 +694,6 @@ init_screen('title',  function ()
   s.draw = function()
     s.show_start_text()
     text.show_center('about', 117, 7)
-    s.flash()
   end
 
   return s
@@ -717,13 +707,6 @@ init_screen('title_transition_out', function()
     destination = 'playing_transition_in',
     timeout     = 35,
   }
-
-  s.flash = function()
-    if s.screen_flash then
-      rectfill(0, 0, 127, 127, 7)
-      s.screen_flash = false
-    end
-  end
 
   s.transition_out_text_animation = function()
     local d   = 20
@@ -750,8 +733,6 @@ init_screen('title_transition_out', function()
   end
 
   s.init = function()
-    s.screen_flash = true
-
     local bline = tiles.title.bottom_line
     local knife = tiles.title.knife
     local spoon = tiles.title.spoon
@@ -765,10 +746,6 @@ init_screen('title_transition_out', function()
     s.transition_out_text_animation()
   end
 
-  s.draw = function()
-    s.flash()
-  end
-
   return s
 end)
 
@@ -776,21 +753,36 @@ end)
 init_screen('playing_transition_in', function()
   local s = {}
 
-  s.transition   = {
+  s.count_in       = 0
+  s.count_in_timer = 0
+  s.transition     = {
     destination = 'playing',
-    timeout     = 30,
+    timeout     = 130,
   }
 
   s.init = function()
-    init_object({
-      type     = 'rects',
-      rects    = rects.floor,
-      x        = 4,
-      y1       = 127,
-      y2       = 111,
-      duration = 20,
-      easing   = 'outBounce',
-    })
+    s.count_in       = 0
+    s.count_in_timer = 0
+
+    local k = tiles.playing.transition_buttons.knifey
+    local s = tiles.playing.transition_buttons.spoony
+
+    init_object({ tiles = k, x = 10, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ tiles = s, x = 86, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ tiles = tiles.playing.score, x = 48, y1 = -24, y2 = 87, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ type  = 'rects', rects = rects.floor, x = 4, y1 = 143, y2 = 111, duration = 20, easing = 'outBounce' })
+  end
+
+  s.update = function()
+    s.count_in_timer += 1
+  end
+
+  s.draw = function()
+    if (s.count_in_timer >= 40)  s.count_in = 3
+    if (s.count_in_timer >= 70)  s.count_in = 2
+    if (s.count_in_timer >= 100) s.count_in = 1
+
+    if (s.count_in > 0) print(s.count_in, 62, 44, 7)
   end
 
   return s

@@ -743,6 +743,29 @@ init_screen('title_transition_out', function()
 end)
 
 -- playing screen
+init_screen('playing_transition_in', function()
+  local s = {}
+
+  s.transition   = {
+    destination = 'playing',
+    timeout     = 30,
+  }
+
+  s.init = function()
+    init_object({
+      type     = 'rects',
+      rects    = rects.floor,
+      x        = 4,
+      y1       = 127,
+      y2       = 111,
+      duration = 20,
+      easing   = 'outBounce',
+    })
+  end
+
+  return s
+end)
+
 init_screen('playing', function()
   local s = {}
 

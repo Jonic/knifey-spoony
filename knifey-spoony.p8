@@ -798,6 +798,7 @@ init_screen('playing', function()
   }
 
   s.button_animations = {}
+  s.floor = nil
   s.score_display = nil
   s.timeout = {}
   s.timer = {
@@ -877,9 +878,17 @@ init_screen('playing', function()
   end 
 
   s.draw_floor = function()
-    rectfill(4, 111, 123, 112, 15)
-    rectfill(4, 113, 123, 119, 4)
-    rectfill(4, 120, 123, 123, 2)
+    destroy_object(s.floor)
+
+    s.floor = init_object({
+      type     = 'rects',
+      rects    = rects.floor,
+      x        = 4,
+      y1       = 127,
+      y2       = 111,
+      duration = 20,
+      easing   = 'outBounce',
+    })
   end
 
   s.draw_timer = function()

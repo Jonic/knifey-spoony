@@ -149,6 +149,14 @@ end
 -->8
 -- sprites
 
+local rects = {
+  floor = {
+    { w = 119, h = 1, color = 15 },
+    { y = 2, w = 119, h = 7, color = 4 },
+    { y = 9, w = 119, h = 3, color = 2 },
+  },
+}
+
 local tiles = {
   playing = {
     buttons = {

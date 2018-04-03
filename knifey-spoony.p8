@@ -892,20 +892,6 @@ init_screen('playing', function()
     s.draw_button(text.spoony)
   end 
 
-  s.draw_floor = function()
-    destroy_object(s.floor)
-
-    s.floor = init_object({
-      type     = 'rects',
-      rects    = rects.floor,
-      x        = 4,
-      y1       = 127,
-      y2       = 111,
-      duration = 20,
-      easing   = 'outBounce',
-    })
-  end
-
   s.draw_timer = function()
     x = s.timer.start_x + s.timer_width()
     y = s.timer.start_y + s.timer.height - 1
@@ -981,7 +967,13 @@ init_screen('playing', function()
   s.init = function()
     s.reset()
     s.new_round()
-    s.draw_floor()
+
+    s.floor = init_object({
+      type  = 'rects',
+      rects = rects.floor,
+      x     = 4,
+      y     = 111,
+    })
   end
 
   s.update = function()

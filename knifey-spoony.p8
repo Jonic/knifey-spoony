@@ -94,10 +94,6 @@ function rndint(min, max)
   return flr(rnd(max)) + min
 end
 
-function table_has_key(table, key)
-  return table[key] ~= nil
-end
-
 function update_high_score()
   if (score > high_score) then
     high_score        = score
@@ -492,13 +488,9 @@ function init_screen(name, props)
   s.frame_count = 0
   s.transition  = s.props.transition
 
-  s.can = function(key)
-    return table_has_key(s.props, key)
-  end
-
   s.init = function()
     destroy_objects()
-    if (s.can('init')) s.props.init()
+    if (s.props.init) s.props.init()
   end
 
   s.tick = function()
@@ -515,7 +507,7 @@ function init_screen(name, props)
       o.update()
     end)
 
-    if (s.can('update')) s.props.update()
+    if (s.props.update) s.props.update()
   end
 
   s.draw = function()
@@ -523,7 +515,7 @@ function init_screen(name, props)
       o.draw()
     end)
 
-    if (s.can('draw')) s.props.draw()
+    if (s.props.draw) s.props.draw()
   end
 
   screens[name] = s

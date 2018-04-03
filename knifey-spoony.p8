@@ -435,6 +435,7 @@ function init_object(props)
 end
 
 function destroy_object(o)
+  if (o == nil) return
   del(objects, o)
 end
 

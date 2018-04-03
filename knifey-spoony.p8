@@ -985,8 +985,8 @@ init_screen('playing', function()
     s.draw_timer()
     s.draw_buttons()
 
-    text.show_center('score', 93, 7)
-    text.output_center(score, 100, 7)
+    text.show_center('score', 92, 7)
+    text.output_center(score, 99, 7)
     text.output(high_score,   113, 8, 7, 0)
   end
 

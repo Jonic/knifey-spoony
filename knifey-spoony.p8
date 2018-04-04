@@ -751,7 +751,6 @@ init_screen('title_transition_out', function()
   return s
 end)
 
--- playing screen
 init_screen('playing_transition_in', function()
   local s = {}
 
@@ -937,7 +936,7 @@ init_screen('playing', function()
   end
 
   s.round_failed = function()
-    go_to('game_over')
+    go_to('playing_transition_out')
   end
 
   s.round_passed = function()
@@ -998,9 +997,32 @@ init_screen('playing', function()
   return s
 end)
 
--- game_over screen
+init_screen('playing_transition_out', function()
+  local s = {}
+
+  s.transition     = {
+    destination = 'game_over',
+    timeout     = 100,
+  }
+
+  s.init = function()
+  end
+
+  s.update = function()
+  end
+
+  s.draw = function()
+  end
+
+  return s
+end)
+
 init_screen('game_over', function()
   local s = {}
+
+  s.init = function()
+    clear_screen = true
+  end
 
   s.update = function()
     if (btnp(4)) go_to('title_transition_in')

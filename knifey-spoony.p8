@@ -523,35 +523,35 @@ function init_screen(name, props)
   -- take everything from level object and add it to this `props` key
   s.props = props()
 
-  s.frame_count  = 0
-  s.screen_flash = s.props.screen_flash or false
-  s.reset_flash  = s.props.screen_flash or false
-  s.transition   = s.props.transition
+  s.frame_count = 0
 
   s.init = function()
     destroy_objects()
     s.frame_count = 0
-    if (s.reset_flash) s.screen_flash = true
     if (s.props.init) s.props.init()
   end
 
-  s.flash = function()
-    if s.screen_flash then
-      rectfill(0, 0, 127, 127, 7)
-      s.screen_flash = false
-    end
+  s.draw_flash = function()
+    rectfill(0, 0, 127, 127, s.props.flash.color)
+  end
+
+  s.should_flash = function()
+    return (s.props.flash ~= nil) and (s.props.flash.on == s.frame_count)
   end
 
   s.tick = function()
-    s.frame_count += 1
+    printh(s.frame_count)
 
-    if (s.frame_count == s.transition.timeout) then
-      go_to(s.transition.destination)
-    end
   end
 
   s.update = function()
-    if (s.transition ~= nil) s.tick()
+    s.frame_count += 1
+
+    if (s.props.transition ~= nil) then
+      if (s.frame_count == s.props.transition.timeout) then
+        go_to(s.props.transition.destination)
+      end
+    end
 
     foreach(objects, function(o)
       o.update()
@@ -561,7 +561,7 @@ function init_screen(name, props)
   end
 
   s.draw = function()
-    if (s.screen_flash) return s.flash()
+    if (s.should_flash()) return s.draw_flash()
 
     foreach(objects, function(o)
       o.draw()
@@ -636,11 +636,13 @@ init_screen('title_transition_in', function()
   return s
 end)
 
--- title screen
 init_screen('title',  function ()
   local s = {}
 
-  s.screen_flash     = true
+  s.flash = {
+    on = 0,
+    color = 7,
+  }
   s.start_text_flash = 0
 
   s.idle_text_animation = function()
@@ -702,7 +704,10 @@ end)
 init_screen('title_transition_out', function()
   local s = {}
 
-  s.screen_flash = true
+  s.flash = {
+    on = 0,
+    color = 7,
+  }
   s.transition   = {
     destination = 'playing_transition_in',
     timeout     = 35,
@@ -791,6 +796,11 @@ end)
 init_screen('playing', function()
   local s = {}
 
+  s.score_display = nil
+  s.flash = {
+    on = 0,
+    color = 7,
+  }
   s.defaults = {}
   s.defaults.button_animations = {
     knifey = {
@@ -813,8 +823,6 @@ init_screen('playing', function()
 
   s.button_animations = {}
   s.floor = nil
-  s.score_display = nil
-  s.screen_flash = true
   s.timeout = {}
   s.timer = {
     color     = 8,

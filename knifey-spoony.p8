@@ -36,13 +36,10 @@ local high_score        = 0
 local high_score_beaten = false
 local score             = 0
 
-local objects     = {}
-local screens     = {}
-local screen      = nil
-local screen_next = nil
-
-local transition_countdown = 0
-local transition_state     = nil
+local clear_screen = true
+local objects      = {}
+local screens      = {}
+local screen       = nil
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table
@@ -1041,7 +1038,7 @@ function _update()
 end
 
 function _draw()
-  cls()
+  if (clear_screen) cls()
   -- rectfill(0, 0, 63, 127, 3)
   screen.draw()
   map(0, 0)

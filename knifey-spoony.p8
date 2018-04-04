@@ -536,11 +536,6 @@ function init_screen(name, props)
     return (s.props.flash ~= nil) and (s.props.flash.on == s.frame_count)
   end
 
-  s.tick = function()
-    printh(s.frame_count)
-
-  end
-
   s.update = function()
     s.frame_count += 1
 

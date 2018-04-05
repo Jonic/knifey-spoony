@@ -931,7 +931,7 @@ init_screen('playing', function()
   end
 
   s.round_failed = function()
-    go_to('playing_transition_out')
+    go_to('game_over')
   end
 
   s.round_passed = function()

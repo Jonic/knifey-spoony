@@ -864,7 +864,7 @@ init_screen('playing', function()
 
   s.decrease_timeout_remaining = function()
     s.timeout.remaining -= 1
-    if (s.timeout.remaining <= 0) go_to('game_over')
+    if (s.timeout.remaining <= 0) s.round_failed()
   end
 
   s.decrease_timeout_start = function()

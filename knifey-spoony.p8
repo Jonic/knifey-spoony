@@ -992,26 +992,6 @@ init_screen('playing', function()
   return s
 end)
 
-init_screen('playing_transition_out', function()
-  local s = {}
-
-  s.transition     = {
-    destination = 'game_over',
-    timeout     = 100,
-  }
-
-  s.init = function()
-  end
-
-  s.update = function()
-  end
-
-  s.draw = function()
-  end
-
-  return s
-end)
-
 init_screen('game_over', function()
   local s = {}
 

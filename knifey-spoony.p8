@@ -636,8 +636,8 @@ init_screen('title',  function ()
   local s = {}
 
   s.flash = {
-    on = 0,
     color = 7,
+    on    = 0,
   }
   s.start_text_flash = 0
 
@@ -667,6 +667,7 @@ init_screen('title',  function ()
 
   s.show_start_text = function()
     s.start_text_flash += 1
+
     if (s.start_text_flash == 24) s.start_text_flash = 0
     if (s.start_text_flash < 12) text.show_center('start_game', 100, 7)
   end
@@ -701,10 +702,10 @@ init_screen('title_transition_out', function()
   local s = {}
 
   s.flash = {
-    on = 0,
     color = 7,
+    on    = 0,
   }
-  s.transition   = {
+  s.transition = {
     destination = 'playing_transition_in',
     timeout     = 35,
   }
@@ -898,6 +899,7 @@ init_screen('playing', function()
   s.draw_timer = function()
     x = s.timer.start_x + s.timer_width()
     y = s.timer.start_y + s.timer.height - 1
+
     rectfill(s.timer.start_x, s.timer.start_y, x, y, s.timer.color)
   end
 

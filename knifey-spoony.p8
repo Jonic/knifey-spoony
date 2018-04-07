@@ -36,10 +36,10 @@ local high_score        = 0
 local high_score_beaten = false
 local score             = 0
 
-local clear_screen = true
-local objects      = {}
-local screens      = {}
-local screen       = nil
+local update_objects = true
+local objects        = {}
+local screens        = {}
+local screen         = nil
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table
@@ -83,8 +83,10 @@ function draw_sprites(sprites, x, y)
 end
 
 function reset_globals()
-  high_score_beaten  = false
-  score              = 0
+  high_score        = dget(0)
+  high_score_beaten = false
+  score             = 0
+  update_objects    = true
 end
 
 function rndint(min, max)
@@ -420,6 +422,14 @@ function init_object(props)
     if (type(o.y) == 'table') o.pos_y = o.calculate_pos('y')
   end
 
+  o.should_draw = function()
+    return update_objects and o.updated
+  end
+
+  o.should_update = function()
+    return update_objects and not o.is_complete()
+  end
+
   o.tick = function()
     if o.delay > 0 then
       o.delay -= 1
@@ -430,13 +440,15 @@ function init_object(props)
   end
 
   o.update = function()
-    if (not o.is_complete()) o.tick()
+    if (not o.should_update()) return
+
+    o.tick()
     o.set_pos()
     o.updated = true
   end
 
   o.draw = function()
-    if (not o.updated) return
+    if (not o.should_draw()) return
 
     if (o.type == 'tiles') o.draw_tiles(o.tiles)
     if (o.type == 'rects') o.draw_rects(o.rects)
@@ -545,21 +557,13 @@ function init_screen(name, props)
       end
     end
 
-    foreach(objects, function(o)
-      o.update()
-    end)
-
     if (s.props.update) s.props.update()
   end
 
   s.draw = function()
     if (s.should_flash()) return s.draw_flash()
-
-    foreach(objects, function(o)
-      o.draw()
-    end)
-
     if (s.props.draw) s.props.draw()
+    map(0, 0)
   end
 
   screens[name] = s
@@ -1026,19 +1030,26 @@ end)
 
 function _init()
   cartdata('knifeyspoony')
-  high_score = dget(0)
+  reset_globals()
   go_to('title_transition_in')
 end
 
 function _update()
+  foreach(objects, function(o)
+    o.update()
+  end)
+
   screen.update()
 end
 
 function _draw()
-  if (clear_screen) cls()
-  -- rectfill(0, 0, 63, 127, 3)
+  if (update_objects) cls()
+
+  foreach(objects, function(o)
+    o.draw()
+  end)
+
   screen.draw()
-  map(0, 0)
 end
 __gfx__
 aaaaaaaaaaaaaaaaaaaaaaa4a9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

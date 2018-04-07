@@ -792,33 +792,41 @@ end)
 init_screen('playing', function()
   local s = {}
 
-  s.score_display = nil
-  s.flash = {
-    on = 0,
-    color = 7,
-  }
-  s.defaults = {}
-  s.defaults.button_animations = {
-    knifey = {
-      animating = false,
-      frame     = 1,
+  s.defaults = {
+    button_animations = {
+      knifey = {
+        animating = false,
+        frame     = 1,
+      },
+      spoony = {
+        animating = false,
+        frame     = 1,
+      },
     },
-    spoony = {
-      animating = false,
-      frame     = 1,
+    failed_state = {
+      animating   = false,
+      flash       = false,
+      timeout     = 50,
+      dissolve_y1 = 7,
+      dissolve_y2 = 80,
     },
-  }
-
-  s.defaults.timeout = {
-    max        = 150,
-    min        = 20,
-    multiplier = 0.95,
-    remaining  = 0,
-    start      = 120,
+    timeout = {
+      max        = 150,
+      min        = 20,
+      multiplier = 0.95,
+      remaining  = 0,
+      start      = 120,
+    },
   }
 
   s.button_animations = {}
+  s.flash = {
+    color = 7,
+    on    = 0,
+  }
   s.floor = nil
+  s.failed_state = {}
+  s.score_display = nil
   s.timeout = {}
   s.timer = {
     color     = 8,
@@ -828,12 +836,12 @@ init_screen('playing', function()
     start_y   = 4,
   }
   s.utensil = {
-    type = nil,
-    index = 0,
-    sprites = {},
+    type     = nil,
+    index    = 0,
+    sprites  = {},
     previous = {
       index = nil,
-      type = nil,
+      type  = nil,
     }
   }
 
@@ -877,6 +885,15 @@ init_screen('playing', function()
     s.timeout.start = mid(s.timeout.min, new_timeout, s.timeout.start)
   end
 
+  s.dissolve_utensil = function()
+    local x1, x2, color = 39, 87, 0
+    local dissolve_y1 = s.failed_state.dissolve_y1
+    local dissolve_y2 = s.failed_state.dissolve_y2
+
+    rectfill(x1, dissolve_y1, x2, dissolve_y1, color)
+    rectfill(x1, dissolve_y2, x2, dissolve_y2, color)
+  end
+
   s.draw_button = function(button)
     local button_animation = s.button_animations[button]
     local button_sprites   = tiles.playing.buttons[button]
@@ -896,6 +913,18 @@ init_screen('playing', function()
     s.draw_button(text.spoony)
   end 
 
+  s.draw_failed_state = function()
+    if (s.failed_state.flash) then
+      rectfill(0, 0, 127, 127, 8)
+      s.failed_state.flash = false
+      return
+    end
+
+    update_objects = false
+
+    s.dissolve_utensil()
+  end
+
   s.draw_timer = function()
     x = s.timer.start_x + s.timer_width()
     y = s.timer.start_y + s.timer.height - 1
@@ -904,14 +933,13 @@ init_screen('playing', function()
   end
 
   s.evaluate_input = function(choice)
-    if (choice == s.utensil.type) then
-      s.round_passed()
-    else
-      s.round_failed()
-    end
+    if (choice == s.utensil.type) return s.round_passed()
+    s.round_failed()
   end
 
   s.get_input = function()
+    if (s.failed_state.animating) return
+
     if (btnp(0)) then
       s.animate_button(text.knifey)
       s.evaluate_input(text.knifey)
@@ -930,14 +958,23 @@ init_screen('playing', function()
   end
 
   s.reset = function()
-    s.button_animations = clone(s.defaults.button_animations)
-    s.score_display     = nil
-    s.timeout           = copy(s.defaults.timeout)
+    s.reset_button_animations()
+
+    s.score_display = nil
+    s.failed_state  = copy(s.defaults.failed_state)
+    s.timeout       = copy(s.defaults.timeout)
+
     reset_globals()
   end
 
+  s.reset_button_animations = function()
+    s.button_animations = clone(s.defaults.button_animations)
+  end
+
   s.round_failed = function()
-    go_to('game_over')
+    s.reset_button_animations()
+    s.failed_state.animating = true
+    s.failed_state.flash     = true
   end
 
   s.round_passed = function()
@@ -949,6 +986,22 @@ init_screen('playing', function()
   s.timer_width = function()
     local elapsed_percentage = s.timeout.remaining / s.timeout.start
     return flr(elapsed_percentage * s.timer.max_width)
+  end
+
+  s.update_failed_state = function()
+    s.failed_state.dissolve_y1 += 2
+    s.failed_state.dissolve_y2 -= 2
+    s.failed_state.timeout     -= 1
+
+    if (s.failed_state.dissolve_y1 > s.defaults.failed_state.dissolve_y2) then
+      s.failed_state.dissolve_y1 = s.defaults.failed_state.dissolve_y2
+    end
+
+    if (s.failed_state.dissolve_y2 < s.defaults.failed_state.dissolve_y1) then
+      s.failed_state.dissolve_y2 = s.defaults.failed_state.dissolve_y1
+    end
+
+    if (s.failed_state.timeout == 0) go_to('game_over')
   end
 
   s.update_score_display = function()
@@ -982,17 +1035,21 @@ init_screen('playing', function()
   end
 
   s.update = function()
+    if (s.failed_state.animating) s.update_failed_state()
+
     s.decrease_timeout_remaining()
     s.get_input()
   end
 
   s.draw = function()
-    s.draw_timer()
-    s.draw_buttons()
+    if (s.failed_state.animating) s.draw_failed_state()
 
+    s.draw_buttons()
+    s.draw_timer()
+
+    text.output(high_score, 113, 8, 7, 0)
     text.show_center('score', 92, 7)
     text.output_center(score, 99, 7)
-    text.output(high_score,   113, 8, 7, 0)
   end
 
   return s
@@ -1002,7 +1059,7 @@ init_screen('game_over', function()
   local s = {}
 
   s.init = function()
-    clear_screen = true
+    update_objects = true
   end
 
   s.update = function()

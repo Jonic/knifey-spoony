@@ -1047,7 +1047,6 @@ init_screen('playing', function()
       x1       = 133,
       x2       = 113,
       y        = 8,
-      outline  = 4,
       delay    = 30,
       duration = 10,
       easing   = 'outBack'

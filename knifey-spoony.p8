@@ -971,21 +971,15 @@ init_screen('playing', function()
   end
 
   s.reset = function()
-    s.reset_button_animations()
-
-    s.score_display = nil
-    s.failed_state  = copy(s.defaults.failed_state)
-    s.timeout       = copy(s.defaults.timeout)
+    s.button_animations = clone(s.defaults.button_animations)
+    s.score_display     = nil
+    s.failed_state      = copy(s.defaults.failed_state)
+    s.timeout           = copy(s.defaults.timeout)
 
     reset_globals()
   end
 
-  s.reset_button_animations = function()
-    s.button_animations = clone(s.defaults.button_animations)
-  end
-
   s.round_failed = function()
-    s.reset_button_animations()
     s.failed_state.animating = true
     s.failed_state.flash     = true
   end

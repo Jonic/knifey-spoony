@@ -492,6 +492,11 @@ function init_object(props)
     if (o.rects ~= nil) return 'rects'
   end
 
+  o.init = function()
+    if (o.x == nil) o.x = { start = props.x1 or 0, dest = props.x2 or nil }
+    if (o.y == nil) o.y = { start = props.y1 or 0, dest = props.y2 or nil }
+  end
+
   o.update = function()
     if (not o.should_update()) return
 
@@ -508,6 +513,7 @@ function init_object(props)
     if (o.is_rects()) return o.draw_rects(o.rects)
   end
 
+  o.init()
   add(objects, o)
 
   return o

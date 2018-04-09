@@ -638,6 +638,7 @@ init_screen('title',  function ()
     color = 7,
     on    = 0,
   }
+  s.start_text       = nil
   s.start_text_flash = 0
 
   s.idle_text_animation = function()
@@ -665,10 +666,19 @@ init_screen('title',  function ()
   end
 
   s.show_start_text = function()
-    s.start_text_flash += 1
+    if s.start_text_flash == 0 and s.start_text == nil then
+      s.start_text = init_object({
+        text = text.start_game,
+        x    = 'center',
+        y    = 100
+      })
+    elseif s.start_text_flash > 12 then
+      destroy_object(s.start_text)
+      s.start_text = nil
+    end
 
+    s.start_text_flash += 1
     if (s.start_text_flash == 24) s.start_text_flash = 0
-    if (s.start_text_flash < 12) text.show_center('start_game', 100, 7)
   end
 
   s.init = function()
@@ -681,6 +691,7 @@ init_screen('title',  function ()
     init_object({ tiles = tline, x = 32, y = 40 })
     init_object({ tiles = bline, x = 16, y = 80 })
     init_object({ tiles = spoon, x = 96, y = 80 })
+    init_object({ text = text.about, x = 'center', y1 = 147, y2 = 117, duration = 20, easing = 'outBack' })
 
     s.idle_text_animation()
   end
@@ -691,7 +702,6 @@ init_screen('title',  function ()
 
   s.draw = function()
     s.show_start_text()
-    text.show_center('about', 117, 7)
   end
 
   return s
@@ -770,7 +780,7 @@ init_screen('playing_transition_in', function()
     init_object({ tiles = k, x = 10, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
     init_object({ tiles = s, x = 86, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
     init_object({ tiles = tiles.playing.score, x = 48, y1 = -24, y2 = 87, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ type  = 'rects', rects = rects.floor, x = 4, y1 = 143, y2 = 111, duration = 20, easing = 'outBounce' })
+    init_object({ rects = rects.floor, x = 4, y1 = 143, y2 = 111, duration = 20, easing = 'outBounce' })
   end
 
   s.update = function()

@@ -36,10 +36,9 @@ local high_score        = 0
 local high_score_beaten = false
 local score             = 0
 
-local update_objects = true
-local objects        = {}
-local screens        = {}
-local screen         = nil
+local objects = {}
+local screens = {}
+local screen  = nil
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table
@@ -86,7 +85,6 @@ function reset_globals()
   high_score        = dget(0)
   high_score_beaten = false
   score             = 0
-  update_objects    = true
 end
 
 function rndint(min, max)
@@ -390,7 +388,8 @@ function init_object(props)
   end
 
   o.center_x = function()
-    return 64 - #o.text * 2
+    local text = o.text .. ''
+    return 64 - #text * 2
   end
 
   o.draw_rect = function(r)
@@ -470,11 +469,11 @@ function init_object(props)
   end
 
   o.should_draw = function()
-    return update_objects and o.updated
+    return o.updated
   end
 
   o.should_update = function()
-    return update_objects and not o.is_complete()
+    return not o.is_complete()
   end
 
   o.tick = function()
@@ -779,8 +778,11 @@ init_screen('playing_transition_in', function()
 
     init_object({ tiles = k, x = 10, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
     init_object({ tiles = s, x = 86, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ tiles = tiles.playing.score, x = 48, y1 = -24, y2 = 87, duration = 20, delay = 5, easing = 'outBounce' })
     init_object({ rects = rects.floor, x = 4, y1 = 143, y2 = 111, duration = 20, easing = 'outBounce' })
+
+    init_object({ tiles = tiles.playing.score, x = 48, y1 = -24, y2 = 87, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ text = text.score, x = 'center', y1 = -19, y2 = 92, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ text = score, x = 'center', y1 = -12, y2 = 99, duration = 20, delay = 5, easing = 'outBounce' })
   end
 
   s.update = function()
@@ -929,12 +931,12 @@ init_screen('playing', function()
       return
     end
 
-    update_objects = false
-
     s.dissolve_utensil()
   end
 
   s.draw_timer = function()
+    if (s.timeout.remaining <= 0) return
+
     x = s.timer.start_x + s.timer_width()
     y = s.timer.start_y + s.timer.height - 1
 
@@ -1019,6 +1021,8 @@ init_screen('playing', function()
     if s.score_display ~= nil then
       score_display_y1 = 86
       destroy_object(s.score_display)
+      destroy_object(s.score_text)
+      destroy_object(s.score)
     end
 
     s.score_display = init_object({
@@ -1029,6 +1033,8 @@ init_screen('playing', function()
       delay    = 3,
       duration = 2,
     })
+    s.score_text = init_object({ text = text.score, x = 'center', y = 92 })
+    s.score      = init_object({ text = score,      x = 'center', y = 99 })
   end
 
   s.init = function()
@@ -1036,24 +1042,32 @@ init_screen('playing', function()
     s.new_round()
 
     s.floor = init_object({ rects = rects.floor, x = 4, y = 111 })
+    s.text_high_score = init_object({
+      text     = high_score,
+      x1       = 133,
+      x2       = 113,
+      y        = 8,
+      outline  = 4,
+      delay    = 30,
+      duration = 10,
+      easing   = 'outBack'
+    })
+    s.score_text = init_object({ text = text.score, x = 'center', y = 92 })
+    s.score      = init_object({ text = score,      x = 'center', y = 99 })
   end
 
   s.update = function()
-    if (s.failed_state.animating) s.update_failed_state()
+    if (s.failed_state.animating) return s.update_failed_state()
 
     s.decrease_timeout_remaining()
     s.get_input()
   end
 
   s.draw = function()
-    if (s.failed_state.animating) s.draw_failed_state()
-
-    s.draw_buttons()
     s.draw_timer()
+    s.draw_buttons()
 
-    text.output(high_score, 113, 8, 7, 0)
-    text.show_center('score', 92, 7)
-    text.output_center(score, 99, 7)
+    if (s.failed_state.animating) s.draw_failed_state()
   end
 
   return s
@@ -1063,26 +1077,24 @@ init_screen('game_over', function()
   local s = {}
 
   s.init = function()
-    update_objects = true
+    local high_score_text = text['high_score'] .. high_score
+    local score_text      = text['score'] .. ': ' .. score
+
+    init_object({ rects = {{w = 111, h = 111, color = 8}}, x = 8, y = 8 })
+    init_object({ text = text.game_over,  x = 'center', y = 16, outline = 0 })
+    init_object({ text = score_text,      x = 'center', y = 32, outline = 0 })
+    init_object({ text = high_score_text, x = 'center', y = 40, outline = 0 })
+
+    if (high_score_beaten) then
+      init_object({ text = text.high_score_beaten, x = 'center', y = 56, outline = 0 })
+    end
+
+    init_object({ text = text.play_again, x = 'center', y = 112, outline = 0 })
   end
 
   s.update = function()
     if (btnp(4)) go_to('title_transition_in')
     if (btnp(5)) go_to('playing')
-  end
-
-  s.draw = function()
-    local high_score_text = text['high_score'] .. high_score
-    local score_text      = text['score'] .. ': ' .. score
-
-    rectfill(8, 8, 119, 119, 8)
-
-    text.show_center('game_over',       16, 7, 0)
-    text.output_center(score_text,      32, 7, 0)
-    text.output_center(high_score_text, 40, 7, 0)
-
-    if (high_score_beaten) text.show_center('high_score_beaten', 56, 7, 0)
-    text.show_center('play_again', 112, 7, 5)
   end
 
   return s
@@ -1106,7 +1118,7 @@ function _update()
 end
 
 function _draw()
-  if (update_objects) cls()
+  cls()
 
   foreach(objects, function(o)
     o.draw()

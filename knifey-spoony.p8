@@ -449,6 +449,18 @@ function init_object(props)
     return o.frame_count > o.duration
   end
 
+  o.is_text = function()
+    return o.type() == 'text'
+  end
+
+  o.is_tiles = function()
+    return o.type() == 'tiles'
+  end
+
+  o.is_rects = function()
+    return o.type() == 'rects'
+  end
+
   o.set_pos = function()
     o.pos_x = o.x
     o.pos_y = o.y
@@ -474,6 +486,12 @@ function init_object(props)
     o.frame_count += 1
   end
 
+  o.type = function()
+    if (o.text  ~= nil) return 'text'
+    if (o.tiles ~= nil) return 'tiles'
+    if (o.rects ~= nil) return 'rects'
+  end
+
   o.update = function()
     if (not o.should_update()) return
 
@@ -485,8 +503,9 @@ function init_object(props)
   o.draw = function()
     if (not o.should_draw()) return
 
-    if (o.type == 'tiles') o.draw_tiles(o.tiles)
-    if (o.type == 'rects') o.draw_rects(o.rects)
+    if (o.is_text())  return o.draw_text()
+    if (o.is_tiles()) return o.draw_tiles(o.tiles)
+    if (o.is_rects()) return o.draw_rects(o.rects)
   end
 
   add(objects, o)

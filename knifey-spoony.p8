@@ -348,18 +348,20 @@ local tiles = {
 function init_object(props)
   local o = {}
 
+  o.color            = props.color or 7
   o.delay            = props.delay or 0
   o.duration         = props.duration or 0
   o.easing           = props.easing or 'linear'
   o.frame_count      = 0
   o.pos_x            = 0
   o.pos_y            = 0
+  o.outline          = props.outline or nil
   o.repeat_after     = props.repeat_after or nil
   o.repeat_countdown = props.repeat_after or nil
   o.repeating        = props.repeat_after ~= nil
-  o.tiles            = props.tiles
-  o.rects            = props.rects
-  o.type             = props.type or 'tiles'
+  o.tiles            = props.tiles or nil
+  o.rects            = props.rects or nil
+  o.text             = props.text  or nil
   o.updated          = false
   o.x                = props.x or { start = props.x1 or 0, dest = props.x2 or nil }
   o.y                = props.y or { start = props.y1 or 0, dest = props.y2 or nil }
@@ -387,11 +389,15 @@ function init_object(props)
     return flr(new_pos)
   end
 
+  o.center_x = function()
+    return 64 - #o.text * 2
+  end
+
   o.draw_rect = function(r)
-    local x1  = (r.x or 0) + o.pos_x
-    local y1  = (r.y or 0) + o.pos_y
-    local x2  = x1 + r.w
-    local y2  = y1 + r.h
+    local x1    = (r.x or 0) + o.pos_x
+    local y1    = (r.y or 0) + o.pos_y
+    local x2    = x1 + r.w
+    local y2    = y1 + r.h
     local color = r.color
 
     rectfill(x1, y1, x2, y2, color)
@@ -402,6 +408,23 @@ function init_object(props)
       if (r.w == nil) return o.draw_rects(r)
       o.draw_rect(r)
     end)
+  end
+
+  o.draw_text = function()
+    local color   = o.color
+    local outline = o.outline
+    local text    = o.text
+    local x       = o.x == 'center' and o.center_x() or o.pos_x
+    local y       = o.pos_y
+
+    if outline ~= nil then
+      print(text, x - 1, y, outline)
+      print(text, x + 1, y, outline)
+      print(text, x, y - 1, outline)
+      print(text, x, y + 1, outline)
+    end
+
+    print(text, x, y, color)
   end
 
   o.draw_tile = function(t)

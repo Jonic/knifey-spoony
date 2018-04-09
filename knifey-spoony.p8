@@ -37,8 +37,8 @@ local high_score_beaten = false
 local score             = 0
 
 local objects = {}
-local screens = {}
 local screen  = nil
+local screens = {}
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table

@@ -838,14 +838,14 @@ init_screen('playing', function()
   }
 
   s.button_animations = {}
-  s.flash = {
-    color = 7,
-    on    = 0,
-  }
-  s.floor = nil
-  s.failed_state = {}
-  s.score_display = nil
-  s.timeout = {}
+  s.failed_state      = {}
+  s.flash             = { color = 7, on = 0 }
+  s.floor             = nil
+  s.score             = nil
+  s.score_display     = nil
+  s.score_text        = nil
+  s.timeout           = {}
+
   s.timer = {
     color     = 8,
     height    = 2,
@@ -1043,18 +1043,10 @@ init_screen('playing', function()
     s.reset()
     s.new_round()
 
-    s.floor = init_object({ rects = rects.floor, x = 4, y = 111 })
-    s.text_high_score = init_object({
-      text     = high_score,
-      x1       = 133,
-      x2       = 113,
-      y        = 8,
-      delay    = 30,
-      duration = 10,
-      easing   = 'outBack'
-    })
-    s.score_text = init_object({ text = text.score, x = 'center', y = 92 })
-    s.score      = init_object({ text = score,      x = 'center', y = 99 })
+    s.floor           = init_object({ rects = rects.floor, x = 4, y = 111 })
+    s.text_high_score = init_object({ text = high_score, x1 = 133, x2 = 113, y = 8, delay = 30, duration = 10, easing = 'outBack' })
+    s.score_text      = init_object({ text = text.score, x = 'center', y = 92 })
+    s.score           = init_object({ text = score,      x = 'center', y = 99 })
   end
 
   s.update = function()

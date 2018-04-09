@@ -360,10 +360,10 @@ function init_object(props)
   o.repeat_after     = props.repeat_after or nil
   o.repeat_countdown = props.repeat_after or nil
   o.repeating        = props.repeat_after ~= nil
-  o.x                = props.x or { start = props.x1 or 0, dest = props.x2 or nil }
-  o.y                = props.y or { start = props.y1 or 0, dest = props.y2 or nil }
   o.text             = props.text         or nil
   o.tiles            = props.tiles        or nil
+  o.x                = props.x            or nil
+  o.y                = props.y            or nil
 
   o.calculate_pos = function(pos_key)
     local pos = o[pos_key]

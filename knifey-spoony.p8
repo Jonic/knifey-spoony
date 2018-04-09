@@ -346,21 +346,22 @@ local tiles = {
 function init_object(props)
   local o = {}
 
+  o.frame_count      = 0
+  o.pos_x            = 0
+  o.pos_y            = 0
+  o.updated          = false
+
   o.color            = props.color or 7
   o.delay            = props.delay or 0
   o.duration         = props.duration or 0
   o.easing           = props.easing or 'linear'
-  o.frame_count      = 0
-  o.pos_x            = 0
-  o.pos_y            = 0
   o.outline          = props.outline or nil
+  o.rects            = props.rects or nil
   o.repeat_after     = props.repeat_after or nil
   o.repeat_countdown = props.repeat_after or nil
   o.repeating        = props.repeat_after ~= nil
-  o.tiles            = props.tiles or nil
-  o.rects            = props.rects or nil
   o.text             = props.text  or nil
-  o.updated          = false
+  o.tiles            = props.tiles or nil
   o.x                = props.x or { start = props.x1 or 0, dest = props.x2 or nil }
   o.y                = props.y or { start = props.y1 or 0, dest = props.y2 or nil }
 

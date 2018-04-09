@@ -156,6 +156,18 @@ local rects = {
   },
 }
 
+local text = {
+  about             = '2018 jonic + ribbon black',
+  game_over         = 'game over!',
+  high_score        = 'high score: ',
+  high_score_beaten = '** new high score **',
+  knifey            = 'knifey',
+  play_again        = 'press x to play again',
+  score             = 'score',
+  spoony            = 'spoony',
+  start_game        = 'press x to start'
+}
+
 local tiles = {
   playing = {
     transition_buttons = {

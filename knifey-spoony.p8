@@ -163,7 +163,7 @@ local text = {
   play_again        = 'press x to play again',
   score             = 'score',
   spoony            = 'spoony',
-  start_game        = 'press x to start'
+  start_game        = 'press x to start',
 }
 
 local tiles = {

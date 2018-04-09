@@ -905,12 +905,8 @@ init_screen('playing', function()
 
   s.dissolve_utensil = function()
     local rects = {{ w = 48, h = 0, color = 0 }}
-
-    local dissolve_y1 = s.failed_state.dissolve_y1
-    local dissolve_y2 = s.failed_state.dissolve_y2
-
-    init_object({ rects = rects, x = 39, y = dissolve_y1 })
-    init_object({ rects = rects, x = 39, y = dissolve_y2 })
+    init_object({ rects = rects, x = 39, y = s.failed_state.dissolve_y1 })
+    init_object({ rects = rects, x = 39, y = s.failed_state.dissolve_y2 })
   end
 
   s.draw_button = function(button)

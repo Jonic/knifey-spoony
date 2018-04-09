@@ -1035,12 +1035,7 @@ init_screen('playing', function()
     s.reset()
     s.new_round()
 
-    s.floor = init_object({
-      type  = 'rects',
-      rects = rects.floor,
-      x     = 4,
-      y     = 111,
-    })
+    s.floor = init_object({ rects = rects.floor, x = 4, y = 111 })
   end
 
   s.update = function()

@@ -91,19 +91,6 @@ function rndint(min, max)
   return flr(rnd(max)) + min
 end
 
-function update_high_score()
-  if (score > high_score) then
-    high_score        = score
-    high_score_beaten = true
-    dset(0, high_score)
-  end
-end
-
-function update_score()
-  score += 1
-  update_high_score()
-end
-
 -- easing equations
 -- https://github.com/EmmanuelOga/easing/blob/master/lib/easing.lua
 
@@ -987,11 +974,11 @@ init_screen('playing', function()
   end
 
   s.round_passed = function()
-    update_score()
+    s.update_score()
     s.decrease_timeout_start()
     s.new_round()
   end
-
+  
   s.timer_width = function()
     local elapsed_percentage = s.timeout.remaining / s.timeout.start
     return flr(elapsed_percentage * s.timer.max_width)
@@ -1011,6 +998,20 @@ init_screen('playing', function()
     end
 
     if (s.failed_state.timeout == 0) go_to('game_over')
+  end
+
+  s.update_high_score = function()
+    high_score        = score
+    high_score_beaten = true
+    dset(0, high_score)
+    
+    destroy_object(s.text_high_score)
+    s.text_high_score = init_object({ text = high_score, x = 113, y1 = 6, y2 = 8, duration = 3 })
+  end
+
+  s.update_score = function()
+    score += 1
+    if (score > high_score) s.update_high_score()
   end
 
   s.update_score_display = function()
@@ -1040,7 +1041,7 @@ init_screen('playing', function()
     s.new_round()
 
     s.floor           = init_object({ rects = rects.floor, x = 4, y = 111 })
-    s.text_high_score = init_object({ text = high_score, x1 = 133, x2 = 113, y = 8, delay = 30, duration = 10, easing = 'outBack' })
+    s.text_high_score = init_object({ text = high_score, x = 113, y = 8 })
     s.score_text      = init_object({ text = text.score, x = 'center', y = 92 })
     s.score           = init_object({ text = score,      x = 'center', y = 99 })
   end

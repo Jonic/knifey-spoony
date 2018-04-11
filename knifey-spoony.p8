@@ -1016,7 +1016,7 @@ init_screen('playing', function()
     destroy_object(s.high_score_icon)
     destroy_object(s.high_score_text)
 
-    s.high_score_icon = init_object({ tiles = tiles.playing.high_score_icon, x = 112, y1 = 6, y2 = 8, duration = 3 })
+    s.high_score_icon = init_object({ tiles = tiles.playing.high_score_icon, x = 106, y1 = 6, y2 = 8, duration = 3 })
     s.high_score_text = init_object({ text = high_score, x = 113, y1 = 6, y2 = 8, duration = 3 })
   end
 

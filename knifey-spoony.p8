@@ -759,17 +759,12 @@ end)
 init_screen('playing_transition_in', function()
   local s = {}
 
-  s.count_in       = 0
-  s.count_in_timer = 0
   s.transition     = {
     destination = 'playing',
     timeout     = 130,
   }
 
   s.init = function()
-    s.count_in       = 0
-    s.count_in_timer = 0
-
     local k = tiles.playing.transition_buttons.knifey
     local s = tiles.playing.transition_buttons.spoony
 
@@ -780,18 +775,10 @@ init_screen('playing_transition_in', function()
     init_object({ tiles = tiles.playing.score, x = 48, y1 = -24, y2 = 87, duration = 20, delay = 5, easing = 'outBounce' })
     init_object({ text = text.score, x = 'center', y1 = -19, y2 = 92, duration = 20, delay = 5, easing = 'outBounce' })
     init_object({ text = score, x = 'center', y1 = -12, y2 = 99, duration = 20, delay = 5, easing = 'outBounce' })
-  end
 
-  s.update = function()
-    s.count_in_timer += 1
-  end
-
-  s.draw = function()
-    if (s.count_in_timer >= 40)  s.count_in = 3
-    if (s.count_in_timer >= 70)  s.count_in = 2
-    if (s.count_in_timer >= 100) s.count_in = 1
-
-    if (s.count_in > 0) print(s.count_in, 62, 44, 7)
+    init_object({ text = '3', x = 55, y1 = -12, y2 = 44, duration = 20, delay = 40,  easing = 'outBounce' })
+    init_object({ text = '2', x = 62, y1 = -12, y2 = 44, duration = 20, delay = 70,  easing = 'outBounce' })
+    init_object({ text = '1', x = 69, y1 = -12, y2 = 44, duration = 20, delay = 100, easing = 'outBounce' })
   end
 
   return s

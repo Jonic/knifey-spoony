@@ -463,7 +463,7 @@ function init_object(props)
     local b = pos1          -- begin
     local c = pos2 - pos1   -- change == ending - beginning
     local d = o.duration    -- duration (total time)
-    local e = o.easing
+    local e = o.easing or linear
 
     if (type(e) == 'string') then
       if     e == 'inBack'    then e = inBack
@@ -707,20 +707,21 @@ init_screen('playing_transition_in', function()
   }
 
   s.init = function()
+    destroy_objects()
     local k = tiles.playing.transition_buttons.knifey
     local s = tiles.playing.transition_buttons.spoony
 
-    init_object({ tiles = k, x = 10, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ tiles = s, x = 86, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ rects = rects.floor, x = 4, y1 = 143, y2 = 111, duration = 20, easing = 'outBounce' })
+    init_object({ tiles = k,           x = 10, y = 127 }).move({ y = 95,  duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ tiles = s,           x = 86, y = 127 }).move({ y = 95,  duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ rects = rects.floor, x = 4,  y = 143 }).move({ y = 111, duration = 20, easing = 'outBounce' })
 
-    init_object({ tiles = tiles.playing.score, x = 48, y1 = -24, y2 = 87, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ text = text.score, x = 'center', y1 = -19, y2 = 92, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ text = score, x = 'center', y1 = -12, y2 = 99, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ tiles = tiles.playing.score, x = 48, y = -24 }).move({ y = 87, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ text = text.score,           x = 54, y = -19 }).move({ y = 92, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ text = score,                x = 60, y = -12 }).move({ y = 99, duration = 20, delay = 5, easing = 'outBounce' })
 
-    init_object({ text = '3', x = 55, y1 = -12, y2 = 44, duration = 20, delay = 40,  easing = 'outBounce' })
-    init_object({ text = '2', x = 62, y1 = -12, y2 = 44, duration = 20, delay = 70,  easing = 'outBounce' })
-    init_object({ text = '1', x = 69, y1 = -12, y2 = 44, duration = 20, delay = 100, easing = 'outBounce' })
+    init_object({ text = '3', x = 55, y = -12 }).move({ y = 44, duration = 20, delay = 40,  easing = 'outBounce' })
+    init_object({ text = '2', x = 62, y = -12 }).move({ y = 44, duration = 20, delay = 70,  easing = 'outBounce' })
+    init_object({ text = '1', x = 69, y = -12 }).move({ y = 44, duration = 20, delay = 100, easing = 'outBounce' })
   end
 
   return s
@@ -805,13 +806,7 @@ init_screen('playing', function()
 
     s.utensil.type    = utensil_type
     s.utensil.index   = utensil_index
-    s.utensil.sprites = init_object({
-      tiles    = utensil_array[utensil_index],
-      x        = 48,
-      y1       = 10,
-      y2       = 16,
-      duration = 3,
-    })
+    s.utensil.sprites = init_object({ tiles = utensil_array[utensil_index], x = 48, y = 10 }).move({ y = 16, duration = 3 })
   end
 
   s.decrease_timeout_remaining = function()
@@ -857,6 +852,9 @@ init_screen('playing', function()
     end
 
     s.dissolve_utensil()
+
+    destroy_object(s.floor)
+    s.floor = init_object({ rects = rects.floor, x = 4, y = 111 }).move({ y = 127, duration = 20 })
   end
 
   s.draw_timer = function()
@@ -945,8 +943,8 @@ init_screen('playing', function()
     destroy_object(s.high_score_icon)
     destroy_object(s.high_score_text)
 
-    s.high_score_icon = init_object({ tiles = tiles.playing.high_score_icon, x = 106, y1 = 6, y2 = 8, duration = 3 })
-    s.high_score_text = init_object({ text = high_score, x = 113, y1 = 6, y2 = 8, duration = 3 })
+    s.high_score_icon = init_object({ tiles = tiles.playing.high_score_icon, x = 106, y = 6 }).move({ y = 8, duration = 3 })
+    s.high_score_text = init_object({ text = high_score, x = 113, y = 6 }).move({ y = 8, duration = 3 })
   end
 
   s.update_score = function()
@@ -964,26 +962,20 @@ init_screen('playing', function()
       destroy_object(s.score)
     end
 
-    s.score_display = init_object({
-      tiles    = tiles.playing.score,
-      x        = 48,
-      y1       = score_display_y1,
-      y2       = 87,
-      delay    = 3,
-      duration = 2,
-    })
-    s.score_text = init_object({ text = text.score, x = 'center', y = 92 })
-    s.score      = init_object({ text = score,      x = 'center', y = 99 })
+    s.score_display = init_object({ tiles = tiles.playing.score, x = 48, y = score_display_y1 }).move({ y = 87, delay = 3, duration = 2 })
+    s.score_text    = init_object({ text = text.score, x = 54, y = 92 })
+    s.score         = init_object({ text = score,      x = 60, y = 99 })
   end
 
   s.init = function()
+    destroy_objects()
     s.reset()
     s.new_round()
 
-    s.floor           = init_object({ rects = rects.floor, x = 4, y = 111 })
-    s.high_score_text = init_object({ text = high_score, x = 113, y = 8 })
-    s.score_text      = init_object({ text = text.score, x = 'center', y = 92 })
-    s.score           = init_object({ text = score,      x = 'center', y = 99 })
+    s.floor           = init_object({ rects = rects.floor, x = 4,   y = 111 })
+    s.high_score_text = init_object({ text  = high_score,  x = 113, y = 8   })
+    s.score_text      = init_object({ text  = text.score,  x = 54,  y = 92  })
+    s.score           = init_object({ text  = score,       x = 60,  y = 99  })
   end
 
   s.update = function()
@@ -1009,15 +1001,15 @@ init_screen('game_over', function()
     local score_text      = text['score'] .. ': ' .. score
 
     init_object({ rects = {{w = 111, h = 111, color = 8}}, x = 8, y = 8 })
-    init_object({ text = text.game_over,  x = 'center', y = 16, outline = 0 })
-    init_object({ text = score_text,      x = 'center', y = 32, outline = 0 })
-    init_object({ text = high_score_text, x = 'center', y = 40, outline = 0 })
+    init_object({ text = text.game_over,  x = 44, y = 16, outline = 0 })
+    init_object({ text = score_text,      x = 46, y = 32, outline = 0 })
+    init_object({ text = high_score_text, x = 36, y = 40, outline = 0 })
 
     if (high_score_beaten) then
-      init_object({ text = text.high_score_beaten, x = 'center', y = 56, outline = 0 })
+      init_object({ text = text.high_score_beaten, x = 24, y = 56, outline = 0 })
     end
 
-    init_object({ text = text.play_again, x = 'center', y = 112, outline = 0 })
+    init_object({ text = text.play_again, x = 22, y = 112, outline = 0 })
   end
 
   s.update = function()

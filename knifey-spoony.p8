@@ -461,7 +461,7 @@ function init_object(props)
 
     local t = o.frame_count -- elapsed time
     local b = pos1          -- begin
-    local c = pos2 - pos1   -- change =  = ending - beginning
+    local c = pos2 - pos1   -- change == ending - beginning
     local d = o.duration    -- duration (total time)
     local e = o.easing
     local easing

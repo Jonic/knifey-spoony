@@ -428,8 +428,8 @@ function init_object(props)
   end
 
   o.pos = function(coords)
-    o.x = coords.x or 0
-    o.y = coords.y or 0
+    o.x = coords.x or o.x
+    o.y = coords.y or o.y
     return o
   end
 

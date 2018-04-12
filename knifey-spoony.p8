@@ -459,8 +459,6 @@ function init_object(props)
     local pos1 = o['old_' .. pos_key]
     local pos2 = o['new_' .. pos_key]
 
-    if (pos2 == o[pos_key]) return o[pos_key]
-    
     local t = o.frame_count -- elapsed time
     local b = pos1          -- begin
     local c = pos2 - pos1   -- change =  = ending - beginning

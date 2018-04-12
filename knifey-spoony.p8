@@ -578,7 +578,7 @@ init_screen('title_transition_in', function()
 
   s.transition_in_text_animation = function()
     local d   = 20
-    local e   = 'outBack'
+    local e   = outBack
     local kx1 = 200
     local ky  = 48
     local sx1 = -200
@@ -605,10 +605,10 @@ init_screen('title_transition_in', function()
     local tline = tiles.title.top_line
     local bline = tiles.title.bottom_line
 
-    title_elements['knife'] = init_object({ tiles = knife, x = 16,   y = -100 }).move({ y = 24, delay = 40, duration = 30, easing = 'outBounce' })
-    title_elements['spoon'] = init_object({ tiles = spoon, x = 96,   y = 227  }).move({ y = 80, delay = 40, duration = 30, easing = 'outBounce' })
-    title_elements['tline'] = init_object({ tiles = tline, x = 200,  y = 40   }).move({ x = 32, delay = 10, duration = 10, easing = 'outBack'   })
-    title_elements['bline'] = init_object({ tiles = bline, x = -328, y = 80   }).move({ x = 16, delay = 10, duration = 10, easing = 'outBack'   })
+    title_elements['knife'] = init_object({ tiles = knife, x = 16,   y = -100 }).move({ y = 24, delay = 40, duration = 30, easing = outBounce })
+    title_elements['spoon'] = init_object({ tiles = spoon, x = 96,   y = 227  }).move({ y = 80, delay = 40, duration = 30, easing = outBounce })
+    title_elements['tline'] = init_object({ tiles = tline, x = 200,  y = 40   }).move({ x = 32, delay = 10, duration = 10, easing = outBack   })
+    title_elements['bline'] = init_object({ tiles = bline, x = -328, y = 80   }).move({ x = 16, delay = 10, duration = 10, easing = outBack   })
 
     s.transition_in_text_animation()
   end

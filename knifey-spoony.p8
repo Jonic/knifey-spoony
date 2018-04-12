@@ -585,33 +585,32 @@ init_screen('title_transition_in', function()
     local sy  = 64
     local t   = tiles.title.text
 
-    init_object({ tiles = t.k1, x1 = kx1, x2 = 16, y = ky, delay = 20, duration = d, easing = e })
-    init_object({ tiles = t.n1, x1 = kx1, x2 = 32, y = ky, delay = 23, duration = d, easing = e })
-    init_object({ tiles = t.i1, x1 = kx1, x2 = 48, y = ky, delay = 26, duration = d, easing = e })
-    init_object({ tiles = t.f1, x1 = kx1, x2 = 56, y = ky, delay = 29, duration = d, easing = e })
-    init_object({ tiles = t.e1, x1 = kx1, x2 = 72, y = ky, delay = 32, duration = d, easing = e })
-    init_object({ tiles = t.y1, x1 = kx1, x2 = 88, y = ky, delay = 35, duration = d, easing = e })
-
-    init_object({ tiles = t.y2, x1 = sx1, x2 = 96, y = sy, delay = 20, duration = d, easing = e })
-    init_object({ tiles = t.n2, x1 = sx1, x2 = 80, y = sy, delay = 23, duration = d, easing = e })
-    init_object({ tiles = t.o2, x1 = sx1, x2 = 64, y = sy, delay = 26, duration = d, easing = e })
-    init_object({ tiles = t.o1, x1 = sx1, x2 = 48, y = sy, delay = 29, duration = d, easing = e })
-    init_object({ tiles = t.p1, x1 = sx1, x2 = 32, y = sy, delay = 32, duration = d, easing = e })
-    init_object({ tiles = t.s1, x1 = sx1, x2 = 16, y = sy, delay = 35, duration = d, easing = e })
+    title_elements['k1'] = init_object({ tiles = t.k1, x = kx1, y = ky }).move({ x = 16, delay = 20, duration = d, easing = e })
+    title_elements['n1'] = init_object({ tiles = t.n1, x = kx1, y = ky }).move({ x = 32, delay = 23, duration = d, easing = e })
+    title_elements['i1'] = init_object({ tiles = t.i1, x = kx1, y = ky }).move({ x = 48, delay = 26, duration = d, easing = e })
+    title_elements['f1'] = init_object({ tiles = t.f1, x = kx1, y = ky }).move({ x = 56, delay = 29, duration = d, easing = e })
+    title_elements['e1'] = init_object({ tiles = t.e1, x = kx1, y = ky }).move({ x = 72, delay = 32, duration = d, easing = e })
+    title_elements['y1'] = init_object({ tiles = t.y1, x = kx1, y = ky }).move({ x = 88, delay = 35, duration = d, easing = e })
+    title_elements['s1'] = init_object({ tiles = t.s1, x = sx1, y = sy }).move({ x = 16, delay = 35, duration = d, easing = e })
+    title_elements['p1'] = init_object({ tiles = t.p1, x = sx1, y = sy }).move({ x = 32, delay = 32, duration = d, easing = e })
+    title_elements['o1'] = init_object({ tiles = t.o1, x = sx1, y = sy }).move({ x = 48, delay = 29, duration = d, easing = e })
+    title_elements['o2'] = init_object({ tiles = t.o2, x = sx1, y = sy }).move({ x = 64, delay = 26, duration = d, easing = e })
+    title_elements['n2'] = init_object({ tiles = t.n2, x = sx1, y = sy }).move({ x = 80, delay = 23, duration = d, easing = e })
+    title_elements['y2'] = init_object({ tiles = t.y2, x = sx1, y = sy }).move({ x = 96, delay = 20, duration = d, easing = e })
   end
 
   s.init = function()
-    local bline = tiles.title.bottom_line
     local knife = tiles.title.knife
     local spoon = tiles.title.spoon
     local tline = tiles.title.top_line
+    local bline = tiles.title.bottom_line
+
+    title_elements['knife'] = init_object({ tiles = knife, x = 16,   y = -100 }).move({ y = 24, delay = 40, duration = 30, easing = 'outBounce' })
+    title_elements['spoon'] = init_object({ tiles = spoon, x = 96,   y = 227  }).move({ y = 80, delay = 40, duration = 30, easing = 'outBounce' })
+    title_elements['tline'] = init_object({ tiles = tline, x = 200,  y = 40   }).move({ x = 32, delay = 10, duration = 10, easing = 'outBack'   })
+    title_elements['bline'] = init_object({ tiles = bline, x = -328, y = 80   }).move({ x = 16, delay = 10, duration = 10, easing = 'outBack'   })
 
     s.transition_in_text_animation()
-
-    init_object({ tiles = knife, x1 = 16,   y1 = -100, x2 = 16, y2 = 24, delay = 40, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = spoon, x1 = 96,   y1 = 227,  x2 = 96, y2 = 80, delay = 40, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = tline, x1 = 200,  y  = 40,   x2 = 32,          delay = 10, duration = 10, easing = 'outBack'   })
-    init_object({ tiles = bline, x1 = -328, y  = 80,   x2 = 16,          delay = 10, duration = 10, easing = 'outBack'   })
   end
 
   s.update = function()
@@ -630,30 +629,6 @@ init_screen('title',  function ()
   }
   s.start_text       = nil
   s.start_text_flash = 0
-
-  s.idle_text_animation = function()
-    local d   = 10
-    local dir = 'inOut'
-    local ky1 = 48
-    local ky2 = 44
-    local sy1 = 64
-    local sy2 = 68
-    local t   = tiles.title.text
-
-    init_object({ tiles = t.k1, x = 16, y = ky1 })
-    init_object({ tiles = t.n1, x = 32, y = ky1 })
-    init_object({ tiles = t.i1, x = 48, y = ky1 })
-    init_object({ tiles = t.f1, x = 56, y = ky1 })
-    init_object({ tiles = t.e1, x = 72, y = ky1 })
-    init_object({ tiles = t.y1, x = 88, y = ky1 })
-
-    init_object({ tiles = t.y2, x = 96, y = sy1 })
-    init_object({ tiles = t.n2, x = 80, y = sy1 })
-    init_object({ tiles = t.o2, x = 64, y = sy1 })
-    init_object({ tiles = t.o1, x = 48, y = sy1 })
-    init_object({ tiles = t.p1, x = 32, y = sy1 })
-    init_object({ tiles = t.s1, x = 16, y = sy1 })
-  end
 
   s.show_start_text = function()
     if s.start_text_flash == 0 and s.start_text == nil then
@@ -677,13 +652,7 @@ init_screen('title',  function ()
     local spoon = tiles.title.spoon
     local tline = tiles.title.top_line
 
-    init_object({ tiles = knife, x = 16, y = 24 })
-    init_object({ tiles = tline, x = 32, y = 40 })
-    init_object({ tiles = bline, x = 16, y = 80 })
-    init_object({ tiles = spoon, x = 96, y = 80 })
     init_object({ text = text.about, x = 'center', y1 = 147, y2 = 117, duration = 20, easing = 'outBack' })
-
-    s.idle_text_animation()
   end
 
   s.update = function()
@@ -710,39 +679,30 @@ init_screen('title_transition_out', function()
   }
 
   s.transition_out_text_animation = function()
-    local d   = 20
-    local e   = 'inBack'
-    local kx2 = 200
-    local ky  = 48
-    local sx2 = -200
-    local sy  = 64
-    local t   = tiles.title.text
+    local d      = 20
+    local e      = 'inBack'
+    local new_kx = 200
+    local new_sx = -200
 
-    init_object({ tiles = t.k1, x1 = 16, x2 = kx2, y = ky, delay = 15, duration = d, easing = e })
-    init_object({ tiles = t.n1, x1 = 32, x2 = kx2, y = ky, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.i1, x1 = 48, x2 = kx2, y = ky, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.f1, x1 = 56, x2 = kx2, y = ky, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.e1, x1 = 72, x2 = kx2, y = ky, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.y1, x1 = 88, x2 = kx2, y = ky, delay = 0,  duration = d, easing = e })
-
-    init_object({ tiles = t.y2, x1 = 96, x2 = sx2, y = sy, delay = 15, duration = d, easing = e })
-    init_object({ tiles = t.n2, x1 = 80, x2 = sx2, y = sy, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.o2, x1 = 64, x2 = sx2, y = sy, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.o1, x1 = 48, x2 = sx2, y = sy, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.p1, x1 = 32, x2 = sx2, y = sy, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.s1, x1 = 16, x2 = sx2, y = sy, delay = 0,  duration = d, easing = e })
+    title_elements['k1'].move({ x = new_kx, delay = 15, duration = d, easing = e })
+    title_elements['n1'].move({ x = new_kx, delay = 12, duration = d, easing = e })
+    title_elements['i1'].move({ x = new_kx, delay = 9,  duration = d, easing = e })
+    title_elements['f1'].move({ x = new_kx, delay = 6,  duration = d, easing = e })
+    title_elements['e1'].move({ x = new_kx, delay = 3,  duration = d, easing = e })
+    title_elements['y1'].move({ x = new_kx, delay = 0,  duration = d, easing = e })
+    title_elements['s1'].move({ x = new_sx, delay = 15, duration = d, easing = e })
+    title_elements['p1'].move({ x = new_sx, delay = 12, duration = d, easing = e })
+    title_elements['o1'].move({ x = new_sx, delay = 9,  duration = d, easing = e })
+    title_elements['o2'].move({ x = new_sx, delay = 6,  duration = d, easing = e })
+    title_elements['n2'].move({ x = new_sx, delay = 3,  duration = d, easing = e })
+    title_elements['y2'].move({ x = new_sx, delay = 0,  duration = d, easing = e })
   end
 
   s.init = function()
-    local bline = tiles.title.bottom_line
-    local knife = tiles.title.knife
-    local spoon = tiles.title.spoon
-    local tline = tiles.title.top_line
-
-    init_object({ tiles = knife, x1 = 16, y1 = 24, x2 = 16,   y2 = -100, delay = 5,  duration = 30, easing = 'inBack' })
-    init_object({ tiles = spoon, x1 = 96, y1 = 80, x2 = 96,   y2 = 227,  delay = 5,  duration = 30, easing = 'inBack' })
-    init_object({ tiles = tline, x1 = 32, y  = 40, x2 = 200,             delay = 15, duration = 10, easing = 'inBack' })
-    init_object({ tiles = bline, x1 = 16, y  = 80, x2 = -328,            delay = 15, duration = 10, easing = 'inBack' })
+    title_elements['knife'].move({ y = -100, delay = 5,  duration = 30, easing = 'inBack' })
+    title_elements['tline'].move({ x = 200,  delay = 15, duration = 10, easing = 'inBack' })
+    title_elements['bline'].move({ x = -328, delay = 15, duration = 10, easing = 'inBack' })
+    title_elements['spoon'].move({ y = 227,  delay = 5,  duration = 30, easing = 'inBack' })
 
     s.transition_out_text_animation()
   end

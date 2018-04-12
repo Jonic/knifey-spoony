@@ -524,7 +524,6 @@ function init_screen(name, props)
   s.frame_count = 0
 
   s.init = function()
-    destroy_objects()
     s.frame_count = 0
     if (s.props.init) s.props.init()
   end

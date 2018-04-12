@@ -464,15 +464,17 @@ function init_object(props)
     local c = pos2 - pos1   -- change == ending - beginning
     local d = o.duration    -- duration (total time)
     local e = o.easing
-    local easing
 
-    if     e == 'outBack'   then easing = outBack
-    elseif e == 'inBack'    then easing = inBack
-    elseif e == 'outBounce' then easing = outBounce
-    elseif e == 'inBounce'  then easing = inBounce
+    if (type(e) == 'string') then
+      if     e == 'inBack'    then e = inBack
+      elseif e == 'outBack'   then e = outBack
+      elseif e == 'inBounce'  then e = inBounce
+      elseif e == 'outBounce' then e = outBounce
+      else                         e = linear
+      end
     end
 
-    return flr(easing(t, b, c, d))
+    return flr(e(t, b, c, d))
   end
 
   o.update = function()

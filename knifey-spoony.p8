@@ -627,40 +627,28 @@ init_screen('title',  function ()
     color = 7,
     on    = 0,
   }
-  s.start_text       = nil
   s.start_text_flash = 0
 
-  s.show_start_text = function()
-    if s.start_text_flash == 0 and s.start_text == nil then
-      s.start_text = init_object({
-        text = text.start_game,
-        x    = 'center',
-        y    = 100
-      })
-    elseif s.start_text_flash > 12 then
-      destroy_object(s.start_text)
-      s.start_text = nil
-    end
+  s.update_start_text = function()
+    local text_pos = (s.start_text_flash > 11) and -10 or 100
 
+    s.start_text.pos({ y = text_pos })
     s.start_text_flash += 1
     if (s.start_text_flash == 24) s.start_text_flash = 0
   end
 
   s.init = function()
-    local bline = tiles.title.bottom_line
-    local knife = tiles.title.knife
-    local spoon = tiles.title.spoon
-    local tline = tiles.title.top_line
-
-    init_object({ text = text.about, x = 'center', y1 = 147, y2 = 117, duration = 20, easing = 'outBack' })
+    init_object({ text = text.about, x = 14, y = 147 }).move({ y = 117, duration = 20, easing = 'outBack' })
+    s.start_text = init_object({
+      text = text.start_game,
+      x    = 32,
+      y    = 100,
+    })
   end
 
   s.update = function()
+    s.update_start_text()
     if (btnp(5)) go_to('title_transition_out')
-  end
-
-  s.draw = function()
-    s.show_start_text()
   end
 
   return s

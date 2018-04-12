@@ -481,9 +481,9 @@ function init_object(props)
     o.updated = true
     if (not o.is_animating()) return
 
+    o.tick()
     o.x = o.update_pos('x')
     o.y = o.update_pos('y')
-    o.tick()
   end
 
   o.draw = function()

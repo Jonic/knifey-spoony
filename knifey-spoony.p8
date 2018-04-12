@@ -506,6 +506,12 @@ function destroy_objects()
   objects = copy({})
 end
 
+function skip_animations()
+  foreach (objects, function(o)
+    o.skip()
+  end)
+end
+
 -->8
 -- screens
 

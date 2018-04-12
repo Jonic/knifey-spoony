@@ -560,13 +560,14 @@ function init_screen(name, props)
 end
 
 function go_to(name)
+  skip_animations()
   screen = screens[name]
   screen.init()
 end
 
 -->8
 -- init screens
-
+title_elements = {}
 init_screen('title_transition_in', function()
   local s = {}
 

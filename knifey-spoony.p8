@@ -336,47 +336,18 @@ local tiles = {
 function init_object(props)
   local o = {}
 
-  o.frame_count      = 0
-  o.pos_x            = 0
-  o.pos_y            = 0
-  o.updated          = false
-
-  o.color            = props.color        or 7
-  o.delay            = props.delay        or 0
-  o.duration         = props.duration     or 0
-  o.easing           = props.easing       or 'linear'
-  o.outline          = props.outline      or nil
-  o.rects            = props.rects        or nil
-  o.repeat_after     = props.repeat_after or nil
-  o.repeat_countdown = props.repeat_after or nil
-  o.repeating        = props.repeat_after ~= nil
-  o.text             = props.text         or nil
-  o.tiles            = props.tiles        or nil
-  o.x                = props.x            or nil
-  o.y                = props.y            or nil
-
-  o.calculate_pos = function(pos_key)
-    local pos = o[pos_key]
-
-    if (pos.dest == nil or o.delay > 0) return pos.start
-    if (o.is_complete()) return pos.dest
-
-    local t = o.frame_count        -- elapsed time
-    local b = pos.start            -- begin
-    local c = pos.dest - pos.start -- change == ending - beginning
-    local d = o.duration           -- duration (total time)
-    local e = o.easing
-    local new_pos = 0
-
-    if     e == 'outBack'   then new_pos = outBack(t, b, c, d)
-    elseif e == 'inBack'    then new_pos = inBack(t, b, c, d)
-    elseif e == 'outBounce' then new_pos = outBounce(t, b, c, d)
-    elseif e == 'inBounce'  then new_pos = inBounce(t, b, c, d)
-    else                         new_pos = linear(t, b, c, d)
-    end
-
-    return flr(new_pos)
-  end
+  o.color   = props.color   or 7
+  o.outline = props.outline or nil
+  o.rects   = props.rects   or nil
+  o.text    = props.text    or nil
+  o.tiles   = props.tiles   or nil
+  o.x       = props.x       or 0
+  o.y       = props.y       or 0
+  
+  o.frame_count = 0
+  o.pos_x       = 0
+  o.pos_y       = 0
+  o.updated     = false
 
   o.center_x = function()
     local text = o.text .. ''
@@ -384,8 +355,8 @@ function init_object(props)
   end
 
   o.draw_rect = function(r)
-    local x1    = (r.x or 0) + o.pos_x
-    local y1    = (r.y or 0) + o.pos_y
+    local x1    = (r.x or 0) + o.x
+    local y1    = (r.y or 0) + o.y
     local x2    = x1 + r.w
     local y2    = y1 + r.h
     local color = r.color
@@ -404,8 +375,8 @@ function init_object(props)
     local color   = o.color
     local outline = o.outline
     local text    = o.text
-    local x       = o.x == 'center' and o.center_x() or o.pos_x
-    local y       = o.pos_y
+    local x       = o.x
+    local y       = o.y
 
     if outline ~= nil then
       print(text, x - 1, y, outline)
@@ -418,8 +389,8 @@ function init_object(props)
   end
 
   o.draw_tile = function(t)
-    local x  = (t.x or 0) + o.pos_x
-    local y  = (t.y or 0) + o.pos_y
+    local x  = (t.x or 0) + o.x
+    local y  = (t.y or 0) + o.y
     local w  = t.w or 1
     local h  = t.h or 1
     local fx = t.fx or false
@@ -435,36 +406,38 @@ function init_object(props)
     end)
   end
 
-  o.is_complete = function()
-    return o.frame_count > o.duration
+  o.is_animating = function() return type(o.duration) == 'number' and o.frame_count < o.duration end
+  o.is_text      = function() return o.type() == 'text'           end
+  o.is_tiles     = function() return o.type() == 'tiles'          end
+  o.is_rects     = function() return o.type() == 'rects'          end
+
+  o.move  = function(props)
+    o.delay    = props.delay    or 0
+    o.duration = props.duration or 0
+    o.easing   = props.easing   or nil
+    o.new_x    = props.x        or o.x
+    o.new_y    = props.y        or o.y
+    o.old_x    = o.x
+    o.old_y    = o.y
+
+    o.complete    = false
+    o.frame_count = 0
+    o.updated     = false
+
+    return o
   end
 
-  o.is_text = function()
-    return o.type() == 'text'
+  o.pos = function(coords)
+    o.x = coords.x or 0
+    o.y = coords.y or 0
+    return o
   end
 
-  o.is_tiles = function()
-    return o.type() == 'tiles'
-  end
-
-  o.is_rects = function()
-    return o.type() == 'rects'
-  end
-
-  o.set_pos = function()
-    o.pos_x = o.x
-    o.pos_y = o.y
-
-    if (type(o.x) == 'table') o.pos_x = o.calculate_pos('x')
-    if (type(o.y) == 'table') o.pos_y = o.calculate_pos('y')
-  end
-
-  o.should_draw = function()
-    return o.updated
-  end
-
-  o.should_update = function()
-    return not o.is_complete()
+  o.skip = function()
+    if (not o.is_animating()) return
+    o.duration = nil
+    o.x        = o.new_x
+    o.y        = o.new_y
   end
 
   o.tick = function()
@@ -482,30 +455,45 @@ function init_object(props)
     if (o.rects ~= nil) return 'rects'
   end
 
-  o.init = function()
-    if (o.x == nil) o.x = { start = props.x1 or 0, dest = props.x2 or nil }
-    if (o.y == nil) o.y = { start = props.y1 or 0, dest = props.y2 or nil }
+  o.update_pos = function(pos_key)
+    local pos1 = o['old_' .. pos_key]
+    local pos2 = o['new_' .. pos_key]
+
+    if (pos2 == o[pos_key]) return o[pos_key]
+    
+    local t = o.frame_count -- elapsed time
+    local b = pos1          -- begin
+    local c = pos2 - pos1   -- change =  = ending - beginning
+    local d = o.duration    -- duration (total time)
+    local e = o.easing
+    local easing
+
+    if     e == 'outBack'   then easing = outBack
+    elseif e == 'inBack'    then easing = inBack
+    elseif e == 'outBounce' then easing = outBounce
+    elseif e == 'inBounce'  then easing = inBounce
+    end
+
+    return flr(easing(t, b, c, d))
   end
 
   o.update = function()
-    if (not o.should_update()) return
-
-    o.tick()
-    o.set_pos()
     o.updated = true
+    if (not o.is_animating()) return
+
+    o.x = o.update_pos('x')
+    o.y = o.update_pos('y')
+    o.tick()
   end
 
   o.draw = function()
-    if (not o.should_draw()) return
-
-    if (o.is_text())  return o.draw_text()
-    if (o.is_tiles()) return o.draw_tiles(o.tiles)
-    if (o.is_rects()) return o.draw_rects(o.rects)
+    if (not o.updated) return
+    if (o.is_text())   return o.draw_text()
+    if (o.is_tiles())  return o.draw_tiles(o.tiles)
+    if (o.is_rects())  return o.draw_rects(o.rects)
   end
 
-  o.init()
   add(objects, o)
-
   return o
 end
 

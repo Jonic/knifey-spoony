@@ -928,6 +928,11 @@ init_screen('playing', function()
     s.new_round()
   end
   
+  s.score_x = function()
+    local score_text = score .. ''
+    return 64 - #score_text * 2
+  end
+
   s.timer_width = function()
     local elapsed_percentage = s.timeout.remaining / s.timeout.start
     return flr(elapsed_percentage * s.timer.max_width)

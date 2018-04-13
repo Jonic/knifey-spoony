@@ -730,17 +730,15 @@ init_screen('playing_transition_in', function()
     local k = tiles.playing.transition_buttons.knifey
     local s = tiles.playing.transition_buttons.spoony
 
-    init_object({ tiles = k,           x = 10, y = 127 }).move({ y = 95,  duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ tiles = s,           x = 86, y = 127 }).move({ y = 95,  duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ rects = rects.floor, x = 4,  y = 143 }).move({ y = 111, duration = 20, easing = 'outBounce' })
-
+    init_object({ tiles = k,                   x = 10, y = 127 }).move({ y = 95,  duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ tiles = s,                   x = 86, y = 127 }).move({ y = 95,  duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ rects = rects.floor,         x = 4,  y = 143 }).move({ y = 111, duration = 20, easing = 'outBounce' })
     init_object({ tiles = tiles.playing.score, x = 48, y = -24 }).move({ y = 87, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ text = text.score,           x = 54, y = -19 }).move({ y = 92, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ text = score,                x = 60, y = -12 }).move({ y = 99, duration = 20, delay = 5, easing = 'outBounce' })
-
-    init_object({ text = '3', x = 55, y = -12 }).move({ y = 44, duration = 20, delay = 40,  easing = 'outBounce' })
-    init_object({ text = '2', x = 62, y = -12 }).move({ y = 44, duration = 20, delay = 70,  easing = 'outBounce' })
-    init_object({ text = '1', x = 69, y = -12 }).move({ y = 44, duration = 20, delay = 100, easing = 'outBounce' })
+    init_object({ text  = text.score,          x = 54, y = -19 }).move({ y = 92, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ text  = score,               x = 62, y = -12 }).move({ y = 99, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ text  = '3',                 x = 55, y = -12 }).move({ y = 44, duration = 20, delay = 40,  easing = 'outBounce' })
+    init_object({ text  = '2',                 x = 62, y = -12 }).move({ y = 44, duration = 20, delay = 70,  easing = 'outBounce' })
+    init_object({ text  = '1',                 x = 69, y = -12 }).move({ y = 44, duration = 20, delay = 100, easing = 'outBounce' })
   end
 
   return s

@@ -3,7 +3,7 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v0.13.4
+-- v0.14.0
 
 --[[
   "i see you've played knifey
@@ -36,9 +36,10 @@ local high_score        = 0
 local high_score_beaten = false
 local score             = 0
 
-local objects = {}
-local screen  = nil
-local screens = {}
+local frame_multiplier = 1
+local objects          = {}
+local screen           = nil
+local screens          = {}
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table
@@ -81,7 +82,12 @@ function draw_sprites(sprites, x, y)
   foreach(sprites, draw_sprite, x, y)
 end
 
+function f(n)
+  return n * frame_multiplier
+end
+
 function reset_globals()
+  frame_multiplier  = 2
   high_score        = dget(0)
   high_score_beaten = false
   score             = 0
@@ -336,47 +342,16 @@ local tiles = {
 function init_object(props)
   local o = {}
 
-  o.frame_count      = 0
-  o.pos_x            = 0
-  o.pos_y            = 0
-  o.updated          = false
-
-  o.color            = props.color        or 7
-  o.delay            = props.delay        or 0
-  o.duration         = props.duration     or 0
-  o.easing           = props.easing       or 'linear'
-  o.outline          = props.outline      or nil
-  o.rects            = props.rects        or nil
-  o.repeat_after     = props.repeat_after or nil
-  o.repeat_countdown = props.repeat_after or nil
-  o.repeating        = props.repeat_after ~= nil
-  o.text             = props.text         or nil
-  o.tiles            = props.tiles        or nil
-  o.x                = props.x            or nil
-  o.y                = props.y            or nil
-
-  o.calculate_pos = function(pos_key)
-    local pos = o[pos_key]
-
-    if (pos.dest == nil or o.delay > 0) return pos.start
-    if (o.is_complete()) return pos.dest
-
-    local t = o.frame_count        -- elapsed time
-    local b = pos.start            -- begin
-    local c = pos.dest - pos.start -- change == ending - beginning
-    local d = o.duration           -- duration (total time)
-    local e = o.easing
-    local new_pos = 0
-
-    if     e == 'outBack'   then new_pos = outBack(t, b, c, d)
-    elseif e == 'inBack'    then new_pos = inBack(t, b, c, d)
-    elseif e == 'outBounce' then new_pos = outBounce(t, b, c, d)
-    elseif e == 'inBounce'  then new_pos = inBounce(t, b, c, d)
-    else                         new_pos = linear(t, b, c, d)
-    end
-
-    return flr(new_pos)
-  end
+  o.color   = props.color   or 7
+  o.outline = props.outline or nil
+  o.rects   = props.rects   or nil
+  o.text    = props.text    or nil
+  o.tiles   = props.tiles   or nil
+  o.x       = props.x       or 0
+  o.y       = props.y       or 0
+  
+  o.frame_count = 0
+  o.updated     = false
 
   o.center_x = function()
     local text = o.text .. ''
@@ -384,8 +359,8 @@ function init_object(props)
   end
 
   o.draw_rect = function(r)
-    local x1    = (r.x or 0) + o.pos_x
-    local y1    = (r.y or 0) + o.pos_y
+    local x1    = (r.x or 0) + o.x
+    local y1    = (r.y or 0) + o.y
     local x2    = x1 + r.w
     local y2    = y1 + r.h
     local color = r.color
@@ -404,8 +379,8 @@ function init_object(props)
     local color   = o.color
     local outline = o.outline
     local text    = o.text
-    local x       = o.x == 'center' and o.center_x() or o.pos_x
-    local y       = o.pos_y
+    local x       = o.x
+    local y       = o.y
 
     if outline ~= nil then
       print(text, x - 1, y, outline)
@@ -418,8 +393,8 @@ function init_object(props)
   end
 
   o.draw_tile = function(t)
-    local x  = (t.x or 0) + o.pos_x
-    local y  = (t.y or 0) + o.pos_y
+    local x  = (t.x or 0) + o.x
+    local y  = (t.y or 0) + o.y
     local w  = t.w or 1
     local h  = t.h or 1
     local fx = t.fx or false
@@ -435,36 +410,38 @@ function init_object(props)
     end)
   end
 
-  o.is_complete = function()
-    return o.frame_count > o.duration
+  o.is_animating = function() return type(o.duration) == 'number' and o.frame_count < o.duration end
+  o.is_text      = function() return o.type() == 'text'           end
+  o.is_tiles     = function() return o.type() == 'tiles'          end
+  o.is_rects     = function() return o.type() == 'rects'          end
+
+  o.move  = function(props)
+    o.delay    = f(props.delay    or 0)
+    o.duration = f(props.duration or 0)
+    o.easing   = props.easing   or nil
+    o.new_x    = props.x        or o.x
+    o.new_y    = props.y        or o.y
+    o.old_x    = o.x
+    o.old_y    = o.y
+
+    o.complete    = false
+    o.frame_count = 0
+    o.updated     = false
+
+    return o
   end
 
-  o.is_text = function()
-    return o.type() == 'text'
+  o.pos = function(coords)
+    o.x = coords.x or o.x
+    o.y = coords.y or o.y
+    return o
   end
 
-  o.is_tiles = function()
-    return o.type() == 'tiles'
-  end
-
-  o.is_rects = function()
-    return o.type() == 'rects'
-  end
-
-  o.set_pos = function()
-    o.pos_x = o.x
-    o.pos_y = o.y
-
-    if (type(o.x) == 'table') o.pos_x = o.calculate_pos('x')
-    if (type(o.y) == 'table') o.pos_y = o.calculate_pos('y')
-  end
-
-  o.should_draw = function()
-    return o.updated
-  end
-
-  o.should_update = function()
-    return not o.is_complete()
+  o.skip = function()
+    if (not o.is_animating()) return
+    o.duration = nil
+    o.x        = o.new_x
+    o.y        = o.new_y
   end
 
   o.tick = function()
@@ -482,30 +459,45 @@ function init_object(props)
     if (o.rects ~= nil) return 'rects'
   end
 
-  o.init = function()
-    if (o.x == nil) o.x = { start = props.x1 or 0, dest = props.x2 or nil }
-    if (o.y == nil) o.y = { start = props.y1 or 0, dest = props.y2 or nil }
+  o.update_pos = function(pos_key)
+    local pos1 = o['old_' .. pos_key]
+    local pos2 = o['new_' .. pos_key]
+
+    local t = o.frame_count -- elapsed time
+    local b = pos1          -- begin
+    local c = pos2 - pos1   -- change == ending - beginning
+    local d = o.duration    -- duration (total time)
+    local e = o.easing or linear
+
+    if (type(e) == 'string') then
+      if     e == 'inBack'    then e = inBack
+      elseif e == 'outBack'   then e = outBack
+      elseif e == 'inBounce'  then e = inBounce
+      elseif e == 'outBounce' then e = outBounce
+      else                         e = linear
+      end
+    end
+
+    return flr(e(t, b, c, d))
   end
 
   o.update = function()
-    if (not o.should_update()) return
+    o.updated = true
+    if (not o.is_animating()) return
 
     o.tick()
-    o.set_pos()
-    o.updated = true
+    o.x = o.update_pos('x')
+    o.y = o.update_pos('y')
   end
 
   o.draw = function()
-    if (not o.should_draw()) return
-
-    if (o.is_text())  return o.draw_text()
-    if (o.is_tiles()) return o.draw_tiles(o.tiles)
-    if (o.is_rects()) return o.draw_rects(o.rects)
+    if (not o.updated) return
+    if (o.is_text())   return o.draw_text()
+    if (o.is_tiles())  return o.draw_tiles(o.tiles)
+    if (o.is_rects())  return o.draw_rects(o.rects)
   end
 
-  o.init()
   add(objects, o)
-
   return o
 end
 
@@ -516,6 +508,12 @@ end
 
 function destroy_objects()
   objects = copy({})
+end
+
+function skip_animations()
+  foreach (objects, function(o)
+    o.skip()
+  end)
 end
 
 -->8
@@ -530,7 +528,6 @@ function init_screen(name, props)
   s.frame_count = 0
 
   s.init = function()
-    destroy_objects()
     s.frame_count = 0
     if (s.props.init) s.props.init()
   end
@@ -547,7 +544,7 @@ function init_screen(name, props)
     s.frame_count += 1
 
     if (s.props.transition ~= nil) then
-      if (s.frame_count == s.props.transition.timeout) then
+      if (s.frame_count == f(s.props.transition.timeout)) then
         go_to(s.props.transition.destination)
       end
     end
@@ -567,13 +564,14 @@ function init_screen(name, props)
 end
 
 function go_to(name)
+  skip_animations()
   screen = screens[name]
   screen.init()
 end
 
 -->8
 -- init screens
-
+title_elements = {}
 init_screen('title_transition_in', function()
   local s = {}
 
@@ -584,40 +582,42 @@ init_screen('title_transition_in', function()
 
   s.transition_in_text_animation = function()
     local d   = 20
-    local e   = 'outBack'
+    local e   = outBack
     local kx1 = 200
     local ky  = 48
     local sx1 = -200
     local sy  = 64
     local t   = tiles.title.text
 
-    init_object({ tiles = t.k1, x1 = kx1, x2 = 16, y = ky, delay = 20, duration = d, easing = e })
-    init_object({ tiles = t.n1, x1 = kx1, x2 = 32, y = ky, delay = 23, duration = d, easing = e })
-    init_object({ tiles = t.i1, x1 = kx1, x2 = 48, y = ky, delay = 26, duration = d, easing = e })
-    init_object({ tiles = t.f1, x1 = kx1, x2 = 56, y = ky, delay = 29, duration = d, easing = e })
-    init_object({ tiles = t.e1, x1 = kx1, x2 = 72, y = ky, delay = 32, duration = d, easing = e })
-    init_object({ tiles = t.y1, x1 = kx1, x2 = 88, y = ky, delay = 35, duration = d, easing = e })
-
-    init_object({ tiles = t.y2, x1 = sx1, x2 = 96, y = sy, delay = 20, duration = d, easing = e })
-    init_object({ tiles = t.n2, x1 = sx1, x2 = 80, y = sy, delay = 23, duration = d, easing = e })
-    init_object({ tiles = t.o2, x1 = sx1, x2 = 64, y = sy, delay = 26, duration = d, easing = e })
-    init_object({ tiles = t.o1, x1 = sx1, x2 = 48, y = sy, delay = 29, duration = d, easing = e })
-    init_object({ tiles = t.p1, x1 = sx1, x2 = 32, y = sy, delay = 32, duration = d, easing = e })
-    init_object({ tiles = t.s1, x1 = sx1, x2 = 16, y = sy, delay = 35, duration = d, easing = e })
+    title_elements['k1'] = init_object({ tiles = t.k1, x = kx1, y = ky }).move({ x = 16, delay = 20, duration = d, easing = e })
+    title_elements['n1'] = init_object({ tiles = t.n1, x = kx1, y = ky }).move({ x = 32, delay = 23, duration = d, easing = e })
+    title_elements['i1'] = init_object({ tiles = t.i1, x = kx1, y = ky }).move({ x = 48, delay = 26, duration = d, easing = e })
+    title_elements['f1'] = init_object({ tiles = t.f1, x = kx1, y = ky }).move({ x = 56, delay = 29, duration = d, easing = e })
+    title_elements['e1'] = init_object({ tiles = t.e1, x = kx1, y = ky }).move({ x = 72, delay = 32, duration = d, easing = e })
+    title_elements['y1'] = init_object({ tiles = t.y1, x = kx1, y = ky }).move({ x = 88, delay = 35, duration = d, easing = e })
+    title_elements['s1'] = init_object({ tiles = t.s1, x = sx1, y = sy }).move({ x = 16, delay = 35, duration = d, easing = e })
+    title_elements['p1'] = init_object({ tiles = t.p1, x = sx1, y = sy }).move({ x = 32, delay = 32, duration = d, easing = e })
+    title_elements['o1'] = init_object({ tiles = t.o1, x = sx1, y = sy }).move({ x = 48, delay = 29, duration = d, easing = e })
+    title_elements['o2'] = init_object({ tiles = t.o2, x = sx1, y = sy }).move({ x = 64, delay = 26, duration = d, easing = e })
+    title_elements['n2'] = init_object({ tiles = t.n2, x = sx1, y = sy }).move({ x = 80, delay = 23, duration = d, easing = e })
+    title_elements['y2'] = init_object({ tiles = t.y2, x = sx1, y = sy }).move({ x = 96, delay = 20, duration = d, easing = e })
   end
 
   s.init = function()
-    local bline = tiles.title.bottom_line
+    destroy_objects()
+    reset_globals()
+
     local knife = tiles.title.knife
     local spoon = tiles.title.spoon
     local tline = tiles.title.top_line
+    local bline = tiles.title.bottom_line
+
+    title_elements['knife'] = init_object({ tiles = knife, x = 16,   y = -100 }).move({ y = 24, delay = 40, duration = 30, easing = outBounce })
+    title_elements['spoon'] = init_object({ tiles = spoon, x = 96,   y = 227  }).move({ y = 80, delay = 40, duration = 30, easing = outBounce })
+    title_elements['tline'] = init_object({ tiles = tline, x = 200,  y = 40   }).move({ x = 32, delay = 10, duration = 10, easing = outBack   })
+    title_elements['bline'] = init_object({ tiles = bline, x = -328, y = 80   }).move({ x = 16, delay = 10, duration = 10, easing = outBack   })
 
     s.transition_in_text_animation()
-
-    init_object({ tiles = knife, x1 = 16,   y1 = -100, x2 = 16, y2 = 24, delay = 40, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = spoon, x1 = 96,   y1 = 227,  x2 = 96, y2 = 80, delay = 40, duration = 30, easing = 'outBounce' })
-    init_object({ tiles = tline, x1 = 200,  y  = 40,   x2 = 32,          delay = 10, duration = 10, easing = 'outBack'   })
-    init_object({ tiles = bline, x1 = -328, y  = 80,   x2 = 16,          delay = 10, duration = 10, easing = 'outBack'   })
   end
 
   s.update = function()
@@ -634,70 +634,40 @@ init_screen('title',  function ()
     color = 7,
     on    = 0,
   }
-  s.start_text       = nil
-  s.start_text_flash = 0
+  s.start_text_flash   = 0
+  s.start_text_max     = f(24)
+  s.start_text_pos_on  = 100
+  s.start_text_pos_off = -10
+  s.start_text_pos     = s.start_text_pos_on
 
-  s.idle_text_animation = function()
-    local d   = 10
-    local dir = 'inOut'
-    local ky1 = 48
-    local ky2 = 44
-    local sy1 = 64
-    local sy2 = 68
-    local t   = tiles.title.text
+  s.update_start_text = function()
+    s.start_text_flash += 1
 
-    init_object({ tiles = t.k1, x = 16, y = ky1 })
-    init_object({ tiles = t.n1, x = 32, y = ky1 })
-    init_object({ tiles = t.i1, x = 48, y = ky1 })
-    init_object({ tiles = t.f1, x = 56, y = ky1 })
-    init_object({ tiles = t.e1, x = 72, y = ky1 })
-    init_object({ tiles = t.y1, x = 88, y = ky1 })
+    if (s.start_text_flash >= s.start_text_max) then
+      s.start_text_flash = 0
 
-    init_object({ tiles = t.y2, x = 96, y = sy1 })
-    init_object({ tiles = t.n2, x = 80, y = sy1 })
-    init_object({ tiles = t.o2, x = 64, y = sy1 })
-    init_object({ tiles = t.o1, x = 48, y = sy1 })
-    init_object({ tiles = t.p1, x = 32, y = sy1 })
-    init_object({ tiles = t.s1, x = 16, y = sy1 })
-  end
-
-  s.show_start_text = function()
-    if s.start_text_flash == 0 and s.start_text == nil then
-      s.start_text = init_object({
-        text = text.start_game,
-        x    = 'center',
-        y    = 100
-      })
-    elseif s.start_text_flash > 12 then
-      destroy_object(s.start_text)
-      s.start_text = nil
+      if (s.start_text_pos == s.start_text_pos_on) then
+        s.start_text_pos = s.start_text_pos_off
+      else
+        s.start_text_pos = s.start_text_pos_on
+      end
     end
 
-    s.start_text_flash += 1
-    if (s.start_text_flash == 24) s.start_text_flash = 0
+    s.start_text.pos({ y = s.start_text_pos })
   end
 
   s.init = function()
-    local bline = tiles.title.bottom_line
-    local knife = tiles.title.knife
-    local spoon = tiles.title.spoon
-    local tline = tiles.title.top_line
-
-    init_object({ tiles = knife, x = 16, y = 24 })
-    init_object({ tiles = tline, x = 32, y = 40 })
-    init_object({ tiles = bline, x = 16, y = 80 })
-    init_object({ tiles = spoon, x = 96, y = 80 })
-    init_object({ text = text.about, x = 'center', y1 = 147, y2 = 117, duration = 20, easing = 'outBack' })
-
-    s.idle_text_animation()
+    init_object({ text = text.about, x = 14, y = 147 }).move({ y = 117, duration = 20, easing = 'outBack' })
+    s.start_text = init_object({
+      text = text.start_game,
+      x    = 32,
+      y    = s.start_text_pos,
+    })
   end
 
   s.update = function()
+    s.update_start_text()
     if (btnp(5)) go_to('title_transition_out')
-  end
-
-  s.draw = function()
-    s.show_start_text()
   end
 
   return s
@@ -716,39 +686,30 @@ init_screen('title_transition_out', function()
   }
 
   s.transition_out_text_animation = function()
-    local d   = 20
-    local e   = 'inBack'
-    local kx2 = 200
-    local ky  = 48
-    local sx2 = -200
-    local sy  = 64
-    local t   = tiles.title.text
+    local d      = 20
+    local e      = 'inBack'
+    local new_kx = 200
+    local new_sx = -200
 
-    init_object({ tiles = t.k1, x1 = 16, x2 = kx2, y = ky, delay = 15, duration = d, easing = e })
-    init_object({ tiles = t.n1, x1 = 32, x2 = kx2, y = ky, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.i1, x1 = 48, x2 = kx2, y = ky, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.f1, x1 = 56, x2 = kx2, y = ky, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.e1, x1 = 72, x2 = kx2, y = ky, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.y1, x1 = 88, x2 = kx2, y = ky, delay = 0,  duration = d, easing = e })
-
-    init_object({ tiles = t.y2, x1 = 96, x2 = sx2, y = sy, delay = 15, duration = d, easing = e })
-    init_object({ tiles = t.n2, x1 = 80, x2 = sx2, y = sy, delay = 12, duration = d, easing = e })
-    init_object({ tiles = t.o2, x1 = 64, x2 = sx2, y = sy, delay = 9,  duration = d, easing = e })
-    init_object({ tiles = t.o1, x1 = 48, x2 = sx2, y = sy, delay = 6,  duration = d, easing = e })
-    init_object({ tiles = t.p1, x1 = 32, x2 = sx2, y = sy, delay = 3,  duration = d, easing = e })
-    init_object({ tiles = t.s1, x1 = 16, x2 = sx2, y = sy, delay = 0,  duration = d, easing = e })
+    title_elements['k1'].move({ x = new_kx, delay = 15, duration = d, easing = e })
+    title_elements['n1'].move({ x = new_kx, delay = 12, duration = d, easing = e })
+    title_elements['i1'].move({ x = new_kx, delay = 9,  duration = d, easing = e })
+    title_elements['f1'].move({ x = new_kx, delay = 6,  duration = d, easing = e })
+    title_elements['e1'].move({ x = new_kx, delay = 3,  duration = d, easing = e })
+    title_elements['y1'].move({ x = new_kx, delay = 0,  duration = d, easing = e })
+    title_elements['s1'].move({ x = new_sx, delay = 0,  duration = d, easing = e })
+    title_elements['p1'].move({ x = new_sx, delay = 3,  duration = d, easing = e })
+    title_elements['o1'].move({ x = new_sx, delay = 6,  duration = d, easing = e })
+    title_elements['o2'].move({ x = new_sx, delay = 9,  duration = d, easing = e })
+    title_elements['n2'].move({ x = new_sx, delay = 12, duration = d, easing = e })
+    title_elements['y2'].move({ x = new_sx, delay = 15, duration = d, easing = e })
   end
 
   s.init = function()
-    local bline = tiles.title.bottom_line
-    local knife = tiles.title.knife
-    local spoon = tiles.title.spoon
-    local tline = tiles.title.top_line
-
-    init_object({ tiles = knife, x1 = 16, y1 = 24, x2 = 16,   y2 = -100, delay = 5,  duration = 30, easing = 'inBack' })
-    init_object({ tiles = spoon, x1 = 96, y1 = 80, x2 = 96,   y2 = 227,  delay = 5,  duration = 30, easing = 'inBack' })
-    init_object({ tiles = tline, x1 = 32, y  = 40, x2 = 200,             delay = 15, duration = 10, easing = 'inBack' })
-    init_object({ tiles = bline, x1 = 16, y  = 80, x2 = -328,            delay = 15, duration = 10, easing = 'inBack' })
+    title_elements['knife'].move({ y = -100, delay = 5,  duration = 30, easing = 'inBack' })
+    title_elements['tline'].move({ x = 200,  delay = 15, duration = 10, easing = 'inBack' })
+    title_elements['bline'].move({ x = -328, delay = 15, duration = 10, easing = 'inBack' })
+    title_elements['spoon'].move({ y = 227,  delay = 5,  duration = 30, easing = 'inBack' })
 
     s.transition_out_text_animation()
   end
@@ -765,20 +726,19 @@ init_screen('playing_transition_in', function()
   }
 
   s.init = function()
+    destroy_objects()
     local k = tiles.playing.transition_buttons.knifey
     local s = tiles.playing.transition_buttons.spoony
 
-    init_object({ tiles = k, x = 10, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ tiles = s, x = 86, y1 = 127, y2 = 95, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ rects = rects.floor, x = 4, y1 = 143, y2 = 111, duration = 20, easing = 'outBounce' })
-
-    init_object({ tiles = tiles.playing.score, x = 48, y1 = -24, y2 = 87, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ text = text.score, x = 'center', y1 = -19, y2 = 92, duration = 20, delay = 5, easing = 'outBounce' })
-    init_object({ text = score, x = 'center', y1 = -12, y2 = 99, duration = 20, delay = 5, easing = 'outBounce' })
-
-    init_object({ text = '3', x = 55, y1 = -12, y2 = 44, duration = 20, delay = 40,  easing = 'outBounce' })
-    init_object({ text = '2', x = 62, y1 = -12, y2 = 44, duration = 20, delay = 70,  easing = 'outBounce' })
-    init_object({ text = '1', x = 69, y1 = -12, y2 = 44, duration = 20, delay = 100, easing = 'outBounce' })
+    init_object({ tiles = k,                   x = 10, y = 127 }).move({ y = 95,  duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ tiles = s,                   x = 86, y = 127 }).move({ y = 95,  duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ rects = rects.floor,         x = 4,  y = 143 }).move({ y = 111, duration = 20, easing = 'outBounce' })
+    init_object({ tiles = tiles.playing.score, x = 48, y = -24 }).move({ y = 87, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ text  = text.score,          x = 54, y = -19 }).move({ y = 92, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ text  = score,               x = 62, y = -12 }).move({ y = 99, duration = 20, delay = 5, easing = 'outBounce' })
+    init_object({ text  = '3',                 x = 55, y = -12 }).move({ y = 44, duration = 20, delay = 40,  easing = 'outBounce' })
+    init_object({ text  = '2',                 x = 62, y = -12 }).move({ y = 44, duration = 20, delay = 70,  easing = 'outBounce' })
+    init_object({ text  = '1',                 x = 69, y = -12 }).move({ y = 44, duration = 20, delay = 100, easing = 'outBounce' })
   end
 
   return s
@@ -801,16 +761,16 @@ init_screen('playing', function()
     failed_state = {
       animating   = false,
       flash       = false,
-      timeout     = 50,
+      timeout     = f(50),
       dissolve_y1 = 7,
       dissolve_y2 = 80,
     },
     timeout = {
-      max        = 150,
-      min        = 20,
+      max        = f(150),
+      min        = f(20),
       multiplier = 0.95,
       remaining  = 0,
-      start      = 120,
+      start      = f(120),
     },
   }
 
@@ -863,18 +823,12 @@ init_screen('playing', function()
 
     s.utensil.type    = utensil_type
     s.utensil.index   = utensil_index
-    s.utensil.sprites = init_object({
-      tiles    = utensil_array[utensil_index],
-      x        = 48,
-      y1       = 10,
-      y2       = 16,
-      duration = 3,
-    })
+    s.utensil.sprites = init_object({ tiles = utensil_array[utensil_index], x = 48, y = 10 }).move({ y = 16, duration = 3 })
   end
 
   s.decrease_timeout_remaining = function()
     s.timeout.remaining -= 1
-    if (s.timeout.remaining == 0) s.round_failed()
+    if (s.timeout.remaining <= 0) s.round_failed()
   end
 
   s.decrease_timeout_start = function()
@@ -915,6 +869,9 @@ init_screen('playing', function()
     end
 
     s.dissolve_utensil()
+
+    destroy_object(s.floor)
+    s.floor = init_object({ rects = rects.floor, x = 4, y = 111 }).move({ y = 127, duration = 20 })
   end
 
   s.draw_timer = function()
@@ -971,6 +928,11 @@ init_screen('playing', function()
     s.new_round()
   end
   
+  s.score_x = function()
+    local score_text = score .. ''
+    return 64 - #score_text * 2
+  end
+
   s.timer_width = function()
     local elapsed_percentage = s.timeout.remaining / s.timeout.start
     return flr(elapsed_percentage * s.timer.max_width)
@@ -1003,8 +965,8 @@ init_screen('playing', function()
     destroy_object(s.high_score_icon)
     destroy_object(s.high_score_text)
 
-    s.high_score_icon = init_object({ tiles = tiles.playing.high_score_icon, x = 106, y1 = 6, y2 = 8, duration = 3 })
-    s.high_score_text = init_object({ text = high_score, x = 113, y1 = 6, y2 = 8, duration = 3 })
+    s.high_score_icon = init_object({ tiles = tiles.playing.high_score_icon, x = 106, y = 6 }).move({ y = 8, duration = 3 })
+    s.high_score_text = init_object({ text = high_score, x = 113, y = 6 }).move({ y = 8, duration = 3 })
   end
 
   s.update_score = function()
@@ -1022,26 +984,20 @@ init_screen('playing', function()
       destroy_object(s.score)
     end
 
-    s.score_display = init_object({
-      tiles    = tiles.playing.score,
-      x        = 48,
-      y1       = score_display_y1,
-      y2       = 87,
-      delay    = 3,
-      duration = 2,
-    })
-    s.score_text = init_object({ text = text.score, x = 'center', y = 92 })
-    s.score      = init_object({ text = score,      x = 'center', y = 99 })
+    s.score_display = init_object({ tiles = tiles.playing.score, x = 48,          y = score_display_y1 }).move({ y = 87, delay = 3, duration = 2 })
+    s.score_text    = init_object({ text = text.score,           x = 54,          y = 92 })
+    s.score         = init_object({ text = score,                x = s.score_x(), y = 99 })
   end
 
   s.init = function()
+    destroy_objects()
     s.reset()
     s.new_round()
 
-    s.floor           = init_object({ rects = rects.floor, x = 4, y = 111 })
-    s.high_score_text = init_object({ text = high_score, x = 113, y = 8 })
-    s.score_text      = init_object({ text = text.score, x = 'center', y = 92 })
-    s.score           = init_object({ text = score,      x = 'center', y = 99 })
+    s.floor           = init_object({ rects = rects.floor, x = 4,           y = 111 })
+    s.high_score_text = init_object({ text  = high_score,  x = 113,         y = 8   })
+    s.score_text      = init_object({ text  = text.score,  x = 54,          y = 92  })
+    s.score           = init_object({ text  = score,       x = s.score_x(), y = 99  })
   end
 
   s.update = function()
@@ -1067,15 +1023,15 @@ init_screen('game_over', function()
     local score_text      = text['score'] .. ': ' .. score
 
     init_object({ rects = {{w = 111, h = 111, color = 8}}, x = 8, y = 8 })
-    init_object({ text = text.game_over,  x = 'center', y = 16, outline = 0 })
-    init_object({ text = score_text,      x = 'center', y = 32, outline = 0 })
-    init_object({ text = high_score_text, x = 'center', y = 40, outline = 0 })
+    init_object({ text = text.game_over,  x = 44, y = 16, outline = 0 })
+    init_object({ text = score_text,      x = 46, y = 32, outline = 0 })
+    init_object({ text = high_score_text, x = 36, y = 40, outline = 0 })
 
     if (high_score_beaten) then
-      init_object({ text = text.high_score_beaten, x = 'center', y = 56, outline = 0 })
+      init_object({ text = text.high_score_beaten, x = 24, y = 56, outline = 0 })
     end
 
-    init_object({ text = text.play_again, x = 'center', y = 112, outline = 0 })
+    init_object({ text = text.play_again, x = 22, y = 112, outline = 0 })
   end
 
   s.update = function()
@@ -1095,7 +1051,7 @@ function _init()
   go_to('title_transition_in')
 end
 
-function _update()
+function _update60()
   foreach(objects, function(o)
     o.update()
   end)

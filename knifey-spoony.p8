@@ -984,9 +984,9 @@ init_screen('playing', function()
       destroy_object(s.score)
     end
 
-    s.score_display = init_object({ tiles = tiles.playing.score, x = 48, y = score_display_y1 }).move({ y = 87, delay = 3, duration = 2 })
-    s.score_text    = init_object({ text = text.score, x = 54, y = 92 })
-    s.score         = init_object({ text = score,      x = 60, y = 99 })
+    s.score_display = init_object({ tiles = tiles.playing.score, x = 48,          y = score_display_y1 }).move({ y = 87, delay = 3, duration = 2 })
+    s.score_text    = init_object({ text = text.score,           x = 54,          y = 92 })
+    s.score         = init_object({ text = score,                x = s.score_x(), y = 99 })
   end
 
   s.init = function()
@@ -994,10 +994,10 @@ init_screen('playing', function()
     s.reset()
     s.new_round()
 
-    s.floor           = init_object({ rects = rects.floor, x = 4,   y = 111 })
-    s.high_score_text = init_object({ text  = high_score,  x = 113, y = 8   })
-    s.score_text      = init_object({ text  = text.score,  x = 54,  y = 92  })
-    s.score           = init_object({ text  = score,       x = 60,  y = 99  })
+    s.floor           = init_object({ rects = rects.floor, x = 4,           y = 111 })
+    s.high_score_text = init_object({ text  = high_score,  x = 113,         y = 8   })
+    s.score_text      = init_object({ text  = text.score,  x = 54,          y = 92  })
+    s.score           = init_object({ text  = score,       x = s.score_x(), y = 99  })
   end
 
   s.update = function()

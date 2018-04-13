@@ -351,8 +351,6 @@ function init_object(props)
   o.y       = props.y       or 0
   
   o.frame_count = 0
-  o.pos_x       = 0
-  o.pos_y       = 0
   o.updated     = false
 
   o.center_x = function()

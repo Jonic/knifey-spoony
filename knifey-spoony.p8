@@ -36,9 +36,10 @@ local high_score        = 0
 local high_score_beaten = false
 local score             = 0
 
-local objects = {}
-local screen  = nil
-local screens = {}
+local frame_multiplier = 1
+local objects          = {}
+local screen           = nil
+local screens          = {}
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table
@@ -81,7 +82,12 @@ function draw_sprites(sprites, x, y)
   foreach(sprites, draw_sprite, x, y)
 end
 
+function f(n)
+  return n * frame_multiplier
+end
+
 function reset_globals()
+  frame_multiplier  = 2
   high_score        = dget(0)
   high_score_beaten = false
   score             = 0
@@ -412,8 +418,8 @@ function init_object(props)
   o.is_rects     = function() return o.type() == 'rects'          end
 
   o.move  = function(props)
-    o.delay    = props.delay    or 0
-    o.duration = props.duration or 0
+    o.delay    = f(props.delay    or 0)
+    o.duration = f(props.duration or 0)
     o.easing   = props.easing   or nil
     o.new_x    = props.x        or o.x
     o.new_y    = props.y        or o.y
@@ -540,7 +546,7 @@ function init_screen(name, props)
     s.frame_count += 1
 
     if (s.props.transition ~= nil) then
-      if (s.frame_count == s.props.transition.timeout) then
+      if (s.frame_count == f(s.props.transition.timeout)) then
         go_to(s.props.transition.destination)
       end
     end
@@ -744,16 +750,16 @@ init_screen('playing', function()
     failed_state = {
       animating   = false,
       flash       = false,
-      timeout     = 50,
+      timeout     = f(50),
       dissolve_y1 = 7,
       dissolve_y2 = 80,
     },
     timeout = {
-      max        = 150,
-      min        = 20,
+      max        = f(150),
+      min        = f(20),
       multiplier = 0.95,
       remaining  = 0,
-      start      = 120,
+      start      = f(120),
     },
   }
 
@@ -1029,7 +1035,7 @@ function _init()
   go_to('title_transition_in')
 end
 
-function _update()
+function _update60()
   foreach(objects, function(o)
     o.update()
   end)

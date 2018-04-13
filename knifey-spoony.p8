@@ -633,14 +633,26 @@ init_screen('title',  function ()
     color = 7,
     on    = 0,
   }
-  s.start_text_flash = 0
+  s.start_text_flash   = 0
+  s.start_text_max     = f(24)
+  s.start_text_pos_on  = 100
+  s.start_text_pos_off = -10
+  s.start_text_pos     = s.start_text_pos_on
 
   s.update_start_text = function()
-    local text_pos = (s.start_text_flash > 11) and -10 or 100
-
-    s.start_text.pos({ y = text_pos })
     s.start_text_flash += 1
-    if (s.start_text_flash == 24) s.start_text_flash = 0
+
+    if (s.start_text_flash >= s.start_text_max) then
+      s.start_text_flash = 0
+
+      if (s.start_text_pos == s.start_text_pos_on) then
+        s.start_text_pos = s.start_text_pos_off
+      else
+        s.start_text_pos = s.start_text_pos_on
+      end
+    end
+
+    s.start_text.pos({ y = s.start_text_pos })
   end
 
   s.init = function()
@@ -648,7 +660,7 @@ init_screen('title',  function ()
     s.start_text = init_object({
       text = text.start_game,
       x    = 32,
-      y    = 100,
+      y    = s.start_text_pos,
     })
   end
 

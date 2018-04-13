@@ -604,6 +604,9 @@ init_screen('title_transition_in', function()
   end
 
   s.init = function()
+    destroy_objects()
+    reset_globals()
+
     local knife = tiles.title.knife
     local spoon = tiles.title.spoon
     local tline = tiles.title.top_line

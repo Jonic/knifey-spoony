@@ -31,15 +31,13 @@ __lua__
 
 -->8
 -- global vars and helpers
-
 local high_score        = 0
 local high_score_beaten = false
 local score             = 0
-
-local frame_multiplier = 1
-local objects          = {}
-local screen           = nil
-local screens          = {}
+local frame_multiplier  = 1
+local objects           = {}
+local state             = nil
+local states            = {}
 
 -- clone and copy from https://gist.github.com/MihailJP/3931841
 function clone(t) -- deep-copy a table
@@ -99,7 +97,6 @@ end
 
 -- easing equations
 -- https://github.com/EmmanuelOga/easing/blob/master/lib/easing.lua
-
 local function linear(t, b, c, d)
   return c * t / d + b
 end
@@ -138,7 +135,6 @@ end
 
 -->8
 -- sprites
-
 local rects = {
   floor = {
     {        w = 119, h = 1, color = 15 },
@@ -517,9 +513,8 @@ function skip_animations()
 end
 
 -->8
--- screens
-
-function init_screen(name, props)
+-- states
+function init_state(name, props)
   local s = {}
 
   -- take everything from level object and add it to this `props` key
@@ -558,21 +553,21 @@ function init_screen(name, props)
     map(0, 0)
   end
 
-  screens[name] = s
+  states[name] = s
 
   return s
 end
 
 function go_to(name)
   skip_animations()
-  screen = screens[name]
-  screen.init()
+  state = states[name]
+  state.init()
 end
 
 -->8
--- init screens
+-- init states
 title_elements = {}
-init_screen('title_transition_in', function()
+init_state('title_transition_in', function()
   local s = {}
 
   s.transition = {
@@ -627,7 +622,7 @@ init_screen('title_transition_in', function()
   return s
 end)
 
-init_screen('title',  function ()
+init_state('title',  function ()
   local s = {}
 
   s.flash = {
@@ -673,7 +668,7 @@ init_screen('title',  function ()
   return s
 end)
 
-init_screen('title_transition_out', function()
+init_state('title_transition_out', function()
   local s = {}
 
   s.flash = {
@@ -717,7 +712,7 @@ init_screen('title_transition_out', function()
   return s
 end)
 
-init_screen('playing_transition_in', function()
+init_state('playing_transition_in', function()
   local s = {}
 
   s.transition     = {
@@ -744,7 +739,7 @@ init_screen('playing_transition_in', function()
   return s
 end)
 
-init_screen('playing', function()
+init_state('playing', function()
   local s = {}
 
   s.defaults = {
@@ -1015,7 +1010,7 @@ init_screen('playing', function()
   return s
 end)
 
-init_screen('game_over', function()
+init_state('game_over', function()
   local s = {}
 
   s.init = function()
@@ -1044,8 +1039,8 @@ end)
 
 -->8
 -- game loop
-
 function _init()
+
   cartdata('knifeyspoony')
   reset_globals()
   go_to('title_transition_in')
@@ -1056,7 +1051,7 @@ function _update60()
     o.update()
   end)
 
-  screen.update()
+  state.update()
 end
 
 function _draw()
@@ -1066,7 +1061,7 @@ function _draw()
     o.draw()
   end)
 
-  screen.draw()
+  state.draw()
 end
 __gfx__
 aaaaaaaaaaaaaaaaaaaaaaa4a9000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000

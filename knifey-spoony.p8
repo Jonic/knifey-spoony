@@ -1099,7 +1099,13 @@ state_init('playing', function()
   end
 
   s.unload = function()
-    game.object_destroy('utensil')
+    game.objects_destroy({
+      'button_knifey',
+      'button_spoony',
+      'score',
+      'utensil',
+    })
+
     for i = 0, 127 do
       game.object_destroy('fail_wipe_top_' .. i)
       game.object_destroy('fail_wipe_bottom_' .. i)
@@ -1152,13 +1158,6 @@ state_init('game_over', function()
   end
 
   s.init = function()
-    game.objects_destroy({
-      'button_knifey',
-      'button_spoony',
-      'score',
-      'utensil',
-    })
-
     local high_score_text = text['high_score'] .. game.high_score
     local score_text      = text['score'] .. ': ' .. game.score
 

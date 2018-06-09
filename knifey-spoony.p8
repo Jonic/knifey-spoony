@@ -504,16 +504,16 @@ local tiles = {
     },
     buttons = {
       knifey = {
-        { i = 4,  w = 4, h = 2 },
-        { i = 8,  w = 4, h = 2 },
-        { i = 12, w = 4, h = 2 },
-        { i = 8,  w = 4, h = 2 },
+        {{ i = 4,  w = 4, h = 2 }},
+        {{ i = 8,  w = 4, h = 2 }},
+        {{ i = 12, w = 4, h = 2 }},
+        {{ i = 8,  w = 4, h = 2 }},
       },
       spoony = {
-        { i = 36, w = 4, h = 2 },
-        { i = 40, w = 4, h = 2 },
-        { i = 44, w = 4, h = 2 },
-        { i = 40, w = 4, h = 2 },
+        {{ i = 36, w = 4, h = 2 }},
+        {{ i = 40, w = 4, h = 2 }},
+        {{ i = 44, w = 4, h = 2 }},
+        {{ i = 40, w = 4, h = 2 }},
       },
     },
     score = {
@@ -862,6 +862,8 @@ state_init('playing_transition_in', function()
   end
 
   s.init = function()
+    game.objects_destroy_all()
+
     local k = tiles.playing_transition_in.knifey
     local s = tiles.playing_transition_in.spoony
 
@@ -895,20 +897,20 @@ state_init('playing', function()
   s.defaults = {
     button_animations = {
       knifey = {
-        animating = false,
-        frame     = 1,
+        active = false,
+        frame  = 1,
       },
       spoony = {
-        animating = false,
-        frame     = 1,
+        active = false,
+        frame  = 1,
       },
     },
     fail_anim = {
-      animating   = false,
-      flash       = false,
-      timeout     = f(50),
+      active      = false,
       dissolve_y1 = 7,
       dissolve_y2 = 80,
+      flash       = false,
+      timeout     = f(50),
     },
     timeout = {
       max        = f(150),
@@ -930,17 +932,17 @@ state_init('playing', function()
     start_y   = 4,
   }
   s.utensil = {
-    type     = nil,
     index    = 0,
     sprites  = {},
     previous = {
       index = nil,
       type  = nil,
-    }
+    },
+    type     = nil,
   }
 
   s.animate_button = function(button)
-    s.button_animations[button].animating = true
+    s.button_animations[button].active = true
   end
 
   s.choose_utensil = function()
@@ -990,13 +992,19 @@ state_init('playing', function()
 
   s.draw_button = function(button)
     local button_animation = s.button_animations[button]
-    local button_sprites   = tiles.playing.buttons[button]
+    local frame            = button_animation.frame
+    local button_tiles     = tiles.playing.buttons[button]
+    local x_values         = { knifey = 10, spoony = 86 }
+
+    object_init('button_' .. button, { tiles = button_tiles[frame] })
+      .pos({
+        x = x_values[button],
+        y = 95,
+      })
 
     if (button_animation.active) button_animation.frame += 1
 
-    object_init('button_' .. button, { tiles = button_sprites, x = 10, y = 127 })
-
-    if (button_animation.frame == #button_sprites) then
+    if (button_animation.frame == #button_tiles) then
       button_animation.active = false
       button_animation.frame  = 1
     end
@@ -1133,10 +1141,6 @@ state_init('playing', function()
     object_init('score', { text = game.score, x = s.score_x(), y = 99 })
   end
 
-  s.draw = function()
-    map(0, 0)
-  end
-
   return s
 end)
 
@@ -1148,6 +1152,13 @@ state_init('game_over', function()
   end
 
   s.init = function()
+    game.objects_destroy({
+      'button_knifey',
+      'button_spoony',
+      'score',
+      'utensil',
+    })
+
     local high_score_text = text['high_score'] .. game.high_score
     local score_text      = text['score'] .. ': ' .. game.score
 

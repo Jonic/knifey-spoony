@@ -53,9 +53,11 @@ local game_init = function()
 
   g.object_debug = function()
     local debug = ''
+
     foreach (g.objects_order, function(name)
       debug = debug .. name .. ', '
     end)
+
     printh(debug)
   end
 
@@ -68,6 +70,7 @@ local game_init = function()
       g.objects_order[index] = nil
       del(g.objects, o)
     end
+
     -- g.object_debug()
   end
 
@@ -94,6 +97,7 @@ local game_init = function()
 
   g.objects_exec = function(fn)
     local obj
+
     for _, name in pairs(g.objects_order) do
       obj = g.objects[name]
       if (obj ~= nil) obj[fn]()
@@ -119,11 +123,12 @@ local game_init = function()
     end
 
     g.state = g.states[name]
-    g.state.init()
+    g.state_init()
   end
 
   g.init = function()
     cartdata('jonic_knifeyspoony')
+    -- dset(0, 0)
     g.go_to(g.default_state)
   end
 
@@ -144,8 +149,13 @@ local game_init = function()
     g.objects_exec('skip')
   end
 
+  g.state_init = function()
+    printh('g.state_init()')
+    if (g.state.init) g.state.init()
+  end
+
   g.state_unload = function()
-    g.state.unload()
+  if (g.state.unload) g.state.unload()
   end
 
   g.update = function()
@@ -829,6 +839,10 @@ state_init('title_transition_out', function()
     s.transition_out_text_animation()
   end
 
+  s.unload = function()
+    game.objects_destroy_all()
+  end
+
   s.transition_out_text_animation = function()
     local d  = 20
     local e  = 'inBack'
@@ -862,8 +876,6 @@ state_init('playing_transition_in', function()
   end
 
   s.init = function()
-    game.objects_destroy_all()
-
     local k = tiles.playing_transition_in.knifey
     local s = tiles.playing_transition_in.spoony
 
@@ -879,11 +891,7 @@ state_init('playing_transition_in', function()
   end
 
   s.unload = function()
-    game.objects_destroy({
-      'countin_1',
-      'countin_2',
-      'countin_3',
-    })
+    game.objects_destroy_all()
   end
 
   return s
@@ -1055,11 +1063,15 @@ state_init('playing', function()
   end
 
   s.init = function()
+    printh('playing.init()')
+    object_init('floor',           { rects = rects.floor,                   x = 4,  y = 111 })
+    object_init('high_score_icon', { tiles = tiles.playing.high_score_icon, x = 106, y = -10 })
+    object_init('high_score_text', { text  = game.high_score,               x = 113, y = 8 }).move({ y = 8, duration = 30, easing = 'outBack' })
+    object_init('score_board',     { tiles = tiles.playing.score,           x = 48, y = 87 })
+    object_init('score_text',      { text  = text.score,                    x = 54, y = 92 })
+
     s.reset()
     s.new_round()
-
-    object_init('high_score_icon', { tiles = tiles.playing.high_score_icon, x = 106, y = -10 })
-    object_init('high_score_text', { text = game.high_score, x = 113, y = 8 }).move({ y = 8, duration = 30, easing = 'outBack' })
   end
 
   s.new_round = function()
@@ -1099,12 +1111,7 @@ state_init('playing', function()
   end
 
   s.unload = function()
-    game.objects_destroy({
-      'button_knifey',
-      'button_spoony',
-      'score',
-      'utensil',
-    })
+    game.objects_destroy_all()
 
     for i = 0, 127 do
       game.object_destroy('fail_wipe_top_' .. i)
@@ -1136,15 +1143,15 @@ state_init('playing', function()
 
   s.update_high_score_display = function()
     if (game.high_score_beaten) then
-      game.object_destroy('high_score_text')
       o('high_score_icon').pos({ y = 6 }).move({ y = 8, duration = 3 })
-      object_init('high_score_text', { text = game.high_score, x = 113, y = 6 }).move({ y = 8, duration = 3 })
+      object_init('high_score_text', { text  = game.high_score, x = 113, y = 6 }).move({ y = 8, duration = 3 })
     end
   end
 
   s.update_score_display = function()
     o('score_board').pos({ y = 86 }).move({ y = 87, delay = 3, duration = 2 })
-    object_init('score', { text = game.score, x = s.score_x(), y = 99 })
+    o('score_text').pos({ y = 91 }).move({ y = 92, delay = 3, duration = 2 })
+    object_init('score', { text  = game.score, x = s.score_x(), y = 98 }).move({ y = 99, delay = 3, duration = 2 })
   end
 
   return s
@@ -1161,11 +1168,11 @@ state_init('game_over', function()
     local high_score_text = text['high_score'] .. game.high_score
     local score_text      = text['score'] .. ': ' .. game.score
 
-    object_init('game_over_bg',    { rects = {{w = 111, h = 111, color = 8}}, x = 8, y = 8 })
+    object_init('game_over_bg',    { rects = {{ w = 111, h = 111, color = 8 }}, x = 8, y = 8 })
     object_init('game_over_text',  { text = text.game_over,  x = 44, y = 16, outline = 0 })
-    object_init('score_text',      { text = score_text,      x = 46, y = 32, outline = 0 })
     object_init('high_score_text', { text = high_score_text, x = 36, y = 40, outline = 0 })
-    object_init('play_again', { text = text.play_again, x = 22, y = 112, outline = 0 })
+    object_init('play_again',      { text = text.play_again, x = 22, y = 112, outline = 0 })
+    object_init('score_text',      { text = score_text,      x = 46, y = 32, outline = 0 })
 
     if (game.high_score_beaten) then
       object_init('high_score_beaten_text', { text = text.high_score_beaten, x = 24, y = 56, outline = 0 })
@@ -1173,13 +1180,7 @@ state_init('game_over', function()
   end
 
   s.unload = function()
-    o('game_over_bg').pos({ x = 200, y = 200 })
-    o('game_over_text').pos({ x = 200, y = 200 })
-    o('play_again').pos({ x = 200, y = 200 })
-
-    if (game.high_score_beaten) then
-      o('high_score_beaten_text').pos({ x = 200, y = 200 })
-    end
+    game.objects_destroy_all()
   end
 
   s.update = function()

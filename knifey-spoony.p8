@@ -924,7 +924,7 @@ state_init('playing', function()
       dissolve_y1 = 7,
       dissolve_y2 = 80,
       flash       = false,
-      timeout     = f(50),
+      timeout     = f(80),
     },
     timeout = {
       max        = f(150),
@@ -995,6 +995,16 @@ state_init('playing', function()
     s.button_animations[button].active = true
   end
 
+  s.animate_fail_state = function()
+    object_init('floor', { rects = rects.floor, x = 4,  y = 111, easing = inBack })
+      .move({ y = 127, delay = 3, duration = 10, easing = outBack })
+    o('button_knifey').move({ y = 127, delay = 6, duration = 10, easing = inBack })
+    o('button_spoony').move({ y = 127, delay = 9, duration = 10, easing = inBack })
+    o('score_board').move({ y = 127, delay = 12, duration = 10, easing = inBack })
+    o('score_text').move({ y = 127, delay = 12, duration = 10, easing = inBack })
+    o('score').move({ y = 127, delay = 12, duration = 10, easing = inBack })
+  end
+
   s.choose_utensil = function()
     s.utensil.previous.type  = s.utensil.type
     s.utensil.previous.index = s.utensil.index
@@ -1054,6 +1064,7 @@ state_init('playing', function()
   end
 
   s.draw_buttons = function()
+    if (s.fail_anim.active) return
     s.draw_button(text.knifey)
     s.draw_button(text.spoony)
   end
@@ -1062,15 +1073,19 @@ state_init('playing', function()
     if (s.fail_anim.flash) then
       rectfill(0, 0, 127, 127, 8)
       s.fail_anim.flash = false
+      game.objects_destroy({
+        'high_score_icon',
+        'high_score_text',
+      })
+      s.animate_fail_state()
       return
     end
 
     s.dissolve_utensil()
-    o('floor').move({ y = 127, duration = 20 })
   end
 
   s.draw_timer = function()
-    if (s.timeout.remaining <= 0) return
+    if (s.timeout.remaining <= 0 or s.fail_anim.active) return
 
     x = s.timer.start_x + s.timer_width()
     y = s.timer.start_y + s.timer.height - 1

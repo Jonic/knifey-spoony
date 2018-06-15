@@ -3,20 +3,22 @@ version 16
 __lua__
 -- knifey spoony
 -- by jonic + ribbon black
--- v1.0.0b
+-- v1.0.0
 
 --[[
   "i see you've played knifey
   spoony before"
 
-  jonic: this is my first real
-  attempt to make a game with
-  pico-8. it's a bit messy,
-  because i've spent a long time
-  trying to figure out systems
-  for things such as displaying
-  groups of sprites, animating
-  elements, and dispalying text.
+  https://youtu.be/mcE0aAhbVFc
+
+  this is my first real attempt
+  to make a game with pico-8.
+  it's a bit messy, because i've
+  spent a long time trying to
+  figure out systems for things
+  such as displaying groups of
+  sprites, animating elements,
+  and displaying text.
 
   i haven't made any attempt to
   optimise this code, so it

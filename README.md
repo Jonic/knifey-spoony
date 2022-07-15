@@ -42,4 +42,4 @@ I can't help you write your game, but I can help explain how this one works if y
 
 If you think you can help improve this game, or if you spot a bug, please let me know! I'd love this game to be a well commented source for beginners to get to grips with PICO-8 (despite being a beginner myself when I wrote it), so help with that is also welcome.
 
-This work is licensed under a Creative Commons Attribution-NonCommercial 4.0 International License.
+This work is licensed under a [Creative Commons Attribution-NonCommercial 4.0 International License.](https://creativecommons.org/licenses/by-nc/4.0/)
